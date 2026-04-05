@@ -6,6 +6,7 @@ import SetRow from "./SetRow";
 import { ExerciseInstance, WorkoutSession } from "@/types/types";
 import ExerciseMenu from "./ExerciseMenu";
 import { useMemo } from "react";
+import { useExercises } from "@/hooks/useExercises";
 
 interface ExerciseCardProps {
     exercise: ExerciseInstance;
@@ -17,7 +18,6 @@ interface ExerciseCardProps {
     };
 
     editActions?: {
-        editExercise: (exerciseId: string) => void;
         deleteExercise: (exerciseId: string) => void;
         addSet: (exerciseId: string) => void;
         deleteSet: (exerciseId: string, setId: string) => void;
@@ -32,6 +32,8 @@ export default function ExerciseCard(
 
     const isEditMode = mode === "edit";
 
+    const {exercises} = useExercises()
+
 
     function getSetScore(set: { weight: number; reps: number; rir?: number }) {
         return set.weight * set.reps * (1 + (5 - (set.rir ?? 0)) * 0.05);
@@ -39,13 +41,13 @@ export default function ExerciseCard(
 
     function getHistoricalBestScore(
         sessions: WorkoutSession[],
-        exerciseName: string
+        exerciseId: string
     ) {
         let best = 0;
 
         sessions.forEach(s => {
             s.exercises
-            .filter(ex => ex.name === exerciseName)
+            .filter(ex => ex.exerciseId === exerciseId)
             .forEach(ex => {
                 ex.sets.forEach(set => {
                 const score = getSetScore(set);
@@ -66,9 +68,11 @@ export default function ExerciseCard(
     }, [exercise.sets]);
 
     const historicalBest = useMemo(
-        () => getHistoricalBestScore(sessions ?? [], exercise.name),
-        [sessions, exercise.name]
+        () => getHistoricalBestScore(sessions ?? [], exercise.exerciseId),
+        [sessions, exercise.exerciseId]
     );
+
+    const exerciseData = exercises.find(e => e.id === exercise.exerciseId);
 
     
     return(
@@ -77,12 +81,11 @@ export default function ExerciseCard(
                 <header className="flex justify-between items-center bg-zinc-800 p-4">
                     <div className={`flex  ${mode === "session" ? "flex-row items-center justify-between w-full" : "flex-col"}`}>
 
-                        <h2 className="text-lg font-semibold">{exercise.name}</h2>
-                        <p className="text-sm text-zinc-500">{exercise.type}</p>
+                        <h2 className="text-lg font-semibold">{exerciseData?.name}</h2>
+                        <p className="text-sm text-zinc-500">{exerciseData?.type}</p>
                     </div>
                     {isEditMode && editActions && (
                         <ExerciseMenu 
-                            onEdit={() => editActions?.editExercise(exercise.id)}
                             onDelete={() => editActions?.deleteExercise(exercise.id)}
                         />
                     )}

@@ -1,6 +1,6 @@
 "use client"
 
-import { Dumbbell, LayoutDashboard, Ruler, UserRound } from "lucide-react";
+import { Dumbbell, LayoutDashboard, TrendingUp, ChartColumnBig  } from "lucide-react";
 import { NavLink } from "./NavLink";
 
 export default function Footer() {
@@ -10,8 +10,8 @@ export default function Footer() {
         <nav className="flex items-center justify-around p-4 bg-neutral/80 backdrop-blur-md border border-white/10 rounded-t-2xl shadow-2xl">
             <NavLink href="/" icon={LayoutDashboard}>Dashboard</NavLink>
             <NavLink href="/workouts" icon={Dumbbell}>Entrenamientos</NavLink>
-            <NavLink href="/measurements" icon={Ruler}>Medidas</NavLink>
-            <NavLink href="/profile" icon={UserRound}>Perfil</NavLink>
+            <NavLink href="/progress" icon={TrendingUp}>Progreso</NavLink>
+            <NavLink href="/stats" icon={ChartColumnBig}>Estadisticas</NavLink>
         </nav>
         </div>
     );

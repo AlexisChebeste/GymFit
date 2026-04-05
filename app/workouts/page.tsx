@@ -39,7 +39,7 @@ export default function WorkoutPage() {
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
             <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh]">
-                <p className="uppercase text-sm text-secondary leading-5">Arma tu rutina - Selecciona para editar</p>
+                <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Arma tu rutina - Selecciona para editar</p>
                 <h1 className="text-4xl font-bold">Mi Rutina</h1>
 
                 <div className="flex flex-col gap-4 items-center w-full py-4 ">

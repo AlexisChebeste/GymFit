@@ -10,11 +10,16 @@ export type Workout = {
     exercises: ExerciseInstance[];
 };
 
-export type ExerciseInstance = {
+export type Exercise = {
     id: string;
-    workoutId: string;
     name: string;
     type: string;
+    userId: string;
+};
+
+export type ExerciseInstance = {
+    id: string;
+    exerciseId: string;
     sets: Set[];
 };
 
@@ -34,11 +39,11 @@ export type WorkoutSession = {
   workoutId: string;
   date: string;
   exercises: {
-    id: string;
-    name: string;
+    exerciseId: string;
     sets: {
       weight: number;
       reps: number;
+      rir: number;
     }[];
   }[];
 };

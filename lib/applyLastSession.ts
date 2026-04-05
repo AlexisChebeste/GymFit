@@ -9,7 +9,9 @@ export function applyLastSession(
   return {
     ...template,
     exercises: template.exercises.map((ex) => {
-      const lastEx = lastSession.exercises.find((e) => e.id === ex.id);
+      const lastEx = lastSession.exercises.find(
+        (e) => e.exerciseId === ex.exerciseId
+      );
 
       if (!lastEx) return ex;
 
@@ -24,6 +26,7 @@ export function applyLastSession(
             ...set,
             weight: lastSet.weight,
             reps: lastSet.reps,
+            rir: lastSet.rir ?? 0, // 👈 importante ahora
             isCompleted: false,
             isPR: false,
           };

@@ -3,12 +3,10 @@ import { EllipsisVertical } from "lucide-react";
 import { useState } from "react";
 
 export interface ExerciseMenuProps {
-    onEdit: () => void;
     onDelete: () => void;
 }
 
 export default function ExerciseMenu({
-    onEdit,
     onDelete,
 }: ExerciseMenuProps) {
 
@@ -16,11 +14,6 @@ export default function ExerciseMenu({
 
     const toggleMenuModal = () => {
         setActiveModal(prev => !prev);
-    }
-
-    const handleOpenEdit = () => {
-        onEdit();
-        setActiveModal(false);
     }
 
     const handleDelete = () => {
@@ -38,9 +31,6 @@ export default function ExerciseMenu({
 
             {activeModal && (
                 <div className="absolute top-16 border border-gray-500 right-4 bg-zinc-800 rounded-lg shadow-lg p-2 z-10 w-48">
-                    <button className="w-full text-left px-4 py-2 hover:bg-zinc-700 rounded-lg transition-colors duration-200 cursor-pointer" onClick={handleOpenEdit}>
-                        Editar ejercicio
-                    </button>
                     <button className="w-full text-left px-4 py-2 hover:bg-zinc-700 rounded-lg transition-colors duration-200 cursor-pointer" onClick={handleDelete}>
                         Eliminar ejercicio
                     </button>

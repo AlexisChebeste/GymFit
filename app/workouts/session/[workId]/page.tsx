@@ -34,11 +34,11 @@ export default function WorkoutSession() {
       workoutId: workout.id,
       date: new Date().toISOString(),
       exercises: workout.exercises.map(ex => ({
-        id: ex.id,
-        name: ex.name,
+        exerciseId: ex.id,
         sets: ex.sets.map(s => ({
           weight: s.weight,
           reps: s.reps,
+          rir: s.rir,
         }))
       }))
     };
@@ -52,7 +52,7 @@ export default function WorkoutSession() {
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[calc(100dvh-6rem)]">
-        <p className="uppercase text-sm text-primary leading-5">Sesión Actual</p>
+        <p className="uppercase text-sm text-primary leading-5 tracking-widest">Sesión Actual</p>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full pb-2">
           
           <div className="flex flex-col gap-2 ">
@@ -70,9 +70,9 @@ export default function WorkoutSession() {
               mode="session"
               setActions={{
                 update: (setId, field, value) =>
-                  dispatch({ type: "UPDATE_SET", payload: { exerciseId: exercise.id, setId, field, value } }),
-                toggle: (exerciseId, setId) =>
-                  dispatch({ type: "TOGGLE_SET", payload: { exerciseId, setId } }),
+                  dispatch({ type: "UPDATE_SET", payload: { exerciseInstanceId: exercise.id, setId, field, value } }),
+                toggle: (exerciseInstanceId, setId) =>
+                  dispatch({ type: "TOGGLE_SET", payload: { exerciseInstanceId, setId } }),
               }}
               sessions={sessions}
             />

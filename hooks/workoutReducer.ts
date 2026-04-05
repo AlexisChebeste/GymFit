@@ -2,12 +2,11 @@ import { Workout } from "@/types/types";
 
 type Action =
   | { type: "INIT"; payload: Workout }
-  | { type: "ADD_EXERCISE"; payload: { name: string; type: string } }
-  | { type: "ADD_SET"; payload: { exerciseId: string } }
-  | { type: "UPDATE_SET"; payload: { exerciseId: string; setId: string; field: 'weight' | 'reps' | 'rir'; value: number } }
-  | { type: "TOGGLE_SET"; payload: { exerciseId: string; setId: string } }
-  | { type: "EDIT_EXERCISE"; payload: { exerciseId: string; name: string; type: string } }
-  | { type: "DELETE_SET"; payload: { exerciseId: string; setId: string } }
+  | { type: "ADD_SET"; payload: { exerciseInstanceId: string } }
+  | { type: "UPDATE_SET"; payload: { exerciseInstanceId: string; setId: string; field: 'weight' | 'reps' | 'rir'; value: number } }
+  | { type: "DELETE_SET"; payload: { exerciseInstanceId: string; setId: string } }
+  | { type: "TOGGLE_SET"; payload: { exerciseInstanceId: string; setId: string } }
+  | { type: "ADD_EXERCISE"; payload: { exerciseId: string } }
   | { type: "DELETE_EXERCISE"; payload: { exerciseId: string } }
   | { type: "RESET"; payload: Workout}
   | { type: "EDIT_WORKOUT"; payload: { name: string; description: string } }
@@ -28,27 +27,11 @@ export function workoutReducer(state: Workout, action: Action): Workout {
         description: action.payload.description
       };
 
-
-    case "ADD_EXERCISE":
-      return {
-        ...state,
-        exercises: [
-          ...state.exercises,
-          {
-            id: crypto.randomUUID(),
-            workoutId: state.id,
-            name: action.payload.name,
-            type: action.payload.type,
-            sets: []
-          }
-        ]
-      };
-
     case "ADD_SET":
       return {
         ...state,
         exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseId
+          ex.id === action.payload.exerciseInstanceId
             ? {
                 ...ex,
                 sets: [
@@ -73,7 +56,7 @@ export function workoutReducer(state: Workout, action: Action): Workout {
       return {
         ...state,
         exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseId
+          ex.id === action.payload.exerciseInstanceId
             ? {
                 ...ex,
                 sets: ex.sets.map(s =>
@@ -90,7 +73,7 @@ export function workoutReducer(state: Workout, action: Action): Workout {
       return {
         ...state,
         exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseId
+          ex.id === action.payload.exerciseInstanceId
             ? {
                 ...ex,
                 sets: ex.sets.map(s =>
@@ -103,21 +86,11 @@ export function workoutReducer(state: Workout, action: Action): Workout {
         )
       };
 
-    case "EDIT_EXERCISE":
-      return {
-        ...state,
-        exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseId
-            ? { ...ex, name: action.payload.name, type: action.payload.type }
-            : ex
-        )
-      };
-
     case "DELETE_SET":
       return {
         ...state,
         exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseId
+          ex.id === action.payload.exerciseInstanceId
             ? {
                 ...ex,
                 sets: ex.sets
@@ -128,6 +101,30 @@ export function workoutReducer(state: Workout, action: Action): Workout {
         )
       };
 
+    case "ADD_EXERCISE":
+      return {
+        ...state,
+        exercises: [
+          ...state.exercises,
+          {
+            id: crypto.randomUUID(),
+            exerciseId: action.payload.exerciseId,
+            sets: [
+              {
+                id: crypto.randomUUID(),
+                exerciseInstanceId: "",
+                set: 1,
+                weight: 0,
+                reps: 0,
+                rir: 0,
+                isCompleted: false,
+                isPR: false
+              }
+            ]
+          }
+        ]
+      };
+    
     case "DELETE_EXERCISE":
       return {
         ...state,
