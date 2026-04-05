@@ -176,26 +176,28 @@ export function useExerciseStats(
 
   // 10. Insights
   const insights = useMemo(() => {
-    if (bestSets.length < 3)
-      return "Entrená más para ver progreso 📈";
+    if (bestSets.length < 3) return "Seguí registrando sesiones para desbloquear el análisis de rendimiento. ¡Vamos por ese progreso!";
 
-    const last = bestSets.at(-1)?.score ?? 0;
-    const prev = bestSets.at(-2)?.score ?? 0;
-    const prev2 = bestSets.at(-3)?.score ?? 0;
+    const scores = bestSets.map(s => s.score);
+    const last = scores.at(-1)!;
+    const prev = scores.at(-2)!;
+    
+    // 1. Detección de Estancamiento (Plateau)
+    const isPlateau = scores.slice(-4).every(s => Math.abs(s - last) < (last * 0.02)); 
+    if (isPlateau) return "Estancamiento detectado. Considerá un Deload o cambiar el rango de repeticiones para romper la meseta.";
 
-    if (last > prev && prev > prev2) {
-      return "Progreso sólido 🚀";
-    }
+    // 2. Progreso de Fuerza Real (1RM)
+    const totalGain = ((last - scores[0]) / scores[0]) * 100;
+    if (totalGain > 10) return `¡Increíble! Tu fuerza estimada subió un ${totalGain.toFixed(1)}% desde que empezaste.`;
 
-    if (last > prev) {
-      return "Vas mejorando 👍";
-    }
+    // 3. Eficiencia de Esfuerzo (RIR)
+    const lastSet = bestSets.at(-1)!;
+    if (lastSet.rir && lastSet.rir > 4) return "Estás moviendo buen peso, pero tu RIR es alto. Podrías intentar subir la carga en la próxima sesión.";
 
-    if (last < prev) {
-      return "Posible fatiga o carga alta 💤";
-    }
-
-    return "Estable, seguí consistente 💪";
+    // 4. Tu lógica de tendencia actual (simplificada)
+    if (last > prev) return "Ganancia de fuerza respecto a la sesión anterior. ¡Buen trabajo! ";
+    
+    return "Manteniendo el nivel. La consistencia es la clave del crecimiento. ";
   }, [bestSets]);
 
   return {

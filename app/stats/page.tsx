@@ -8,7 +8,7 @@ import { useExercises } from "@/hooks/useExercises";
 import { BestSet, useExerciseStats } from "@/hooks/useExercisesStats";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import {  WorkoutSession } from "@/types/types";
-import { TrendingDown, TrendingUp } from "lucide-react";
+import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
@@ -43,11 +43,9 @@ export default function StatsPage() {
     
     const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
 
-
-
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
-            <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh]">
+            <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh] lg:overflow-hidden">
                 <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Ejercicio especifico</p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
@@ -115,6 +113,26 @@ export default function StatsPage() {
                     <p className="text-sm text-secondary uppercase font-medium">Evolución de Fuerza</p>
                     
                     <StatsChart data={stats.bestSets} />
+                </div>
+
+                <div className="flex flex-col gap-3 w-full py-6">
+                    <p className="text-xs text-secondary uppercase font-bold tracking-widest">Análisis de Rendimiento</p>
+                    <Card className="bg-primary/5 border-primary/20 p-6 relative overflow-hidden group">
+                        {/* Decoración neón sutil de fondo */}
+                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all" />
+                        
+                        <div className="flex items-start gap-4">
+                        <div className="p-2 bg-primary/20 rounded-lg text-primary shadow-neon-glow">
+                            <Zap size={20} fill="currentColor" />
+                        </div>
+                        <div className="flex flex-col gap-1">
+                            <p className="text-sm text-zinc-100 font-medium leading-relaxed">
+                            {stats.insights}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Análisis basado en tus últimas {stats.bestSets?.length} sesiones</p>
+                        </div>
+                        </div>
+                    </Card>
                 </div>
             </main>
         </div>
