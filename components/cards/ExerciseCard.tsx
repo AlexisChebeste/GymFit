@@ -34,24 +34,31 @@ export default function ExerciseCard(
 
     const {exercises} = useExercises()
 
+    type ComparableSet = { weight: number; reps: number };
 
-    function getSetScore(set: { weight: number; reps: number; rir?: number }) {
-        return set.weight * set.reps * (1 + (5 - (set.rir ?? 0)) * 0.05);
+    function isBetterSet(a: ComparableSet, b: ComparableSet | null) {
+        if (!b) return true;
+
+        return (
+            a.weight > b.weight ||
+            (a.weight === b.weight && a.reps > b.reps)
+        );
     }
 
-    function getHistoricalBestScore(
-        sessions: WorkoutSession[],
-        exerciseId: string
+    function getHistoricalPR(
+    sessions: WorkoutSession[],
+    exerciseId: string
     ) {
-        let best = 0;
+        let best : ComparableSet | null = null;
 
         sessions.forEach(s => {
             s.exercises
             .filter(ex => ex.exerciseId === exerciseId)
             .forEach(ex => {
                 ex.sets.forEach(set => {
-                const score = getSetScore(set);
-                if (score > best) best = score;
+                if (!best || isBetterSet(set, best)) {
+                    best = set;
+                }
                 });
             });
         });
@@ -59,21 +66,22 @@ export default function ExerciseCard(
         return best;
     }
 
-    const bestSetId = useMemo(() => {
-        if (!exercise.sets.length) return null;
-
-        return exercise.sets.reduce((best, current) =>
-            getSetScore(current) > getSetScore(best) ? current : best
-        ).id;
-    }, [exercise.sets]);
-
-    const historicalBest = useMemo(
-        () => getHistoricalBestScore(sessions ?? [], exercise.exerciseId),
+    const historicalPR = useMemo<ComparableSet | null>(
+        () => getHistoricalPR(sessions ?? [], exercise.exerciseId),
         [sessions, exercise.exerciseId]
     );
 
-    const exerciseData = exercises.find(e => e.id === exercise.exerciseId);
+    const isPRSet = (set: ComparableSet) => {
+        if (historicalPR === null) return false;
 
+        return (
+            set.weight > historicalPR.weight ||
+            (set.weight === historicalPR.weight &&
+            set.reps > historicalPR.reps)
+        );
+    };
+
+    const exerciseData = exercises.find(e => e.id === exercise.exerciseId);
     
     return(
         <>
@@ -108,10 +116,7 @@ export default function ExerciseCard(
                                 onChangeRir={(value) => setActions.update(set.id, 'rir', value)}
                                 onToggleDone={() => setActions.toggle(exercise.id, set.id)} 
                                 onDelete={() => editActions?.deleteSet(exercise.id, set.id)}   
-                                isPr={
-                                    set.id === bestSetId &&
-                                    getSetScore(set) > historicalBest
-                                }
+                                isPr={isPRSet(set)}
                             />
                         ))}
                         {isEditMode && (

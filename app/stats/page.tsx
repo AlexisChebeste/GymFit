@@ -1,22 +1,31 @@
 "use client"
 
+import { Card } from "@/components/cards/Card";
+import { CustomSelect } from "@/components/CustomSelect";
+import RangeFilter from "@/components/RangeFilter";
+import StatsChart from "@/components/StatsCharts";
 import { useExercises } from "@/hooks/useExercises";
+import { BestSet, useExerciseStats } from "@/hooks/useExercisesStats";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import {  WorkoutSession } from "@/types/types";
-import { useEffect, useMemo } from "react";
+import { TrendingDown, TrendingUp } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
 
     const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
     const {exercises} = useExercises();
+    const [range, setRange] = useState<"30D" | "3M" | "6M" | "ALL">("30D");
 
+    const isValidRange = (value: string): value is "30D" | "3M" | "6M" | "ALL" =>
+        value === "30D" || value === "3M" || value === "6M" || value === "ALL";
 
     const usedExercises = useMemo(() => {
         const usedIds = new Set<string>();
 
         sessions.forEach(session => {
             session.exercises.forEach(ex => {
-            usedIds.add(ex.exerciseId);
+                usedIds.add(ex.exerciseId);
             });
         });
 
@@ -32,54 +41,81 @@ export default function StatsPage() {
         }
     }, [usedExercises]);
     
-    const bestSets = useMemo(() => {
-        if (!selectedExerciseId) return [];
+    const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
 
-        return sessions
-            .map(session => {
-            const ex = session.exercises.find(e => e.exerciseId === selectedExerciseId);
-            if (!ex) return null;
 
-        const best = ex.sets.reduce((a, b) =>
-            getSetScore(a) > getSetScore(b) ? a : b
-        );
-
-        return {
-            date: session.date,
-            ...best,
-            score: getSetScore(best)
-        };
-        })
-        .filter(Boolean);
-    }, [sessions, selectedExerciseId]);
-
-    function getSetScore(set: { weight: number; reps: number; rir?: number }) {
-        return set.weight * set.reps * (1 + (5 - (set.rir ?? 0)) * 0.05);
-    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
             <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh]">
                 <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Ejercicio especifico</p>
-                
-                <select
-                    value={selectedExerciseId}
-                    onChange={(e) => setSelectedExerciseId(e.target.value)}
-                    className="border border-gray-300 rounded-md p-2 w-full max-w-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 "
-                >
-                    {usedExercises.map((ex) => (
-                        <option key={ex.id} value={ex.id} className="text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            {ex.name}
-                        </option>
-                    ))}
-                </select>
 
-{/*                 {bestSets.map(set => (
-                    <div key={set.date}>
-                        {new Date(set.date).toLocaleDateString()} - 
-                        {set.weight}kg x {set.reps} (RIR {set.rir}) → score {Math.round(set.score)}
-                    </div>
-                ))} */}
+                <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
+                
+                    <CustomSelect
+                        options={usedExercises}
+                        value={selectedExerciseId}
+                        onChange={setSelectedExerciseId}
+                    />
+
+                    <RangeFilter
+                        value={range}
+                        onChange={(next) => {
+                            setRange((prev) => {
+                                const resolved = typeof next === "function" ? next(prev) : next;
+                                return isValidRange(resolved) ? resolved : prev;
+                            });
+                        }}
+                    />
+                    
+                </div>
+
+                <div className="w-full grid grid-cols-2 lg:grid-cols-3 gap-4 py-4">
+                    <Card className="px-6 py-4 flex flex-col gap-4 col-span-2 lg:col-span-1">
+                        <p className="text-xs uppercase tracking-widest text-secondary font-bold">PR Actual</p>
+                        {stats.pr && (
+                            <div className="flex gap-2 items-baseline">
+                                
+                                <p className="text-4xl font-bold">
+                                {stats.pr.weight}<span className="text-lg font-normal text-muted-foreground uppercase italic">kg</span> 
+                                </p>
+                                <p className="text-2xl font-bold px-2">x</p>
+                                <p className="text-4xl font-bold">
+                                {stats.pr.reps}<span className="text-lg font-normal text-muted-foreground uppercase italic">Reps</span> 
+                                </p>
+
+                                
+                                <span className="text-lg font-normal text-muted-foreground uppercase italic">(RIR {stats.pr.rir})</span>
+                            </div>
+                        )}
+                    </Card>
+                    <Card className="px-6 py-4 flex flex-col gap-4">
+                        <p className="text-xs uppercase tracking-widest text-secondary font-bold">Volumen del mes</p>
+                        <p className="text-4xl font-bold flex gap-2 items-baseline">{stats.totalVolume}<span className="text-lg font-normal text-muted-foreground uppercase italic">kg</span></p>
+                    </Card>
+                    <Card className="px-6 py-4 flex flex-col gap-4">
+                        <p className="text-xs uppercase tracking-widest text-secondary font-bold">Frecuencia</p>
+                        <p className="text-4xl font-bold">{stats.frequency} <span className="text-lg font-normal text-muted-foreground uppercase italic">{stats.frequency === 1 ? " sesión" : ` sesiones`}</span></p>
+                    </Card>
+                    {stats.progress !== null && (
+                        <Card className="flex flex-col gap-1 col-span-full items-center justify-center ">
+                            <p className="text-xs uppercase tracking-widest text-secondary font-bold">Crecimiento</p>
+                            <div className="flex items-baseline gap-2">
+                                <span className={`text-3xl font-black ${stats.progress >= 0 ? 'text-primary' : 'text-red-500'}`}>
+                                {stats.progress >= 0 ? '+' : ''}{stats.progress.toFixed(1)}%
+                                </span>
+                                {stats.progress >= 0 ? <TrendingUp size={20} className="text-primary" /> : <TrendingDown size={20} className="text-red-500" />}
+                            </div>
+                            <p className="text-[9px] text-zinc-500">Promedio de volumen por sesión</p>
+                        </Card>
+                    )}
+                </div>
+                
+                <div className="flex flex-col gap-2 w-full h-full">
+                    <p className="text-sm text-secondary uppercase font-medium">Evolución de Fuerza</p>
+                    
+                    <StatsChart data={stats.bestSets} />
+                </div>
             </main>
         </div>
     );
