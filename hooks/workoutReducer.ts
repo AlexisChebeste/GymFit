@@ -102,17 +102,19 @@ export function workoutReducer(state: Workout, action: Action): Workout {
       };
 
     case "ADD_EXERCISE":
+      const instanceId = crypto.randomUUID();  
+
       return {
         ...state,
         exercises: [
           ...state.exercises,
           {
-            id: crypto.randomUUID(),
+            id: instanceId,
             exerciseId: action.payload.exerciseId,
             sets: [
               {
                 id: crypto.randomUUID(),
-                exerciseInstanceId: "",
+                exerciseInstanceId: instanceId,
                 set: 1,
                 weight: 0,
                 reps: 0,

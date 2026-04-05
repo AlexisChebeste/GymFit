@@ -34,7 +34,7 @@ export default function WorkoutSession() {
       workoutId: workout.id,
       date: new Date().toISOString(),
       exercises: workout.exercises.map(ex => ({
-        exerciseId: ex.id,
+        exerciseId: ex.exerciseId,
         sets: ex.sets.map(s => ({
           weight: s.weight,
           reps: s.reps,

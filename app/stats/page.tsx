@@ -2,38 +2,60 @@
 
 import { useExercises } from "@/hooks/useExercises";
 import { useLocalStorage } from "@/lib/useLocalStorage";
-import { WorkoutSession } from "@/types/types";
+import {  WorkoutSession } from "@/types/types";
+import { useEffect, useMemo } from "react";
 
 export default function StatsPage() {
 
     const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
     const {exercises} = useExercises();
-    const [selectedExerciseId, setSelectedExerciseId] =
-    useLocalStorage<string>("selectedExercise", exercises[0]?.id || "");
 
-    function getUsedExercises(
-        sessions: WorkoutSession[],
-        exercises: { id: string; name: string }[]
-    ) {
+
+    const usedExercises = useMemo(() => {
         const usedIds = new Set<string>();
 
         sessions.forEach(session => {
             session.exercises.forEach(ex => {
-                usedIds.add(ex.exerciseId);
+            usedIds.add(ex.exerciseId);
             });
         });
 
-        console.log("Used Exercise IDs:", usedIds);
-
-        console.log("All Exercises:", exercises);
-
-        console.log("All ExercisesFilters:", exercises.filter(ex => usedIds.has(ex.id)));
-
         return exercises.filter(ex => usedIds.has(ex.id));
-    }
+    }, [sessions, exercises]);
 
-    const usedExercises = getUsedExercises(sessions, exercises);
+    const [selectedExerciseId, setSelectedExerciseId] =
+        useLocalStorage<string>("selectedExercise", "");
+
+    useEffect(() => {
+        if (!selectedExerciseId && usedExercises.length > 0) {
+            setSelectedExerciseId(usedExercises[0].id);
+        }
+    }, [usedExercises]);
     
+    const bestSets = useMemo(() => {
+        if (!selectedExerciseId) return [];
+
+        return sessions
+            .map(session => {
+            const ex = session.exercises.find(e => e.exerciseId === selectedExerciseId);
+            if (!ex) return null;
+
+        const best = ex.sets.reduce((a, b) =>
+            getSetScore(a) > getSetScore(b) ? a : b
+        );
+
+        return {
+            date: session.date,
+            ...best,
+            score: getSetScore(best)
+        };
+        })
+        .filter(Boolean);
+    }, [sessions, selectedExerciseId]);
+
+    function getSetScore(set: { weight: number; reps: number; rir?: number }) {
+        return set.weight * set.reps * (1 + (5 - (set.rir ?? 0)) * 0.05);
+    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
@@ -52,7 +74,12 @@ export default function StatsPage() {
                     ))}
                 </select>
 
-
+{/*                 {bestSets.map(set => (
+                    <div key={set.date}>
+                        {new Date(set.date).toLocaleDateString()} - 
+                        {set.weight}kg x {set.reps} (RIR {set.rir}) → score {Math.round(set.score)}
+                    </div>
+                ))} */}
             </main>
         </div>
     );
