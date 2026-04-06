@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronDown,  Check } from "lucide-react";
 
-export function CustomSelect({ options, value, onChange }: { options: any[]; value: string; onChange: (value: string) => void }) {
+export function CustomSelect({ options, value, onChange, defaultValue = "Seleccionar ejercicio" }: { options: any[]; value: string; onChange: (value: string) => void, defaultValue?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const selectedOption = options.find((o: any) => o.id === value);
 
@@ -14,7 +14,7 @@ export function CustomSelect({ options, value, onChange }: { options: any[]; val
       >
         <div className="flex items-center gap-3">
           <span className="font-medium tracking-wide">
-            {selectedOption?.name || "Seleccionar ejercicio"}
+            {selectedOption?.name || defaultValue}
           </span>
         </div>
         <ChevronDown size={18} className={`transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`} />

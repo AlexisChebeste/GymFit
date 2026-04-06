@@ -47,3 +47,17 @@ export type WorkoutSession = {
     }[];
   }[];
 };
+
+export type Routine = {
+  id: string;
+  userId: string;
+  name: string; 
+  days: RoutineDay[];
+  createdAt: string;
+  updatedAt?: string;
+};
+
+export type RoutineDay = {
+  day: number; 
+  templateId: string;
+};

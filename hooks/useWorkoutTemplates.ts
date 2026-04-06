@@ -1,14 +1,17 @@
 // hooks/useWorkoutTemplates.ts
 import { useLocalStorage } from "@/lib/useLocalStorage";
-import { Workout } from "@/types/types";
+import { Routine, Workout } from "@/types/types";
 
 export function useWorkoutTemplates() {
   const [templates, setTemplates, isLoaded] =
     useLocalStorage<Workout[]>("templates", []);
-
+    
   const createTemplate = () => {
+
+    const idTemplate = crypto.randomUUID();
+
     const newTemplate: Workout = {
-      id: crypto.randomUUID(),
+      id: idTemplate,
       userId: "123",
       name: `Rutina ${templates.length + 1}`,
       description: "Descripción",

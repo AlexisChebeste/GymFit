@@ -17,6 +17,8 @@ export function WorkoutCard({ workout, deleteTemplate }: WorkoutCardProps) {
     const updatedAt = daysDiff !== null
         ? daysDiff === 0
             ? "Hoy"
+            : daysDiff === 1
+                ? "Hace 1 día"
             : "Hace " + daysDiff + " días"
         : "Sin fecha de actualización";
 

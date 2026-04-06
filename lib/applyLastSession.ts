@@ -26,7 +26,7 @@ export function applyLastSession(
             ...set,
             weight: lastSet.weight,
             reps: lastSet.reps,
-            rir: lastSet.rir ?? 0, // 👈 importante ahora
+            rir: lastSet.rir ?? 0, 
             isCompleted: false,
             isPR: false,
           };

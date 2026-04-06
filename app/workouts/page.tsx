@@ -2,9 +2,11 @@
 
 import { Card } from "@/components/cards/Card";
 import { WorkoutCard } from "@/components/cards/WorkutCard";
+import { CustomSelect } from "@/components/CustomSelect";
 import Modal from "@/components/Modal";
+import { useRoutines } from "@/hooks/useRoutine";
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -17,15 +19,18 @@ export default function WorkoutPage() {
         isLoaded
     } = useWorkoutTemplates();
 
+    const { routine, createRoutine, updateRoutine } = useRoutines();
+
     const [openModal, setOpenModal] = useState(false);
+    const [openModalPlan, setOpenModalPlan] = useState(false);
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [selectedName, setSelectedName] = useState<string | null>(null);
+    const [plan, setPlan] = useState<Record<number, string | null>>({});
 
     if (!isLoaded) return null;
 
     const handleCreate = () => {
         const newId = createTemplate();
-
         router.push(`/workouts/edit/${newId}`);
     };
 
@@ -35,6 +40,57 @@ export default function WorkoutPage() {
         setOpenModal(true);
     }
 
+    const handlePlan = () => {
+        if (routine.days.length > 0) {
+            const initialPlan: Record<number, string> = {};
+
+            routine.days.forEach(d => {
+                initialPlan[d.day] = d.templateId;
+            });
+
+            setPlan(initialPlan);
+        }
+
+        setOpenModalPlan(true);
+    };
+
+    const days = [
+        { label: "Domingo", value: 0 },
+        { label: "Lunes", value: 1 },
+        { label: "Martes", value: 2 },
+        { label: "Miércoles", value: 3 },
+        { label: "Jueves", value: 4 },
+        { label: "Viernes", value: 5 },
+        { label: "Sábado", value: 6 },
+    ];
+
+    const handleSaveRoutine = () => {
+        const days = Object.entries(plan)
+            .filter(([_, templateId]) => templateId)
+            .map(([day, templateId]) => ({
+            day: Number(day),
+            templateId: templateId as string
+            }));
+
+        if (routine) {
+            updateRoutine({
+            ...routine,
+            days
+            });
+        } else {
+            createRoutine({
+            id: crypto.randomUUID(),
+            userId: "123",
+            name: "Mi rutina",
+            days,
+            createdAt: new Date().toISOString()
+            });
+        }
+
+        setOpenModalPlan(false);
+    };
+
+    const templatesForPlan = [...templates, { id: "", name: "Descanso" }];
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
@@ -56,6 +112,12 @@ export default function WorkoutPage() {
                             Agregar rutina
                         </p>
                     </Card>
+
+                    <Card className="w-full flex gap-4 items-center justify-center bg-secondary! cursor-pointer hover:bg-secondary/80! transition-colors" onClick={handlePlan}>
+                        <p className="text-lg text-zinc-300 font-semibold">
+                            Planificar rutina
+                        </p>
+                    </Card>
                 </div>
 
                 {selectedId && openModal && (
@@ -64,6 +126,7 @@ export default function WorkoutPage() {
                             setOpenModal(false);
                             setSelectedId(null);
                         }}
+                        className="max-w-xl"
                     >
                         <div className="flex flex-col gap-4">
                             <h2 className="text-xl font-semibold">¿Estas seguro de eliminar la rutina <span className="font-bold text-red-600">{selectedName}</span>?</h2>
@@ -90,6 +153,62 @@ export default function WorkoutPage() {
                                 </button>
                             </div>
                         </div>
+                    </Modal>
+                )}
+
+                {openModalPlan && (
+                    <Modal
+                        onClose={() => {
+                            setOpenModalPlan(false);
+                        }}
+                        className="max-w-xl"
+                    >
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center justify-between w-full">                                
+                                <h2 className="text-xl font-semibold">Planificar semana</h2>
+                                <button
+                                    className="p-2 rounded-full hover:bg-gray-600 transition-colors cursor-pointer"
+                                    onClick={() => {
+                                        setOpenModalPlan(false);
+                                    }}
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-4 py-6 w-full">
+                            {days.map((day, index) => (
+                                <div key={index} className="flex items-center gap-4 w-full justify-between">
+                                    <p className="min-w-32">{day.label}</p>
+                                    <CustomSelect
+                                        options={templatesForPlan.map(t => ({ 
+                                            id: t.id, 
+                                            name: t.name 
+                                        }))}
+                                        value={plan[index + 1] || ""}
+                                        onChange={(value) => {
+                                            setPlan(prev => ({
+                                                ...prev,
+                                                [index + 1]: value || null
+                                            }));
+                                        }}
+                                        defaultValue="Seleccionar rutina"
+                                    />
+
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-4 w-full ">
+                            <button
+                                className="p-4 font-semibold bg-primary/60 text-white rounded hover:bg-secondary transition-colors cursor-pointer w-full"
+                                onClick={handleSaveRoutine}
+                            >
+                                Guardar rutina
+                            </button>
+                        </div>
+
                     </Modal>
                 )}
             </main>

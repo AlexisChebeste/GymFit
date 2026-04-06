@@ -45,7 +45,9 @@ export default function WorkoutSession() {
 
     setSessions(prev => [...prev, session]);
 
-    // opcional: redirigir
+    
+    localStorage.removeItem("active_session");
+    
     router.push("/workouts");
   };
   
