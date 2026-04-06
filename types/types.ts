@@ -62,7 +62,7 @@ export type RoutineDay = {
   templateId: string;
 };
 
-type BodyMeasurement = {
+export type BodyMeasurement = {
   id: string;
   userId: string;
   date: string;
@@ -74,6 +74,17 @@ type BodyMeasurement = {
   waist?: number;
   arm?: number;
   leg?: number;
+
+  createdAt: string;
+};
+
+export type ProgressPhoto = {
+  id: string;
+  userId: string;
+  date: string;
+
+  url: string;
+  type?: "front" | "side" | "back";
 
   createdAt: string;
 };
