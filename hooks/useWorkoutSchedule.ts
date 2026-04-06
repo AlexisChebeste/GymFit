@@ -50,6 +50,7 @@ export function useWorkoutSchedule(routine: Routine | null, templates: Workout[]
       }
     }
 
+
     return {
       todayWorkout: null,
       nextWorkout: null,

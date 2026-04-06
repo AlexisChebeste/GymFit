@@ -106,7 +106,7 @@ export default function ExerciseCard(
                         <span className=" text-sm text-zinc-500">RIR</span>
                     </div>
                     <div className="flex flex-col gap-2">
-                        {exercise.sets.map(set => (
+                        {exercise.sets.map((set, index) => (
                             <SetRow
                                 key={set.id}
                                 set={set}
@@ -116,7 +116,7 @@ export default function ExerciseCard(
                                 onChangeRir={(value) => setActions.update(set.id, 'rir', value)}
                                 onToggleDone={() => setActions.toggle(exercise.id, set.id)} 
                                 onDelete={() => editActions?.deleteSet(exercise.id, set.id)}   
-                                isPr={isPRSet(set)}
+                                isPr={index === 0 && isPRSet(set)}
                             />
                         ))}
                         {isEditMode && (

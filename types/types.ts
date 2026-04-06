@@ -61,3 +61,19 @@ export type RoutineDay = {
   day: number; 
   templateId: string;
 };
+
+type BodyMeasurement = {
+  id: string;
+  userId: string;
+  date: string;
+
+  weight?: number;
+  bodyFat?: number;
+
+  chest?: number;
+  waist?: number;
+  arm?: number;
+  leg?: number;
+
+  createdAt: string;
+};

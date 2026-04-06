@@ -3,13 +3,14 @@
 import { Card } from "@/components/cards/Card";
 import VolumeChart from "@/components/VolumeCharts";
 import WeeklyConsistency from "@/components/WeeklyConsistency";
+import { hasTrainedToday } from "@/hooks/hasTrainedToday";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useWeeklyStats } from "@/hooks/useWeeklyStats";
 import { useWeightStats, weightGoal } from "@/hooks/useWeightStats";
 import { useWorkoutSchedule } from "@/hooks/useWorkoutSchedule";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import { WorkoutSession } from "@/types/types";
-import { BicepsFlexed, Calendar, Dumbbell, Play, ShieldAlert, TrendingUp, Trophy, Zap } from "lucide-react";
+import { BicepsFlexed, Calendar, Check, Dumbbell, Eye, Play, ShieldAlert, TrendingUp, Trophy, Zap } from "lucide-react";
 import Link from "next/link";
 
 const weightHistory : weightGoal = {
@@ -39,6 +40,10 @@ export default function Home() {
   const {todayWorkout, nextWorkout, isToday, label } = useWorkoutSchedule(routine, templates);
 
   const { completionRate, missedWorkouts } = useWeeklyStats(routine, sessions);
+
+  const trainedToday = hasTrainedToday(sessions);
+
+  const isRestDay = !isToday && !nextWorkout;
 
   const { 
     current, 
@@ -73,7 +78,7 @@ export default function Home() {
               
             </div>
 
-            <WeeklyConsistency sessions={sessions} />
+            <WeeklyConsistency sessions={sessions} routine={routine} />
           
           </section>
           
@@ -85,9 +90,11 @@ export default function Home() {
 
                   <p className="text-xs uppercase tracking-widest text-secondary font-bold">{isToday ? "Hoy" : "Próxima sesión"}</p>
                   <h2 className="text-3xl font-bold">
-                    {isToday
-                      ? todayWorkout?.name
-                      : nextWorkout?.name ?? "Sin rutina"}
+                    {isRestDay
+                      ? "Descanso"
+                      : isToday
+                        ? todayWorkout?.name
+                        : nextWorkout?.name ?? "Sin rutina"}
                   </h2>
                 </div>
 
@@ -97,13 +104,25 @@ export default function Home() {
               </section>
 
               <p className="text-sm font-normal text-muted-foreground uppercase italic">
-                {label ? `${label}` : "No hay entrenamientos planificados"}
+                {isRestDay
+                  ? "Día libre"
+                  : trainedToday
+                    ? "Entrenamiento completado"
+                    : label ?? "Sin planificación"}
               </p>
 
-              <Link href={isToday ? `/workouts/session/${todayWorkout?.id}` : "/workouts"} className="text-sm text-natural font-semibold w-full text-center py-4 bg-primary/80 rounded-md flex items-center justify-center hover:bg-primary transition-colors" 
+              <Link href={isToday && !trainedToday ? `/workouts/session/${todayWorkout?.id}` : "/workouts"} className={`text-sm font-semibold w-full text-center py-4 rounded-md flex items-center justify-center transition-colors
+                ${trainedToday ? "bg-green-700 hover:bg-green-800" : "bg-primary/80 hover:bg-primary"}
+              `}
               >
-                <Play className="mr-2 stroke-2" size={16}  />
-                {isToday ? "Empezar entrenamiento" : "Ver rutina"}
+                
+                {isToday && trainedToday ? <Check  className="mr-2 stroke-2" size={16}/> : isToday ? <Play className="mr-2 stroke-2" size={16} /> : <Eye className="mr-2" size={16} />}
+
+                {isRestDay
+                  ? "Ver rutinas"
+                  : isToday && !trainedToday
+                    ? "Empezar entrenamiento"
+                    : "Ver rutina"}
               </Link>
             </Card>
 

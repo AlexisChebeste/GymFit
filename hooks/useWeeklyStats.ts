@@ -55,7 +55,6 @@ export function useWeeklyStats(
     return {
       completionRate,
       missedWorkouts,
-      
     };
   }, [routine, sessions]);
 }
