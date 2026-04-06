@@ -8,8 +8,8 @@ export default function ProgressPage() {
   const [tab, setTab] = useState<"measurements" | "photos">("measurements");
 
   return (
-    <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
-        <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh]">
+    <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
+        <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl">
             <p className="uppercase text-sm text-secondary leading-5 tracking-widest">
                 Controla tu progreso y mantente motivado
             </p>

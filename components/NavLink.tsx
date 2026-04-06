@@ -7,10 +7,11 @@ import { usePathname } from "next/navigation"
 interface NavLinkProps {
   href: string
   children: React.ReactNode
-  icon: LucideIcon
+  icon?: LucideIcon
+  className?: string
 }
 
-export function NavLink({ href, children, icon: Icon }: NavLinkProps) {
+export function NavLink({ href, children, icon: Icon, className }: NavLinkProps) {
   const pathname = usePathname()
   
   // Verificamos si la ruta actual coincide con el href
@@ -19,19 +20,21 @@ export function NavLink({ href, children, icon: Icon }: NavLinkProps) {
   return (
     <Link
       href={href}
-      className={`nav-link ${
+      className={`${className || "nav-link"} ${
         isActive 
           ? "text-primary drop-shadow- pointer-events-none" // Colores activos (tus variables)
-          : "text-gray-700 hover:bg-neutral/10 hover:text-foreground" // Colores inactivos
+          : "text-gray-600 hover:bg-neutral/10 hover:text-foreground" // Colores inactivos
       }`}
       
     >
-      <Icon 
-        size={20} 
-        className={`transition-transform duration-300 ${
-          isActive ? "scale-110 drop-shadow-[0_0_12px_#39FF14] " : "group-hover:scale-110"
-        }`} 
-      />
+      {Icon && (
+        <Icon 
+          size={20} 
+          className={`transition-transform duration-300 ${
+            isActive ? "scale-110 drop-shadow-[0_0_12px_#39FF14] " : "group-hover:scale-110"
+          }`} 
+        />
+      )}
       {children}
     </Link>
   )

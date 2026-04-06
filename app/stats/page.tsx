@@ -15,10 +15,10 @@ export default function StatsPage() {
 
     const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
     const {exercises} = useExercises();
-    const [range, setRange] = useState<"30D" | "3M" | "6M" | "ALL">("30D");
+    const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
 
-    const isValidRange = (value: string): value is "30D" | "3M" | "6M" | "ALL" =>
-        value === "30D" || value === "3M" || value === "6M" || value === "ALL";
+    const isValidRange = (value: string): value is "30D" | "3M" | "6M" =>
+        value === "30D" || value === "3M" || value === "6M" ;
 
     const usedExercises = useMemo(() => {
         const usedIds = new Set<string>();
@@ -44,8 +44,8 @@ export default function StatsPage() {
     const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
 
     return (
-        <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
-            <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural overflow-y-auto max-h-[85vh] lg:overflow-hidden">
+        <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
+            <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural  max-w-7xl">
                 <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Ejercicio especifico</p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">

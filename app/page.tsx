@@ -53,10 +53,10 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-start bg-zinc-50 font-sans dark:bg-natural">
-      <div className=" max-h-[85vh] overflow-y-auto h-full w-full flex items-center justify-center ">
+    <div className="flex flex-col flex-1 items-center justify-start bg-zinc-50 font-sans dark:bg-natural max-h-[85vh] overflow-y-auto md:max-h-full">
+      <div className=" h-full w-full flex items-center justify-center ">
 
-        <main className="flex flex-1 w-full flex-col items-start p-4 bg-white dark:bg-natural gap-4 max-w-7xl h-full">
+        <main className="flex flex-1 w-full flex-col items-start p-4 bg-white dark:bg-natural gap-4 max-w-7xl h-full ">
           <section className="flex flex-col gap-4 md:flex-row items-center justify-between w-full mb-4">
             
             <div className="flex flex-col">
@@ -218,7 +218,7 @@ export default function Home() {
               </Card>
             )}
 
-            <div className="lg:col-span-3 flex flex-col gap-2 w-full">
+            <div className="lg:col-span-3 flex flex-col gap-2 w-full pb-6">
               <h2 className="text-xs uppercase tracking-widest text-secondary font-bold">Perspectivas</h2>
               <p className="text-sm text-muted-foreground">
                 Aquí encontrarás análisis y recomendaciones basadas en tus datos de entrenamiento.
