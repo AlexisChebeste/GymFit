@@ -89,3 +89,14 @@ export type ProgressPhoto = {
 
   createdAt: string;
 };
+
+export type UserProfile = {
+  email: string;
+  avatarUrl?: string;
+  name: string;
+  height: number;
+  weightGoal: number;
+  goalType: "lose" | "gain" | "maintain";
+  createdAt: string;
+  updatedAt?: string;
+};

@@ -2,22 +2,18 @@ import { Card } from "../cards/Card";
 import { TrendingUp } from "lucide-react";
 import WeightChart from "./WeightCharts";
 import RangeFilter from "../RangeFilter";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMeasurements } from "@/hooks/useMeasurements";
 import MetricCard from "../cards/MetriCard";
-import { BodyMeasurement } from "@/types/types";
+import { BodyMeasurement, UserProfile } from "@/types/types";
 import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
+import { useProfile } from "@/hooks/useProfile";
 
-type UserProfile = {
-  weightGoal: number;
-  goalType: "lose" | "gain" | "maintain";
-};
 
 export default function MeasurementsTab() {
-  const profile = JSON.parse(localStorage.getItem("profile") || "{}");
-  const goalWeight = profile.weightGoal ?? 72;
+  const { profile } = useProfile();
 
   const [range, setRange] = useState<"7D" | "30D" | "90D" >("7D");
 
@@ -91,7 +87,7 @@ export default function MeasurementsTab() {
           <div className="flex flex-col gap-2 mt-1">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
               <span>Objetivo</span>
-              <span>{latest?.weight?.toFixed(1)} / {goalWeight}</span>
+              <span>{latest?.weight?.toFixed(1)} / {profile?.weightGoal?.toFixed(1)}</span>
             </div>
 
             <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
@@ -116,7 +112,7 @@ export default function MeasurementsTab() {
           
         </div>
         {weightHistory.length > 0 && (
-          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={goalWeight} />
+          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={profile?.weightGoal} />
         )}
       </Card>
 
