@@ -68,14 +68,14 @@ export default function WorkoutPage() {
         const days = Object.entries(plan)
             .filter(([_, templateId]) => templateId)
             .map(([day, templateId]) => ({
-            day: Number(day),
-            templateId: templateId as string
+                day: Number(day),
+                templateId: templateId as string
             }));
 
         if (routine) {
             updateRoutine({
-            ...routine,
-            days
+                ...routine,
+                days
             });
         } else {
             createRoutine({
@@ -186,11 +186,11 @@ export default function WorkoutPage() {
                                             id: t.id, 
                                             name: t.name 
                                         }))}
-                                        value={plan[index + 1] || ""}
+                                        value={plan[index] || ""}
                                         onChange={(value) => {
                                             setPlan(prev => ({
                                                 ...prev,
-                                                [index + 1]: value || null
+                                                [index]: value || null
                                             }));
                                         }}
                                         defaultValue="Seleccionar rutina"

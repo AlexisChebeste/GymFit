@@ -25,6 +25,8 @@ export default function WeeklyConsistency({ sessions, routine }: { sessions: Wor
 
   const weekDays = useMemo(() => getWeekDays(), []);
 
+  console.log("Rutina:", routine);
+
   function isPlannedDay(date: Date, routine: Routine | null) {
     if (!routine) return false;
 
@@ -61,11 +63,10 @@ export default function WeeklyConsistency({ sessions, routine }: { sessions: Wor
           const dateKey = toLocalKey(date); // Genera "2026-04-05" según hora local
           const hasTrained = trainedDays.has(dateKey);
           const isPlanned = isPlannedDay(date, routine);
+
           // Para el punto de "Hoy" seguí usando toDateString que es seguro
           const isToday = date.toDateString() === new Date().toDateString();
-
           
-
           return (
             <div key={index} className="flex flex-col items-center gap-2">
               <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">

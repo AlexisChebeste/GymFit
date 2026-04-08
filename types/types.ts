@@ -76,6 +76,7 @@ export type BodyMeasurement = {
   leg: number;
 
   createdAt: string;
+  updatedAt?: string;
 };
 
 export type ProgressPhoto = {

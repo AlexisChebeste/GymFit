@@ -33,14 +33,14 @@ export function useWeeklyStats(
     const trainedDays = new Set(
       sessionsThisWeek.map(s => {
         const d = new Date(s.date).getDay();
-        return d === 0 ? 6 : d - 1; // lo pasamos a formato lunes=0
+        return d === 0 ? 6 : d ; // lo pasamos a formato lunes=0
       })
     );
 
     const plannedDays = routine.days.map(d => d.day);
 
     const completed = plannedDays.filter(d => trainedDays.has(d)).length;
-
+    
     const completionRate =
       plannedDays.length === 0
         ? 0
