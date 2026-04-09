@@ -6,24 +6,21 @@ import { Pen } from "lucide-react";
 import { useEffect, useState } from "react";
 import OptionProfile from "@/components/profile/OptionProfile";
 import FitnessSettings from "@/components/profile/FitnessSettings";
+import { useMeasurements } from "@/hooks/useMeasurements";
+import PasswordSettings from "@/components/profile/PasswordSettings";
+import PrivacySettings from "@/components/profile/PrivacySettings";
 
 type ProfileSection =
-  | "fitness"
   | "account"
   | "password"
   | "privacy";
 
 export default function ProfilePage() {
 
-    const {profile} = useProfile();
-    const [goal, setGoal] = useState<"maintain" | "lose" | "gain">("maintain");
-    const [section, setSection] = useState<ProfileSection>("fitness");
-
-    useEffect(() => {
-        if (profile?.goalType) {
-            setGoal(profile.goalType);
-        }
-    }, [profile]);
+    const {profile, updateMetrics} = useProfile();
+    const {latest} = useMeasurements("90D");
+    
+    const [section, setSection] = useState<ProfileSection>("account");
 
     if (!profile) {
         return (
@@ -37,8 +34,6 @@ export default function ProfilePage() {
         );
     }
 
-    
-
     const yearSince = new Date(profile.createdAt).getFullYear();
 
     return (
@@ -46,7 +41,7 @@ export default function ProfilePage() {
             <main className="flex flex-1 w-full flex-col md:flex-row gap-6 items-start p-4 py-8 bg-white dark:bg-natural max-w-7xl">
                 {/* <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Perfil de usuario</p> */}
 
-                <section className="flex flex-col gap-6 items-center w-full md:w-2xl md:bg-white md:dark:bg-zinc-900 p-6 rounded-xl py-8">
+                <section className="flex flex-col gap-6 items-center w-full md:w-xl md:bg-white md:dark:bg-zinc-900 p-6 rounded-xl py-8">
                     <div className="border-2 border-primary rounded-full p-1 shadow-[0_0_25px_rgba(57,255,20,0.35)]">
                         
                         <img src={profile.avatarUrl || "/default-avatar.webp"} alt="Avatar" className="w-46 h-46 rounded-full object-cover" />
@@ -62,7 +57,7 @@ export default function ProfilePage() {
 
                     </div>
 
-                    <div className="flex flex-col gap-4 p-2 w-full">
+                    <div className="hidden md:flex flex-col gap-4 p-2 w-full">
                         
                         <span className="text-sm uppercase tracking-widest text-secondary font-bold">Configuración</span>
                         <OptionProfile 
@@ -94,15 +89,46 @@ export default function ProfilePage() {
 
                 <section className="w-full flex flex-col gap-4 ">
 
-                    {section === "account" && <FitnessSettings
-                        goal={goal}
-                        setGoal={setGoal}
-                        profile={profile}
-                    />}
-                    {/* {section === "password" && <PasswordSettings />}
-                    {section === "privacy" && <PrivacySettings />} */}
+                    {section === "account" && 
+                        <FitnessSettings
+                            profile={profile}
+                            currentWeight={latest?.weight}
+                            updateMetrics={updateMetrics}
+                        />
+                    }
+                    {section === "password" && <PasswordSettings />}
+                    {section === "privacy" && <PrivacySettings />}
                     
                 </section>
+
+                <div className="flex flex-col gap-4 p-2 w-full md:hidden">
+                        
+                    <span className="text-sm uppercase tracking-widest text-secondary font-bold">Configuración</span>
+                    <OptionProfile 
+                        title="Cuenta" 
+                        section={section}
+                        label="account"
+                        icon={UserRound} 
+                        onClick={() => setSection("account")}
+                    />
+                    <OptionProfile 
+                        title="Cambiar contraseña" 
+                        label="password"
+                        section={section}
+                        icon={KeyRound} 
+                        onClick={() => setSection("password")}
+                    />
+                    <OptionProfile 
+                        title="Privacidad" 
+                        label="privacy"
+                        section={section}
+                        icon={LockKeyhole} 
+                        onClick={() => setSection("privacy")}
+                    />
+                    <OptionProfile title="Cerrar sesión" 
+                        label="log-out"
+                        icon={LogOut} className="text-red-700" viewArrow={false} />
+                </div>
             </main>
         </div>
     );
