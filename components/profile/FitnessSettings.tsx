@@ -86,7 +86,7 @@ export default function FitnessSettings({ profile, currentWeight, updateMetrics 
 
             <p className="text-sm uppercase tracking-widest text-secondary font-bold pt-8">Biometria</p>
                     
-            <Card className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-6">
+            <Card className="grid grid-cols-1  gap-4 p-6">
 
                 <div className="flex flex-col gap-1">
                     <span className="text-sm text-muted-foreground">Peso Actual</span>

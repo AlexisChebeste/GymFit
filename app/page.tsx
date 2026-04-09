@@ -66,7 +66,7 @@ export default function Home() {
               {completionRate !== undefined && (
                 <span className="text-sm text-muted-foreground">
                   Tasa de cumplimiento esta semana:{" "}
-                  <span className="font-medium text-green-500">{(completionRate * 100).toFixed(1)}%</span>
+                  <span className="font-medium text-green-500">{(completionRate).toFixed(1)}%</span>
                 </span>
               )}
               {missedWorkouts > 0 && (
@@ -152,7 +152,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <TrendingUp className="text-green-500" size={20} />
                   <div className="flex flex-col">
-                    <p className="text-lg font-medium ">{progress?.toFixed(2)} <span className="text-xs font-normal text-muted-foreground uppercase italic">% ultimos 7 dias</span></p>
+                    <p className="text-lg font-medium ">{progress?.toFixed(2)} <span className="text-xs font-normal text-muted-foreground uppercase italic">% (7D)</span></p>
                   </div>
                 </div>
               </Card>
