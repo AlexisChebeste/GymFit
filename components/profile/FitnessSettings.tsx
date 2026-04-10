@@ -1,11 +1,9 @@
 import { Dumbbell, LucideIcon, Scale, TrendingDown } from "lucide-react";
 import { Card } from "../cards/Card";
 import GoalCard from "./GoalCard";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { UserProfile } from "@/types/types";
-import { GoalOption } from "@/hooks/useProfile";
-
-
+import { GoalOption } from "@/hooks/useUser";
 
 type GoalInfo = {
     title: string;
@@ -29,7 +27,7 @@ const goalsFitness: GoalInfo[] = [
     },
     {
         label: "gain",
-        title: "Ganar masa",
+        title: "Ganar peso",
         description: "Aumenta tu masa muscular con proteína alta y entrenamientos de fuerza progresivos.",
         icon: Dumbbell
     }
@@ -51,9 +49,9 @@ export default function FitnessSettings({ profile, currentWeight, updateMetrics 
 
     const handleCancel = () => {
         setForm({
-            goalType: profile?.goalType || "maintain",
-            height: profile?.height || 170,
-            weightGoal: profile?.weightGoal || 70
+            goalType: profile?.goalType ,
+            height: profile?.height ,
+            weightGoal: profile?.weightGoal 
         });
     }
 

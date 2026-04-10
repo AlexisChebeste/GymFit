@@ -37,6 +37,7 @@ export type Set = {
 export type WorkoutSession = {
   id: string;
   workoutId: string;
+  userId: string;
   date: string;
   exercises: {
     exerciseId: string;
@@ -91,9 +92,11 @@ export type ProgressPhoto = {
 };
 
 export type UserProfile = {
+  id: string;
   email: string;
   avatarUrl?: string;
   name: string;
+  age: number;
   height: number;
   weightGoal: number;
   goalType: "lose" | "gain" | "maintain";

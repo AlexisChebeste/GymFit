@@ -8,11 +8,25 @@ import { applyLastSession } from "@/lib/applyLastSession";
 
 const workoutInitial = { id: '', name: '', userId: '', description: '', exercises: [], createdAt: new Date().toISOString(), color: 'blue' };
 
-export function useWorkout(workoutId: string) {
+export function useWorkout(workoutId: string, userId: string) {
 
   const [templates] = useLocalStorage<Workout[]>("templates", []);
 
   const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const userTemplates = templates.filter(t => t.userId === userId);
+
+    if (userTemplates.length === 0) {
+      const defaultTemplates = templates.filter(t => t.userId === "default");
+      if (defaultTemplates.length > 0) {
+        const newTemplates = [...templates, ...defaultTemplates.map(t => ({ ...t, userId }))];
+        localStorage.setItem("templates", JSON.stringify(newTemplates));
+      }
+    }
+  }, [userId, templates]);
   
   const [persistedState, setPersistedState, isLoaded] =
     useLocalStorage<Workout>("active_session", workoutInitial);

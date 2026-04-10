@@ -1,6 +1,7 @@
 "use client"
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
+import { useUser } from "@/hooks/useUser";
 import { useWorkout } from "@/hooks/useWorkout";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import type { WorkoutSession } from "@/types/types";
@@ -8,6 +9,7 @@ import { useParams, useRouter } from "next/navigation";
 
 export default function WorkoutSession() {
   const params = useParams();
+  const {user} = useUser();
   const workoutId = params.workId as string;
   const router = useRouter();
 
@@ -24,7 +26,7 @@ export default function WorkoutSession() {
     workout,
     dispatch,
     isLoaded,
-  } = useWorkout(workoutId);
+  } = useWorkout(workoutId, user?.id ?? "");
 
   if (!isSessionsLoaded || !isLoaded) return null; // o un loader
 
@@ -33,6 +35,7 @@ export default function WorkoutSession() {
       id: crypto.randomUUID(),
       workoutId: workout.id,
       date: new Date().toISOString(),
+      userId: user?.id ?? "",
       exercises: workout.exercises.map(ex => ({
         exerciseId: ex.exerciseId,
         sets: ex.sets.map(s => ({

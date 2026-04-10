@@ -1,10 +1,19 @@
 // hooks/useWorkoutTemplates.ts
 import { useLocalStorage } from "@/lib/useLocalStorage";
-import { Routine, Workout } from "@/types/types";
+import { Workout } from "@/types/types";
+import { useEffect } from "react";
 
-export function useWorkoutTemplates() {
+export function useWorkoutTemplates(userId: string) {
   const [templates, setTemplates, isLoaded] =
     useLocalStorage<Workout[]>("templates", []);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    // Filtrar las plantillas para el usuario actual
+    const userTemplates = templates.filter(t => t.userId === userId);
+    setTemplates(userTemplates);
+  }, [isLoaded, userId]);
     
   const createTemplate = () => {
 
@@ -12,7 +21,7 @@ export function useWorkoutTemplates() {
 
     const newTemplate: Workout = {
       id: idTemplate,
-      userId: "123",
+      userId: userId,
       name: `Rutina ${templates.length + 1}`,
       description: "Descripción",
       exercises: [],

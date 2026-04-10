@@ -90,15 +90,15 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
                 onSubmit={handleSubmit}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                    <div>
-                        <label className="text-sm font-medium">Peso (kg)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Peso (kg)</label>
                         <input type="number" step="0.1" min="0" required value={form.weight} onChange={(e) => setForm({...form, weight: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 72.5"/>
                         {errors.weight && (
                             <p className="text-red-500 text-xs">{errors.weight}</p>
                         )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium">Cintura (cm)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Cintura (cm)</label>
                         <input type="number" step="0.1" min="0" required value={form.waist} onChange={(e) => setForm({...form, waist: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" 
                         placeholder="Ej: 85.0"
                         />
@@ -106,30 +106,30 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
                             <p className="text-red-500 text-xs">{errors.waist}</p>
                         )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium">Pecho (cm)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Pecho (cm)</label>
                         <input type="number" step="0.1" min="0" required value={form.chest} onChange={(e) => setForm({...form, chest: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 95.0"/>
                         {errors.chest && (
                             <p className="text-red-500 text-xs">{errors.chest}</p>
                         )}
 
                     </div>
-                    <div>
-                        <label className="text-sm font-medium">Brazo (cm)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Brazo (cm)</label>
                         <input type="number" step="0.1" min="0" required value={form.arm} onChange={(e) => setForm({...form, arm: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 35.0"/>
                         {errors.arm && (
                             <p className="text-red-500 text-xs">{errors.arm}</p>
                         )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium">Pierna (cm)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Pierna (cm)</label>
                         <input type="number" step="0.1" min="0" required value={form.leg} onChange={(e) => setForm({...form, leg: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 90.0"/>
                         {errors.leg && (
                             <p className="text-red-500 text-xs">{errors.leg}</p>
                         )}
                     </div>
-                    <div>
-                        <label className="text-sm font-medium">Grasa corporal (%)</label>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Grasa corporal (%)</label>
                         <input type="number" step="0.1" min="0" max="100" required value={form.bodyFat} onChange={(e) => setForm({...form, bodyFat: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 25.0"/>
                         {errors.bodyFat && (
                             <p className="text-red-500 text-xs">{errors.bodyFat}</p>

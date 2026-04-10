@@ -5,21 +5,23 @@ import { WorkoutCard } from "@/components/cards/WorkutCard";
 import { CustomSelect } from "@/components/CustomSelect";
 import Modal from "@/components/Modal";
 import { useRoutines } from "@/hooks/useRoutine";
+import { useUser } from "@/hooks/useUser";
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function WorkoutPage() {
+    const {user} = useUser();
     const router = useRouter();
     const {
         templates,
         createTemplate,
         deleteTemplate,
         isLoaded
-    } = useWorkoutTemplates();
+    } = useWorkoutTemplates(user?.id ?? "");
 
-    const { routine, createRoutine, updateRoutine } = useRoutines();
+    const { routine, createRoutine, updateRoutine } = useRoutines(user?.id ?? "");
 
     const [openModal, setOpenModal] = useState(false);
     const [openModalPlan, setOpenModalPlan] = useState(false);
@@ -91,6 +93,17 @@ export default function WorkoutPage() {
     };
 
     const templatesForPlan = [...templates, { id: "", name: "Descanso" }];
+
+
+    if(!user) {
+        return (
+            <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-natural ">
+                <main className="flex flex-1 w-full flex-col gap-2 items-center p-4 bg-white dark:bg-natural max-w-7xl">
+                    <h1 className="text-4xl font-bold">Inicia sesión para ver tus rutinas</h1>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">

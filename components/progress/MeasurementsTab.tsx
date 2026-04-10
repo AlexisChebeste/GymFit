@@ -5,15 +5,15 @@ import RangeFilter from "../RangeFilter";
 import { useState } from "react";
 import { useMeasurements } from "@/hooks/useMeasurements";
 import MetricCard from "../cards/MetriCard";
-import { BodyMeasurement, UserProfile } from "@/types/types";
+import { BodyMeasurement } from "@/types/types";
 import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
-import { useProfile } from "@/hooks/useProfile";
+import { useUser } from "@/hooks/useUser";
 
 
 export default function MeasurementsTab() {
-  const { profile } = useProfile();
+  const { user: profile } = useUser();
 
   const [range, setRange] = useState<"7D" | "30D" | "90D" >("7D");
 
@@ -31,7 +31,7 @@ export default function MeasurementsTab() {
     metrics,
     updateMeasurement,
     getPrefill
-  } = useMeasurements(range);
+  } = useMeasurements(profile?.id ?? "", range);
 
   const isValidRange = (value: string): value is "7D" | "30D" | "90D" =>
       value === "7D" || value === "30D" || value === "90D" ;

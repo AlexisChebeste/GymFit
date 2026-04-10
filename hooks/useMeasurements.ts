@@ -4,32 +4,49 @@ import { useEffect, useMemo, useState } from "react";
 
 const STORAGE_KEY = "body_measurements";
 
-function getMeasurements() {
+function getMeasurements(userId: string) {
   const data = localStorage.getItem(STORAGE_KEY);
-  return data ? JSON.parse(data) : [];
+  const parsed: BodyMeasurement[] = data ? JSON.parse(data) : [];
+
+  return parsed.filter(m => m.userId === userId);
 }
 
-function saveMeasurements(data: BodyMeasurement[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+function saveMeasurements(userId: string, data: BodyMeasurement[]) {
+  const existing = localStorage.getItem(STORAGE_KEY);
+  const parsed: BodyMeasurement[] = existing ? JSON.parse(existing) : [];
+
+  const otherUsers = parsed.filter(m => m.userId !== userId);
+
+  const merged = [...otherUsers, ...data];
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
 }
 
 export type Trend = "up_good" | "down_good" | "neutral";
 
-export function useMeasurements(range: "7D" | "30D" | "90D") {
+export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "30D") {
 
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);
 
   useEffect(() => {
-    setMeasurements(getMeasurements());
-  }, []);
+    if (!userId) return;
+
+    setMeasurements(getMeasurements(userId));
+  }, [userId]);
 
   const addMeasurement = (newMeasurement: BodyMeasurement) => {
-    const updated = [...measurements, newMeasurement].sort(
+
+    const measurement = {
+      ...newMeasurement,
+      userId
+    }
+
+    const updated = [...measurements, measurement].sort(
       (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
     );
 
     setMeasurements(updated);
-    saveMeasurements(updated);
+    saveMeasurements(userId, updated);
   };
 
   function filterByRange(date: string, range: string) {
@@ -139,7 +156,7 @@ export function useMeasurements(range: "7D" | "30D" | "90D") {
     );
 
     setMeasurements(newData);
-    saveMeasurements(newData);
+    saveMeasurements(userId, newData);
   };
 
   const getPrefill : () => BodyMeasurement = () => {
@@ -148,7 +165,7 @@ export function useMeasurements(range: "7D" | "30D" | "90D") {
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      userId: latest?.userId || "",
+      userId: userId,
       weight: latest?.weight ?? 0,
       bodyFat: latest?.bodyFat ?? 0,
       chest: latest?.chest ?? 0,

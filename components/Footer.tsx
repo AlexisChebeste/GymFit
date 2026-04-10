@@ -2,8 +2,15 @@
 
 import { Dumbbell, LayoutDashboard, TrendingUp, ChartColumnBig  } from "lucide-react";
 import { NavLink } from "./NavLink";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
+    const pathname = usePathname();
+
+    const isPageLogin = pathname.includes("/auth/login") || pathname.includes("/auth/register")
+
+    if(isPageLogin) return null
+
 
     return (
         <div className="fixed bottom-0 w-full  bg-stone-950 rounded-t-2xl">

@@ -184,6 +184,19 @@ export function useDashboard(sessions: WorkoutSession[]) {
     return best;
   }, [sessions]);
 
+  function isSameDay(date1: Date, date2: Date) {
+    return date1.toDateString() === date2.toDateString();
+  }
+
+  function hasTrainedToday(sessions: WorkoutSession[]) {
+    const today = new Date();
+
+    return sessions.some(s => {
+        const sessionDate = new Date(s.date);
+        return isSameDay(sessionDate, today);
+    });
+  }
+
   return {
     volumeData,   // para el gráfico
     totalVolume,  // cards
@@ -191,5 +204,6 @@ export function useDashboard(sessions: WorkoutSession[]) {
     progress,
     bestSession,
     insightsData,
+    hasTrainedToday: hasTrainedToday(sessions)
   };
 }

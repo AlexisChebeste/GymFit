@@ -6,14 +6,16 @@ import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
 import { useExercises } from "@/hooks/useExercises";
 import { BestSet, useExerciseStats } from "@/hooks/useExercisesStats";
+import useSessions from "@/hooks/useSessions";
+import { useUser } from "@/hooks/useUser";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import {  WorkoutSession } from "@/types/types";
 import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
-
-    const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
+    const {user} = useUser();
+    const {sessions} = useSessions(user?.id ?? "");
     const {exercises} = useExercises();
     const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
 

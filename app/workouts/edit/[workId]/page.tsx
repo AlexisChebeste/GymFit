@@ -51,7 +51,7 @@ const filteredExercises = exercises.filter(ex =>
       name: workout.name,
       description: workout.description
     });
-  }, [workout]);
+  }, [workoutId]);
 
   const handleSaveTemplate = () => {
     saveTemplate({
