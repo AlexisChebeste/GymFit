@@ -2,8 +2,7 @@ import { Dumbbell, LucideIcon, Scale, TrendingDown } from "lucide-react";
 import { Card } from "../cards/Card";
 import GoalCard from "./GoalCard";
 import { useState } from "react";
-import { UserProfile } from "@/types/types";
-import { GoalOption } from "@/hooks/useUser";
+import { GoalOption, UserProfile } from "@/types/types";
 
 type GoalInfo = {
     title: string;
@@ -34,35 +33,35 @@ const goalsFitness: GoalInfo[] = [
 ];
 
 type FormSettings = {
-    goalType: GoalOption;
+    goal_type: GoalOption;
     height: number;
-    weightGoal: number;
+    weight_goal: number;
 }
 
-export default function FitnessSettings({ profile, currentWeight, updateMetrics }: { profile: UserProfile, currentWeight?: number, updateMetrics: (weightGoal: number, height: number, goalType: GoalOption) => void }) {
+export default function FitnessSettings({ profile, currentWeight, updateMetrics }: { profile: UserProfile, currentWeight?: number, updateMetrics: (userId: string, weightGoal: number, height: number, goalType: GoalOption) => void }) {
 
     const [form, setForm] = useState<FormSettings>({
-        goalType: profile?.goalType as GoalOption,
+        goal_type: profile?.goal_type as GoalOption,
         height: profile?.height,
-        weightGoal: profile?.weightGoal
+        weight_goal: profile?.weight_goal
     });
 
     const handleCancel = () => {
         setForm({
-            goalType: profile?.goalType ,
+            goal_type: profile?.goal_type as GoalOption,
             height: profile?.height ,
-            weightGoal: profile?.weightGoal 
+            weight_goal: profile?.weight_goal 
         });
     }
 
     const handleSave = () => {
-        updateMetrics(form.weightGoal, form.height, form.goalType);
+        updateMetrics(profile.id,form.weight_goal, form.height, form.goal_type);
     }
 
     const hasChanges =
-        form.goalType !== profile.goalType ||
+        form.goal_type !== profile.goal_type ||
         form.height !== profile.height ||
-        form.weightGoal !== profile.weightGoal;
+        form.weight_goal !== profile.weight_goal;
 
     return (
         <>
@@ -73,8 +72,8 @@ export default function FitnessSettings({ profile, currentWeight, updateMetrics 
                     <GoalCard
                         key={goalOption.label}
                         label={goalOption.label}
-                        goal={form.goalType}
-                        setGoal={(goal) => setForm(prev => ({...prev, goalType: goal}))}
+                        goal={form.goal_type}
+                        setGoal={(goal) => setForm(prev => ({...prev, goal_type: goal}))}
                         title={goalOption.title}
                         description={goalOption.description}
                         icon={goalOption.icon}
@@ -114,8 +113,8 @@ export default function FitnessSettings({ profile, currentWeight, updateMetrics 
                     <div className="flex gap-2 items-center p-2 border rounded-lg bg-zinc-300 dark:bg-zinc-800 text-center text-lg font-medium border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition">
                         <input
                             type="number"
-                            value={form.weightGoal}
-                            onChange={(e) => setForm(prev => ({...prev, weightGoal: Number(e.target.value)}))}
+                            value={form.weight_goal}
+                            onChange={(e) => setForm(prev => ({...prev, weight_goal: Number(e.target.value)}))}
                             className="w-full px-2 focus:outline-none focus:ring-0 bg-transparent text-center text-lg font-medium"
                         />
                         <span className="text-lg font-medium uppercase italic px-2">Kg</span>

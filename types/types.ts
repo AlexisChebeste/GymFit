@@ -80,14 +80,24 @@ export type BodyMeasurement = {
   updatedAt?: string;
 };
 
-export type ProgressPhoto = {
+export type ProgressEntry = {
   id: string;
   userId: string;
   date: string;
 
-  url: string;
-  type?: "front" | "side" | "back";
+  weight?: number;
+  note?: string;
+  muscleMass?: number;
+  bodyFat?: number;
 
+  createdAt: string;
+};
+
+export type ProgressPhoto = {
+  id: string;
+  entry_id: string;
+  url: string;
+  type: "front" | "side" | "back";
   createdAt: string;
 };
 
@@ -98,8 +108,10 @@ export type UserProfile = {
   name: string;
   age: number;
   height: number;
-  weightGoal: number;
-  goalType: "lose" | "gain" | "maintain";
-  createdAt: string;
-  updatedAt?: string;
+  weight_goal: number;
+  goal_type: GoalOption;
+  created_at: string;
+  updated_at?: string;
 };
+
+export type GoalOption = "lose" | "maintain" | "gain";

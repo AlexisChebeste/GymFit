@@ -1,41 +1,39 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { redirect, useRouter } from "next/navigation"
 import { Eye, EyeOff, Zap } from "lucide-react";
 import Link from "next/link";
-import { UserProfile } from "@/types/types";
+import { useUser } from "@/hooks/useUser";
+import { login } from "@/services/auth.services";
 
 export default function LoginPage() {
     const router = useRouter();
+    const {user, profile} = useUser();
 
     const [showCurrent, setShowCurrent] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [loginForm, setLoginForm] = useState({
         email: "",
         password: ""
     });
 
-    function handleLogin() {
-        // Simulamos una validación
-        if (loginForm.email && loginForm.password) {
-            const mockUser: UserProfile = {
-                id: "user123",
-                email: loginForm.email,
-                name: "Alex",
-                goalType: "lose",
-                weightGoal: 69,
-                height: 160,
-                age: 20,
-                createdAt: new Date().toISOString(),
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
 
-            };
-            
-            localStorage.setItem("user", JSON.stringify(mockUser));
-            router.push("/dashboard"); // router.push es mejor que redirect en eventos
+        try {
+            await login(loginForm.email, loginForm.password);
+            router.push("/dashboard");
+        } catch (error) {
+            setError("Credenciales inválidas. Por favor, intenta de nuevo.");
         }
+    };
 
-
-    }
+    useEffect(() => {
+        if (user && profile) {
+            router.push("/dashboard");
+        }
+    }, [user, profile]);
 
     
     return (
@@ -56,10 +54,7 @@ export default function LoginPage() {
             </div>
 
             <div className="max-w-xl w-full p-8 h-full flex flex-col items-center justify-center gap-8 max-h-max rounded-xl bg-stone-900 border-none ">
-                <form className="flex flex-col gap-8 w-full" onSubmit={(e) => {
-                    e.preventDefault()
-                    handleLogin()
-                }}>
+                <form className="flex flex-col gap-8 w-full" onSubmit={handleSubmit}>
                     <div className="flex flex-col gap-2">
                         <label className="text-xs uppercase tracking-widest text-secondary font-bold">
                         Correo electrónico
@@ -107,6 +102,8 @@ export default function LoginPage() {
                             </button>
                         </div>
                     </div>
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+
                     <button type="submit" 
                         className="bg-primary text-zinc-800 font-bold uppercase p-3 rounded-lg hover:bg-primary/80 transition cursor-pointer"
                     >
