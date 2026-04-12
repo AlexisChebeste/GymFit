@@ -3,10 +3,9 @@
 import { Plus } from "lucide-react";
 import { Card } from "./Card";
 import SetRow from "./SetRow";
-import { ExerciseInstance, WorkoutSession } from "@/types/types";
+import { Exercise, ExerciseInstance, WorkoutSession } from "@/types/types";
 import ExerciseMenu from "./ExerciseMenu";
 import { useMemo } from "react";
-import { useExercises } from "@/hooks/useExercises";
 
 interface ExerciseCardProps {
     exercise: ExerciseInstance;
@@ -24,15 +23,14 @@ interface ExerciseCardProps {
     };
 
     sessions?: WorkoutSession[];
+    exercises: Exercise[]
 }
 
 export default function ExerciseCard(
-    { exercise, mode, setActions, editActions, sessions }: ExerciseCardProps) 
+    { exercise, mode, setActions, editActions, sessions, exercises }: ExerciseCardProps) 
 {
 
     const isEditMode = mode === "edit";
-
-    const {exercises} = useExercises()
 
     type ComparableSet = { weight: number; reps: number };
 
@@ -53,7 +51,7 @@ export default function ExerciseCard(
 
         sessions.forEach(s => {
             s.exercises
-            .filter(ex => ex.exerciseId === exerciseId)
+            .filter(ex => ex.exercise_id === exerciseId)
             .forEach(ex => {
                 ex.sets.forEach(set => {
                 if (!best || isBetterSet(set, best)) {
@@ -67,8 +65,8 @@ export default function ExerciseCard(
     }
 
     const historicalPR = useMemo<ComparableSet | null>(
-        () => getHistoricalPR(sessions ?? [], exercise.exerciseId),
-        [sessions, exercise.exerciseId]
+        () => getHistoricalPR(sessions ?? [], exercise.exercise_id),
+        [sessions, exercise.exercise_id]
     );
 
     const isPRSet = (set: ComparableSet) => {
@@ -81,7 +79,7 @@ export default function ExerciseCard(
         );
     };
 
-    const exerciseData = exercises.find(e => e.id === exercise.exerciseId);
+    const exerciseData = exercises.find(e => e.id === exercise.exercise_id);
     
     return(
         <>

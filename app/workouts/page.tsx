@@ -21,7 +21,7 @@ export default function WorkoutPage() {
         isLoaded
     } = useWorkoutTemplates(user?.id ?? "");
 
-    const { routine, createRoutine, updateRoutine } = useRoutines(user?.id ?? "");
+    const { routine, createRoutine, updateRoutine } = useRoutines(user?.id ?? "", );
 
     const [openModal, setOpenModal] = useState(false);
     const [openModalPlan, setOpenModalPlan] = useState(false);
@@ -31,8 +31,11 @@ export default function WorkoutPage() {
 
     if (!isLoaded) return null;
 
-    const handleCreate = () => {
-        const newId = createTemplate();
+    const handleCreate = async () => {
+        const newId = await createTemplate();
+
+        if (!newId) return;
+
         router.push(`/workouts/edit/${newId}`);
     };
 
@@ -43,7 +46,7 @@ export default function WorkoutPage() {
     }
 
     const handlePlan = () => {
-        if (routine.days.length > 0) {
+        if (routine?.days && routine.days.length > 0) {
             const initialPlan: Record<number, string> = {};
 
             routine.days.forEach(d => {
@@ -80,13 +83,7 @@ export default function WorkoutPage() {
                 days
             });
         } else {
-            createRoutine({
-            id: crypto.randomUUID(),
-            userId: "123",
-            name: "Mi rutina",
-            days,
-            createdAt: new Date().toISOString()
-            });
+            createRoutine(days);
         }
 
         setOpenModalPlan(false);

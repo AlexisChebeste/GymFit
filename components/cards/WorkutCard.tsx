@@ -9,13 +9,13 @@ interface WorkoutCardProps {
 }
 
 export function WorkoutCard({ workout, deleteTemplate }: WorkoutCardProps) {
-    const updatedAtDate = workout.updatedAt ? new Date(workout.updatedAt) : null;
+    const updatedAtDate = workout.updated_at ? new Date(workout.updated_at) : null;
     const updatedAtTime = updatedAtDate?.getTime();
     const daysDiff = typeof updatedAtTime === "number" && !Number.isNaN(updatedAtTime)
         ? Math.floor((Date.now() - updatedAtTime) / (1000 * 60 * 60 * 24))
         : null;
     const updatedAt = daysDiff !== null
-        ? daysDiff === 0
+        ? daysDiff === 0 || daysDiff === -1
             ? "Hoy"
             : daysDiff === 1
                 ? "Hace 1 día"

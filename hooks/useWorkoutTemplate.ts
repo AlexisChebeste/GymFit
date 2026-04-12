@@ -1,48 +1,81 @@
 "use client";
 
 import { Workout } from "@/types/types";
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { workoutReducer } from "./workoutReducer";
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { supabase } from "@/lib/supabaseClient";
 
 export function useWorkoutTemplate(workoutId: string) {
 
-  const [templates, setTemplates, isLoaded] = useLocalStorage<Workout[]>(
-    "templates",
-    []
-  );
-
-  // buscar si ya existe template
-  const existing = templates.find(t => t.id === workoutId);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const [state, dispatch] = useReducer(
     workoutReducer,
-    existing || { id: workoutId, name: '', userId: '', description: '', exercises: [], createdAt: new Date().toISOString(), color: 'blue' }
+    null as unknown as Workout
   );
 
-  // guardar cambios en templates
-  const saveTemplate = (override?: Partial<Workout>) => {
-    const finalState = { ...state, ...override };
+  useEffect(() => {
+  if (!workoutId) return;
 
-    setTemplates(prev => {
-      const exists = prev.find(t => t.id === finalState.id);
+  const fetchWorkout = async () => {
+    const { data, error } = await supabase
+      .from("workouts")
+      .select("*")
+      .eq("id", workoutId)
+      .single();
 
-      if (exists) {
-        return prev.map(t =>
-          t.id === finalState.id ? finalState : t
-        );
-      }
+    if (error) {
+      console.error("Error fetching workout:", error);
+    } else {
+      const formatted: Workout = {
+        ...data,
+        exercises: data.exercises || [],
+      };
 
-      return [...prev, finalState];
-    });
+      dispatch({
+        type: "INIT",
+        payload: formatted,
+      });
+    }
+
+    setIsLoaded(true);
   };
 
-  useEffect(() => {
-    if (existing) {
-      dispatch({ type: "RESET", payload: existing });
-    }
-  }, [existing]);
+  fetchWorkout();
+}, [workoutId]);
 
+const saveTemplate = async (updates?: {
+    name: string;
+    description: string;
+  }) => {
+    if (!state) return;
+
+    const updatedWorkout = {
+      ...state,
+      ...updates,
+    };
+
+    const { error } = await supabase
+      .from("workouts")
+      .update({
+        name: updatedWorkout.name,
+        description: updatedWorkout.description,
+        exercises: updatedWorkout.exercises,
+      })
+      .eq("id", workoutId);
+
+    if (error) {
+      console.error("Error saving workout:", error);
+    } else {
+      dispatch({
+        type: "EDIT_WORKOUT",
+        payload: {
+          name: updatedWorkout.name,
+          description: updatedWorkout.description
+        }
+      });
+    }
+  };
 
   return {
     workout: state,

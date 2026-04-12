@@ -110,7 +110,7 @@ export function workoutReducer(state: Workout, action: Action): Workout {
           ...state.exercises,
           {
             id: instanceId,
-            exerciseId: action.payload.exerciseId,
+            exercise_id: action.payload.exerciseId,
             sets: [
               {
                 id: crypto.randomUUID(),

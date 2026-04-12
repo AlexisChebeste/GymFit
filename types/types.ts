@@ -1,10 +1,10 @@
 
 export type Workout = {
     id: string;
-    userId: string;
+    user_id: string;
     name: string;
-    createdAt: string;
-    updatedAt?: string;
+    created_at: string;
+    updated_at?: string;
     description: string;
     color: string;
     exercises: ExerciseInstance[];
@@ -14,12 +14,12 @@ export type Exercise = {
     id: string;
     name: string;
     type: string;
-    userId: string;
+    user_id: string;
 };
 
 export type ExerciseInstance = {
     id: string;
-    exerciseId: string;
+    exercise_id: string;
     sets: Set[];
 };
 
@@ -36,11 +36,11 @@ export type Set = {
 
 export type WorkoutSession = {
   id: string;
-  workoutId: string;
-  userId: string;
+  workout_id: string;
+  user_id: string;
   date: string;
   exercises: {
-    exerciseId: string;
+    exercise_id: string;
     sets: {
       weight: number;
       reps: number;
@@ -51,11 +51,11 @@ export type WorkoutSession = {
 
 export type Routine = {
   id: string;
-  userId: string;
+  user_id: string;
   name: string; 
   days: RoutineDay[];
-  createdAt: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at?: string;
 };
 
 export type RoutineDay = {
@@ -65,7 +65,7 @@ export type RoutineDay = {
 
 export type BodyMeasurement = {
   id: string;
-  userId: string;
+  user_id: string;
   date: string;
 
   weight: number;
@@ -76,13 +76,13 @@ export type BodyMeasurement = {
   arm: number;
   leg: number;
 
-  createdAt: string;
-  updatedAt?: string;
+  created_at: string;
+  updated_at?: string;
 };
 
 export type ProgressEntry = {
   id: string;
-  userId: string;
+  user_id: string;
   date: string;
 
   weight?: number;
@@ -90,7 +90,7 @@ export type ProgressEntry = {
   muscleMass?: number;
   bodyFat?: number;
 
-  createdAt: string;
+  created_at: string;
 };
 
 export type ProgressPhoto = {
@@ -98,7 +98,7 @@ export type ProgressPhoto = {
   entry_id: string;
   url: string;
   type: "front" | "side" | "back";
-  createdAt: string;
+  created_at: string;
 };
 
 export type UserProfile = {

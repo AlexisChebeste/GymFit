@@ -1,47 +1,89 @@
-// hooks/useWorkoutTemplates.ts
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { supabase } from "@/lib/supabaseClient";
 import { Workout } from "@/types/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function useWorkoutTemplates(userId: string) {
-  const [templates, setTemplates, isLoaded] =
-    useLocalStorage<Workout[]>("templates", []);
+  const [templates, setTemplates] = useState<Workout[]>([]);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!isLoaded) return;
+    if(!userId) return;
 
-    // Filtrar las plantillas para el usuario actual
-    const userTemplates = templates.filter(t => t.userId === userId);
-    setTemplates(userTemplates);
-  }, [isLoaded, userId]);
+    const fetchTemplates = async () => {
+      const {data, error} = await supabase
+        .from("workouts")
+        .select("*")
+        .eq("user_id", userId);
+
+      if (error) {
+        console.error("Error fetching templates:", error);
+      } else {
+        setTemplates(data as Workout[]);
+      }
+      setIsLoaded(true);
+    };
+
+    fetchTemplates();
+
+  }, [userId]);
     
-  const createTemplate = () => {
-
-    const idTemplate = crypto.randomUUID();
-
-    const newTemplate: Workout = {
-      id: idTemplate,
-      userId: userId,
+  const createTemplate = async () => {
+    const newTemplate = {
+      user_id: userId,
       name: `Rutina ${templates.length + 1}`,
       description: "Descripción",
       exercises: [],
       color: "#10B981",
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     };
 
-    setTemplates(prev => [...prev, newTemplate]);
+    const { data, error } = await supabase
+      .from("workouts")
+      .insert(newTemplate)
+      .select()
+      .single();
 
-    return newTemplate.id; 
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setTemplates((prev) => [...prev, data]);
+
+    return data.id;
   };
 
-  const deleteTemplate = (id: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== id));
+ const deleteTemplate = async (id: string) => {
+    const { error } = await supabase
+      .from("workouts")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setTemplates((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const updateTemplate = (updated: Workout) => {
-    setTemplates(prev =>
-      prev.map(t => (t.id === updated.id ? updated : t))
+  const updateTemplate = async (updated: Workout) => {
+    const { error } = await supabase
+      .from("workouts")
+      .update({
+        name: updated.name,
+        description: updated.description,
+        exercises: updated.exercises,
+        color: updated.color,
+      })
+      .eq("id", updated.id);
+
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setTemplates((prev) =>
+      prev.map((t) => (t.id === updated.id ? updated : t))
     );
   };
 

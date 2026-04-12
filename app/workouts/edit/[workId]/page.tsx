@@ -4,6 +4,7 @@ import { Card } from "@/components/cards/Card";
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Modal from "@/components/Modal";
 import { useExercises } from "@/hooks/useExercises";
+import { useUser } from "@/hooks/useUser";
 import { useWorkoutTemplate } from "@/hooks/useWorkoutTemplate";
 import { Plus, X } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -19,6 +20,7 @@ export default function WorkoutEdit() {
   const params = useParams();
   const workoutId = params.workId as string;
   const router = useRouter();
+  const {user} = useUser();
 
   if (!workoutId) {
     return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
@@ -31,30 +33,32 @@ export default function WorkoutEdit() {
     isLoaded
   } = useWorkoutTemplate(workoutId);
 
-  const { exercises, createExercise } = useExercises();
+  const { exercises, createExercise } = useExercises(user?.id ?? "");
   const [search, setSearch] = useState("");
   const [newExerciseType, setNewExerciseType] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
 
-const filteredExercises = exercises.filter(ex =>
-  ex.name.toLowerCase().includes(search.toLowerCase())
-);
+  const filteredExercises = exercises.filter(ex =>
+    ex.name.toLowerCase().includes(search.toLowerCase())
+  );
 
   const [modal, setModal] = useState<ModalState>(null);
   const [workoutForm, setWorkoutForm] = useState({
-    name: workout.name,
-    description: workout.description
+    name: "Rutin",
+    description: "Una descripción breve de mi rutina"
   });
 
   useEffect(() => {
-    setWorkoutForm({
-      name: workout.name,
-      description: workout.description
-    });
-  }, [workoutId]);
+    if (!workout) return;
 
-  const handleSaveTemplate = () => {
-    saveTemplate({
+    setWorkoutForm({
+      name: workout.name || "",
+      description: workout.description || ""
+    });
+  }, [workout]);
+
+  const handleSaveTemplate = async () => {
+    await saveTemplate({
       name: workoutForm.name,
       description: workoutForm.description
     });
@@ -72,6 +76,7 @@ const filteredExercises = exercises.filter(ex =>
           <div className="flex flex-col gap-2 ">
             
             <input
+              type="text"
               value={workoutForm.name}
               onChange={(e) =>
                 setWorkoutForm(prev => ({ ...prev, name: e.target.value }))
@@ -122,6 +127,7 @@ const filteredExercises = exercises.filter(ex =>
                 deleteSet: (exerciseId, setId) => 
                   dispatch({ type: "DELETE_SET", payload: { exerciseInstanceId: exercise.id, setId } })
               }}
+              exercises={exercises}
             />
           )))}
         </section>
@@ -145,7 +151,6 @@ const filteredExercises = exercises.filter(ex =>
       </button>
     </div>
 
-    {/* 🔍 Search */}
     <input
       type="text"
       placeholder="Buscar ejercicio..."
@@ -157,7 +162,6 @@ const filteredExercises = exercises.filter(ex =>
       }}
     />
 
-    {/* 📋 Lista */}
     <div className="flex flex-col gap-2 max-h-60 overflow-y-auto mb-4">
       
       {filteredExercises.length > 0 ? (
@@ -184,11 +188,9 @@ const filteredExercises = exercises.filter(ex =>
 
     </div>
 
-    {/* ➕ Crear nuevo (opcional) */}
     {search && filteredExercises.length === 0 && (
   <div className="flex flex-col gap-3 mb-3">
     
-    {/* Select tipo */}
     <select
       className="p-3 bg-black/70 rounded-lg"
       value={newExerciseType}
@@ -202,7 +204,6 @@ const filteredExercises = exercises.filter(ex =>
       <option value="Otro">Otro</option>
     </select>
 
-    {/* Crear */}
     <button
       disabled={!newExerciseType}
       className={`w-full p-3 rounded-lg transition
@@ -210,10 +211,12 @@ const filteredExercises = exercises.filter(ex =>
           ? "bg-blue-600 hover:bg-blue-700" 
           : "bg-gray-600 text-gray-400 cursor-not-allowed"}
       `}
-      onClick={() => {
-        const newEx = createExercise(search, newExerciseType);
+      onClick={async () => {
+        const newEx = await createExercise(search, newExerciseType);
 
-        setSelectedExercise(newEx.id);
+        if (newEx) {
+          setSelectedExercise(newEx.id);
+        }
         setNewExerciseType("");
       }}
     >
@@ -223,7 +226,6 @@ const filteredExercises = exercises.filter(ex =>
   </div>
 )}
 
-    {/* ✅ Confirm */}
     <button
       disabled={!selectedExercise}
       onClick={() => {

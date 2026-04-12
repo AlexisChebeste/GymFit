@@ -25,8 +25,6 @@ export default function WeeklyConsistency({ sessions, routine }: { sessions: Wor
 
   const weekDays = useMemo(() => getWeekDays(), []);
 
-  console.log("Rutina:", routine);
-
   function isPlannedDay(date: Date, routine: Routine | null) {
     if (!routine) return false;
 
