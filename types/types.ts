@@ -69,12 +69,14 @@ export type BodyMeasurement = {
   date: string;
 
   weight: number;
-  bodyFat: number;
+  body_fat: number;
 
   chest: number;
   waist: number;
-  arm: number;
-  leg: number;
+  left_arm: number;
+  right_arm: number;
+  left_leg: number;
+  right_leg: number;
 
   created_at: string;
   updated_at?: string;

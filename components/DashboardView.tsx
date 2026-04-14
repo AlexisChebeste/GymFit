@@ -23,7 +23,7 @@ interface DashboardViewProps {
 
 export default function DashboardView({ user, sessions, routine, templates, measurements }: DashboardViewProps) {
 
-  const {history: weightHistory, latest, change, weightProgress} = measurements;
+  const {history: weightHistory, latest, change, progress: weightProgress} = measurements;
 
   const { 
     volumeData, 

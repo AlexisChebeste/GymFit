@@ -9,14 +9,13 @@ import { BestSet, useExerciseStats } from "@/hooks/useExercisesStats";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
 import { useLocalStorage } from "@/lib/useLocalStorage";
-import {  WorkoutSession } from "@/types/types";
 import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
     const {user} = useUser();
     const {sessions} = useSessions(user?.id ?? "");
-    const {exercises} = useExercises();
+    const {exercises} = useExercises(user?.id ?? "");
     const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
 
     const isValidRange = (value: string): value is "30D" | "3M" | "6M" =>
@@ -27,7 +26,7 @@ export default function StatsPage() {
 
         sessions.forEach(session => {
             session.exercises.forEach(ex => {
-                usedIds.add(ex.exerciseId);
+                usedIds.add(ex.exercise_id);
             });
         });
 
@@ -44,6 +43,21 @@ export default function StatsPage() {
     }, [usedExercises]);
     
     const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
+
+    if (usedExercises.length === 0) {
+        return (
+            <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
+                <main className="flex flex-1 w-full flex-col gap-2  p-4 bg-white dark:bg-natural  max-w-7xl h-full items-center justify-center">
+                    <div className="flex flex-col sm:flex-row items-center justify-between w-full gap-4">
+                        <div className="w-full bg-red-100 border border-red-300 text-red-700 p-6 rounded relative text-center " role="alert">
+                            <strong className="font-bold">¡No hay ejercicios registrados!</strong>
+                            <span className="block sm:inline"> Registra tus ejercicios para ver las estadísticas.</span>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">

@@ -1,44 +1,48 @@
 
-import { BodyMeasurement } from "@/types/types";
+import { supabase } from "@/lib/supabaseClient";
+import { BodyMeasurement, UserProfile } from "@/types/types";
 import { useEffect, useMemo, useState } from "react";
-
-const STORAGE_KEY = "body_measurements";
-
-function getMeasurements(userId: string) {
-  const data = localStorage.getItem(STORAGE_KEY);
-  const parsed: BodyMeasurement[] = data ? JSON.parse(data) : [];
-
-  return parsed.filter(m => m.userId === userId);
-}
-
-function saveMeasurements(userId: string, data: BodyMeasurement[]) {
-  const existing = localStorage.getItem(STORAGE_KEY);
-  const parsed: BodyMeasurement[] = existing ? JSON.parse(existing) : [];
-
-  const otherUsers = parsed.filter(m => m.userId !== userId);
-
-  const merged = [...otherUsers, ...data];
-
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
-}
 
 export type Trend = "up_good" | "down_good" | "neutral";
 
-export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "30D") {
+export function useMeasurements(userId: string, profile: UserProfile, range: "7D" | "30D" | "90D" = "30D") {
 
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!userId) return;
 
-    setMeasurements(getMeasurements(userId));
+    const fetchMeasurements = async () => {
+      const {data, error } = await supabase
+        .from("measurements")
+        .select("*")
+        .eq("user_id", userId)
+
+      if (error) {
+        console.error("Error fetching routine:", error);
+      } else {
+        setMeasurements(data || []);
+      }
+      setIsLoading(false);
+    };
+
+    fetchMeasurements();
   }, [userId]);
 
-  const addMeasurement = (newMeasurement: BodyMeasurement) => {
+  const addMeasurement = async (newMeasurement: BodyMeasurement) => {
 
     const measurement = {
       ...newMeasurement,
-      userId
+      user_id: userId
+    }
+
+    const { error } =  await supabase      
+      .from("measurements")
+      .insert(measurement);
+
+    if (error) {
+      throw new Error("Error saving measurement: " + error.message);
     }
 
     const updated = [...measurements, measurement].sort(
@@ -46,7 +50,7 @@ export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "3
     );
 
     setMeasurements(updated);
-    saveMeasurements(userId, updated);
+
   };
 
   function filterByRange(date: string, range: string) {
@@ -124,39 +128,64 @@ export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "3
         trend: getTrend(getChange("chest"))
       },
       {
-        key: "arm",
-        label: "Brazo",
+        key: "left_arm",
+        label: "Brazo (izq.)",
         unit: "cm",
-        value: latest.arm,
-        change: getChange("arm"),
-        trend: getTrend(getChange("arm"))
+        value: latest.left_arm,
+        change: getChange("left_arm"),
+        trend: getTrend(getChange("left_arm"))
       },
       {
-        key: "bodyFat",
+        key: "right_arm",
+        label: "Brazo (der.)",
+        unit: "cm",
+        value: latest.right_arm,
+        change: getChange("right_arm"),
+        trend: getTrend(getChange("right_arm"))
+      },
+      {
+        key: "body_fat",
         label: "% Grasa",
         unit: "%",
-        value: latest.bodyFat,
-        change: getChange("bodyFat"),
-        trend: getTrend(getChange("bodyFat"), true)
+        value: latest.body_fat,
+        change: getChange("body_fat"),
+        trend: getTrend(getChange("body_fat"), true)
       },
       {
-        key: "leg",
-        label: "Pierna",
+        key: "left_leg",
+        label: "Pierna (izq.)",
         unit: "cm",
-        value: latest.leg,
-        change: getChange("leg"),
-        trend: getTrend(getChange("leg"))
+        value: latest.left_leg,
+        change: getChange("left_leg"),
+        trend: getTrend(getChange("left_leg"))
+      },
+      {
+        key: "right_leg",
+        label: "Pierna (der.)",
+        unit: "cm",
+        value: latest.right_leg,
+        change: getChange("right_leg"),
+        trend: getTrend(getChange("right_leg"))
       },
     ];
   }, [filtered, latest]);
 
-  const updateMeasurement = (updated: BodyMeasurement) => {
+  const updateMeasurement = async (updated: BodyMeasurement) => {
     const newData = measurements.map(m =>
       m.id === updated.id ? updated : m
     );
 
     setMeasurements(newData);
-    saveMeasurements(userId, newData);
+    
+    const { error } = await supabase
+      .from("measurements")
+      .update(updated)
+      .eq("id", updated.id);
+
+    if (error) {
+      console.error("Error updating measurement:", error);
+      throw new Error("Error updating measurement: " + error.message);  
+    }
   };
 
   const getPrefill : () => BodyMeasurement = () => {
@@ -164,16 +193,24 @@ export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "3
       ...latest,
       id: crypto.randomUUID(),
       date: new Date().toISOString(),
-      createdAt: new Date().toISOString(),
-      userId: userId,
+      created_at: new Date().toISOString(),
+      user_id: userId,
       weight: latest?.weight ?? 0,
-      bodyFat: latest?.bodyFat ?? 0,
+      body_fat: latest?.body_fat ?? 0,
       chest: latest?.chest ?? 0,
       waist: latest?.waist ?? 0,
-      arm: latest?.arm ?? 0,
-      leg: latest?.leg ?? 0,
+      left_arm: latest?.left_arm ?? 0,
+      right_arm: latest?.right_arm ?? 0,
+      left_leg: latest?.left_leg ?? 0,
+      right_leg: latest?.right_leg ?? 0,
     };
   };
+
+  const progress = latest && profile?.weight_goal
+  ? latest.weight > profile.weight_goal
+    ? Math.min(profile.weight_goal / (latest.weight / 100), 100)
+    : Math.min((latest.weight / profile.weight_goal) * 100, 100)
+  : null;
 
   return {
     latest,
@@ -183,6 +220,7 @@ export function useMeasurements(userId: string, range: "7D" | "30D" | "90D" = "3
     history: filtered,
     metrics,
     updateMeasurement,
-    getPrefill
+    getPrefill,
+    progress
   };
 }

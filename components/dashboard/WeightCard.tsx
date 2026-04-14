@@ -1,11 +1,12 @@
 import { TrendingUp } from "lucide-react";
 import { Card } from "../cards/Card";
+import { UserProfile } from "@/types/types";
 
 interface WeightCardProps {
     latest: any;
     change: number;
     weightProgress: number ;
-    user: any;
+    user: UserProfile;
 }
 
 export default function WeightCard({ latest, change, weightProgress, user }: WeightCardProps) {
@@ -32,18 +33,18 @@ export default function WeightCard({ latest, change, weightProgress, user }: Wei
             <div className="flex flex-col gap-2 mt-1">
                 <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
                 <span>Objetivo</span>
-                <span>{latest?.weight} / {user?.weightGoal}</span>
+                <span>{latest?.weight} / {user?.weight_goal}</span>
                 </div>
 
                 <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
                 <div
                     className="h-full rounded-full bg-primary transition-all duration-500"
-                    style={{ width: `${weightProgress + 100}%` }}
+                    style={{ width: `${weightProgress}%` }}
                 />
                 </div>
 
                 <p className="text-xs text-secondary font-semibold">
-                {100 + (Number(weightProgress?.toFixed(1)) || 0)} % hacia tu objetivo
+                {weightProgress?.toFixed(1)} % hacia tu objetivo
                 </p>
             </div>
         </Card>

@@ -5,7 +5,7 @@ import RangeFilter from "../RangeFilter";
 import { useState } from "react";
 import { useMeasurements } from "@/hooks/useMeasurements";
 import MetricCard from "../cards/MetriCard";
-import { BodyMeasurement } from "@/types/types";
+import { BodyMeasurement, UserProfile } from "@/types/types";
 import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
@@ -13,14 +13,10 @@ import { useUser } from "@/hooks/useUser";
 
 
 export default function MeasurementsTab() {
-  const { user: profile } = useUser();
-
+  const { profile } = useUser();
   const [range, setRange] = useState<"7D" | "30D" | "90D" >("7D");
-
   const [open, setOpen] = useState<boolean>(false);
-
   const [editing, setEditing] = useState<BodyMeasurement | null>(null);
-
 
   const { 
     latest, 
@@ -30,17 +26,25 @@ export default function MeasurementsTab() {
     addMeasurement,
     metrics,
     updateMeasurement,
-    getPrefill
-  } = useMeasurements(profile?.id ?? "", range);
+    getPrefill,
+    progress
+  } = useMeasurements(profile?.id ?? "", profile ?? {} as UserProfile, range);
 
   const isValidRange = (value: string): value is "7D" | "30D" | "90D" =>
       value === "7D" || value === "30D" || value === "90D" ;
-
 
   const mainMetrics = metrics.slice(0, 4);
   const extraMetrics = metrics.slice(4);
 
   const prefill = getPrefill();
+
+  if (!profile) {
+    return (
+      <div className="flex items-center justify-center h-56 text-zinc-500">
+        Iniciá sesión para registrar tus medidas y ver tu progreso
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-4 flex-1 w-full pt-6">
@@ -87,18 +91,18 @@ export default function MeasurementsTab() {
           <div className="flex flex-col gap-2 mt-1">
             <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
               <span>Objetivo</span>
-              <span>{latest?.weight?.toFixed(1)} / {profile?.weightGoal?.toFixed(1)}</span>
+              <span>{latest?.weight?.toFixed(1)} / {profile?.weight_goal?.toFixed(1)}</span>
             </div>
 
             <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
               <div
                 className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${weightProgress + 100}%` }}
+                style={{ width: `${progress}%` }}
               />
             </div>
 
             <p className="text-xs text-secondary font-semibold">
-              {100 + (Number(weightProgress?.toFixed(1)) || 0)} % hacia tu objetivo
+              {(Number(progress?.toFixed(1)))} % hacia tu objetivo
             </p>
           </div>
         </Card>
@@ -112,7 +116,7 @@ export default function MeasurementsTab() {
           
         </div>
         {weightHistory.length > 0 && (
-          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={profile?.weightGoal} />
+          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={profile?.weight_goal } />
         )}
       </Card>
 
@@ -133,7 +137,7 @@ export default function MeasurementsTab() {
 
       </div>
 
-{/*       {extraMetrics.length > 0 && (
+      {extraMetrics.length > 0 && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80">
           {extraMetrics.map(m => (
             <MetricCard key={m.key}
@@ -146,7 +150,7 @@ export default function MeasurementsTab() {
             />
           ))}
         </div>
-        )} */}
+        )}
 
       {/* 4. Historial */}
       <Card className="px-6">
@@ -180,6 +184,7 @@ export default function MeasurementsTab() {
       {open && (
         <Modal onClose={() => setOpen(false)} className="max-w-2xl!">
           <FormModalMeasurement
+            userId={profile?.id ?? ""}
             mode={editing ? "edit" : "create"}
             onSubmit={editing ? updateMeasurement : addMeasurement}
             onClose={() => setOpen(false)}

@@ -19,7 +19,7 @@ type WeightHistory = {
 
 interface StatsChartProps {
   data: WeightHistory[];
-  goalWeight?: number;
+  goalWeight: number;
 }
 
 export default function WeightChart({ data, goalWeight }: StatsChartProps) {

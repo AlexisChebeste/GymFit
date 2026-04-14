@@ -1,24 +1,35 @@
-import { useLocalStorage } from "@/lib/useLocalStorage";
+import { supabase } from "@/lib/supabaseClient";
 import { WorkoutSession } from "@/types/types";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 
 export default function useSessions(userId: string) {
 
-  const [sessions] = useLocalStorage<WorkoutSession[]>("sessions", []);
+  const [sessions, setSessions] = useState<WorkoutSession[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!userId) return;
+      const fetchSessions = async () => {
+        const {data, error } = await supabase
+          .from("workout_sessions")
+          .select("*")
+          .eq("user_id", userId)
 
-    const userSessions = sessions.filter(s => s.userId === userId);
+        if (error) {
+          console.error("Error fetching routine:", error);
+        } else {
+          setSessions(data || []);
+        }
+        setIsLoading(false);
+      };
 
-    if (userSessions.length === 0) {
-        const newSessions = [...sessions, ...userSessions];
-        localStorage.setItem("sessions", JSON.stringify(newSessions));
-    }
-    }, [userId, sessions]);
+      fetchSessions();
+    }, [userId]);
 
     return {
-      sessions: sessions.filter(s => s.userId === userId)
+      sessions,
+      setSessions,
+      isSessionsLoaded: !isLoading,
     }
 }

@@ -6,9 +6,8 @@ import { useRoutines } from "@/hooks/useRoutine";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
+import { UserProfile } from "@/types/types";
 import { useRouter } from "next/navigation";
-
-import { useEffect } from "react";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,7 +17,7 @@ export default function Dashboard() {
   const { routine } = useRoutines(user?.id ?? "");
   const { templates } = useWorkoutTemplates(user?.id ?? "");
 
-  const measurements = useMeasurements(user?.id ?? "", "30D");
+  const measurements = useMeasurements(user?.id ?? "", profile ?? {} as UserProfile, "30D");
 
   if (loading) return (
     <div className="flex-1 flex justify-center items-center h-full mx-auto gap-6 text-center">

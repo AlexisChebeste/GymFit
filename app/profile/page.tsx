@@ -11,6 +11,7 @@ import PrivacySettings from "@/components/profile/PrivacySettings";
 import { useUser } from "@/hooks/useUser";
 import { logout, updateMetrics } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
+import { UserProfile } from "@/types/types";
 
 type ProfileSection =
   | "account"
@@ -20,7 +21,7 @@ type ProfileSection =
 export default function ProfilePage() {
     const router = useRouter();
     const {profile, loading } = useUser();
-    const {latest} = useMeasurements(profile?.id ?? "","90D");
+    const {latest} = useMeasurements(profile?.id ?? "",profile ?? {} as UserProfile ,"90D");
     
     const [section, setSection] = useState<ProfileSection>("account");
 

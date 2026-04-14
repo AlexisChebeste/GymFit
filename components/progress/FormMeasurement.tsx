@@ -2,25 +2,28 @@ import { BodyMeasurement } from "@/types/types";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-function createDefaultForm(): BodyMeasurement {
-  return {
-    id: crypto.randomUUID(),
-    weight: 0,
-    waist: 0,
-    chest: 0,
-    arm: 0,
-    bodyFat: 0,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    leg: 0,
-    userId: "user123",
-    date: new Date().toISOString(),
-  };
-}
 
 
-export default function FormModalMeasurement({ mode, onSubmit, onClose, initialData }: { mode: "create" | "edit"; onSubmit: (m: BodyMeasurement) => void; onClose: () => void; initialData?: BodyMeasurement | null }) {
+export default function FormModalMeasurement({userId, mode, onSubmit, onClose, initialData }: { userId: string; mode: "create" | "edit"; onSubmit: (m: BodyMeasurement) => void; onClose: () => void; initialData?: BodyMeasurement | null }) {
     const isEditing = mode === "edit";
+
+    function createDefaultForm(): BodyMeasurement {
+        return {
+            id: crypto.randomUUID(),
+            weight: 0,
+            waist: 0,
+            chest: 0,
+            left_arm: 0,
+            right_arm: 0,
+            body_fat: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            left_leg: 0,
+            right_leg: 0,
+            user_id: userId,
+            date: new Date().toISOString(),
+        };
+    }
 
     const [form, setForm] = useState<BodyMeasurement>(() => {
         return initialData || createDefaultForm();
@@ -34,8 +37,8 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
         if (form.weight < 30 || form.weight > 300)
             errors.weight = "Peso poco realista";
 
-        if (form.bodyFat < 3 || form.bodyFat > 60)
-            errors.bodyFat = "Grasa corporal fuera de rango";
+        if (form.body_fat < 3 || form.body_fat > 60)
+            errors.body_fat = "Grasa corporal fuera de rango";
 
         if (form.waist < 40 || form.waist > 200)
             errors.waist = "Cintura inválida";
@@ -43,11 +46,17 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
         if (form.chest < 50 || form.chest > 200)
             errors.chest = "Pecho inválido";
 
-        if (form.arm < 15 || form.arm > 100)
-            errors.arm = "Brazo inválido";
+        if (form.left_arm < 15 || form.left_arm > 100)
+            errors.left_arm = "Brazo izquierdo inválido";
 
-        if (form.leg < 30 || form.leg > 150)
-            errors.leg = "Pierna inválida";
+        if (form.right_arm < 15 || form.right_arm > 100)
+            errors.right_arm = "Brazo derecho inválido";
+
+        if (form.left_leg < 30 || form.left_leg > 150)
+            errors.left_leg = "Pierna izquierda inválida";
+
+        if (form.right_leg < 30 || form.right_leg > 150)
+            errors.right_leg = "Pierna derecha inválida";
 
         return errors;
     }
@@ -63,8 +72,8 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
 
         onSubmit({
             ...form,
-            updatedAt: new Date().toISOString(),
-            createdAt: initialData?.createdAt || new Date().toISOString()
+            updated_at: new Date().toISOString(),
+            created_at: initialData?.created_at || new Date().toISOString()
         });
 
         onClose();
@@ -114,25 +123,41 @@ export default function FormModalMeasurement({ mode, onSubmit, onClose, initialD
                         )}
 
                     </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-medium text-secondary">Brazo (cm)</label>
-                        <input type="number" step="0.1" min="0" required value={form.arm} onChange={(e) => setForm({...form, arm: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 35.0"/>
-                        {errors.arm && (
-                            <p className="text-red-500 text-xs">{errors.arm}</p>
-                        )}
-                    </div>
-                    <div className="flex flex-col gap-2">
-                        <label className="text-sm font-medium text-secondary">Pierna (cm)</label>
-                        <input type="number" step="0.1" min="0" required value={form.leg} onChange={(e) => setForm({...form, leg: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 90.0"/>
-                        {errors.leg && (
-                            <p className="text-red-500 text-xs">{errors.leg}</p>
-                        )}
-                    </div>
+                    
                     <div className="flex flex-col gap-2">
                         <label className="text-sm font-medium text-secondary">Grasa corporal (%)</label>
-                        <input type="number" step="0.1" min="0" max="100" required value={form.bodyFat} onChange={(e) => setForm({...form, bodyFat: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 25.0"/>
-                        {errors.bodyFat && (
-                            <p className="text-red-500 text-xs">{errors.bodyFat}</p>
+                        <input type="number" step="0.1" min="0" max="100" required value={form.body_fat} onChange={(e) => setForm({...form, body_fat: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 25.0"/>
+                        {errors.body_fat && (
+                            <p className="text-red-500 text-xs">{errors.body_fat}</p>
+                        )}
+                    </div>
+
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Brazo izquierdo (cm)</label>
+                        <input type="number" step="0.1" min="0" required value={form.left_arm} onChange={(e) => setForm({...form, left_arm: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 35.0"/>
+                        {errors.left_arm && (
+                            <p className="text-red-500 text-xs">{errors.left_arm}</p>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Brazo derecho (cm)</label>
+                        <input type="number" step="0.1" min="0" required value={form.right_arm} onChange={(e) => setForm({...form, right_arm: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 35.0"/>
+                        {errors.right_arm && (
+                            <p className="text-red-500 text-xs">{errors.right_arm}</p>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Pierna izquierda (cm)</label>
+                        <input type="number" step="0.1" min="0" required value={form.left_leg} onChange={(e) => setForm({...form, left_leg: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 55.0"/>
+                        {errors.left_leg && (
+                            <p className="text-red-500 text-xs">{errors.left_leg}</p>
+                        )}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                        <label className="text-sm font-medium text-secondary">Pierna derecha (cm)</label>
+                        <input type="number" step="0.1" min="0" required value={form.right_leg} onChange={(e) => setForm({...form, right_leg: parseFloat(e.target.value) || 0})} className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 55.0"/>
+                        {errors.right_leg && (
+                            <p className="text-red-500 text-xs">{errors.right_leg}</p>
                         )}
                     </div>
                 </div>

@@ -1,10 +1,12 @@
 "use client"
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
+import { useExercises } from "@/hooks/useExercises";
+import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
 import { useWorkout } from "@/hooks/useWorkout";
-import { useLocalStorage } from "@/lib/useLocalStorage";
 import type { WorkoutSession } from "@/types/types";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
 export default function WorkoutSession() {
@@ -17,27 +19,24 @@ export default function WorkoutSession() {
     return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
   }
 
-  const [sessions, setSessions, isSessionsLoaded] = useLocalStorage<WorkoutSession[]>(
-    "sessions",
-    []
-  );
-  
+  const { sessions, setSessions, isSessionsLoaded } = useSessions(user?.id ?? "");
+  const { exercises } = useExercises(user?.id ?? "");
   const {
     workout,
     dispatch,
     isLoaded,
-  } = useWorkout(workoutId, user?.id ?? "");
+  } = useWorkout(workoutId, user?.id ?? "", sessions);
 
   if (!isSessionsLoaded || !isLoaded) return null; // o un loader
 
   const handleFinishSession = () => {
     const session: WorkoutSession = {
       id: crypto.randomUUID(),
-      workoutId: workout.id,
+      workout_id: workout.id,
       date: new Date().toISOString(),
-      userId: user?.id ?? "",
+      user_id: user?.id ?? "",
       exercises: workout.exercises.map(ex => ({
-        exerciseId: ex.exerciseId,
+        exercise_id: ex.exercise_id,
         sets: ex.sets.map(s => ({
           weight: s.weight,
           reps: s.reps,
@@ -54,6 +53,18 @@ export default function WorkoutSession() {
     router.push("/workouts");
   };
   
+  if (!workout || workout.exercises.length === 0) {
+    return <div className="flex flex-col gap-6 items-center justify-center h-screen">
+      Rutina no encontrada o sin ejercicios.
+      <Link 
+        href="/workouts"
+        className="ml-4 bg-primary/90 text-natural hover:bg-primary/80  font-black py-2 px-4 rounded-2xl shadow-neon-glow transition-transform active:scale-95 cursor-pointer"
+      >
+        Volver a Rutinas
+      </Link>
+    </div>;
+  }
+
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[90vh] md:max-h-full">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl ">
@@ -80,6 +91,7 @@ export default function WorkoutSession() {
                   dispatch({ type: "TOGGLE_SET", payload: { exerciseInstanceId, setId } }),
               }}
               sessions={sessions}
+              exercises={exercises}
             />
           ))}
         </section>
