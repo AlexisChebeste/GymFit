@@ -90,13 +90,29 @@ export function useMeasurements(userId: string, profile: UserProfile, range: "7D
     return ((last - first) / first) * 100;
   })();
 
-  function getChange(field: keyof BodyMeasurement) {
-    if (filtered.length < 2) return 0;
+  const calculateIMC = (weight: number, heightCm: number) => {
+    if (!heightCm) return 0;
+    const heightM = heightCm / 100;
+    return (weight / (heightM * heightM)).toFixed(1);
+  };
 
-    const last = filtered[0];
-    const first = filtered[filtered.length - 1];
+  const measurementsWithIMC = useMemo(() => {
+    return filtered.map(m => ({
+      ...m,
+      imc: calculateIMC(m.weight, profile?.height || 170) 
+    }));
+  }, [filtered, profile]);
 
-    return ((first[field] as number) ?? 0) - ((last[field] as number) ?? 0);
+  function getChange(field: keyof BodyMeasurement | "imc") {
+    if (measurementsWithIMC.length < 2) return 0;
+
+    const last = measurementsWithIMC[0]; 
+    const first = measurementsWithIMC[measurementsWithIMC.length - 1];
+
+    const valFirst = Number(first[field as keyof typeof first]) || 0;
+    const valLast = Number(last[field as keyof typeof last]) || 0;
+
+    return valLast - valFirst;
   }
 
   const change = getChange("weight");
@@ -144,14 +160,6 @@ export function useMeasurements(userId: string, profile: UserProfile, range: "7D
         trend: getTrend(getChange("right_arm"))
       },
       {
-        key: "body_fat",
-        label: "% Grasa",
-        unit: "%",
-        value: latest.body_fat,
-        change: getChange("body_fat"),
-        trend: getTrend(getChange("body_fat"), true)
-      },
-      {
         key: "left_leg",
         label: "Pierna (izq.)",
         unit: "cm",
@@ -167,6 +175,22 @@ export function useMeasurements(userId: string, profile: UserProfile, range: "7D
         change: getChange("right_leg"),
         trend: getTrend(getChange("right_leg"))
       },
+      {
+        key: "body_fat",
+        label: "% Grasa",
+        unit: "%",
+        value: latest.body_fat,
+        change: getChange("body_fat"),
+        trend: getTrend(getChange("body_fat"), true)
+      },
+      {
+        key: "imc",
+        label: "IMC",
+        unit: "Índice",
+        value: calculateIMC(latest.weight, profile.height) as Number,
+        change: 0,
+        trend: "neutral" as Trend
+      }
     ];
   }, [filtered, latest]);
 
@@ -221,6 +245,7 @@ export function useMeasurements(userId: string, profile: UserProfile, range: "7D
     metrics,
     updateMeasurement,
     getPrefill,
-    progress
+    progress,
+    isLoading
   };
 }

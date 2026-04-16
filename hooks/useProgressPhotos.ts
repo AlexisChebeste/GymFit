@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { ProgressPhoto } from "@/types/types";
 
 export type ProgressEntryUI = {
   id: string;
@@ -17,6 +16,14 @@ export type ProgressEntryUI = {
 };
 
 export type PhotoType = "front" | "side" | "back";
+
+type ProgressPhotoDB = {
+  id: string;
+  entry_id: string;
+  type: PhotoType;
+  path: string;
+  user_id: string;
+};
 
 export function useProgressPhotos(userId: string | null) {
   const [entries, setEntries] = useState<ProgressEntryUI[]>([]);
@@ -35,38 +42,47 @@ export function useProgressPhotos(userId: string | null) {
         .order("date", { ascending: true });
 
       if (e1) {
-        console.error(e1);
         setLoading(false);
         return;
       }
 
       const { data: photosData, error: e2 } = await supabase
         .from("progress_photos")
-        .select("*");
+        .select("*")
+        .in("entry_id", entriesData.map((e) => e.id));
 
       if (e2) {
-        console.error(e2);
         setLoading(false);
         return;
       }
 
-      const mapped: ProgressEntryUI[] = entriesData.map((entry: any) => {
-        const photos : ProgressPhoto[] = photosData.filter((p : ProgressPhoto) => p.entry_id === entry.id);
+      const mapped: ProgressEntryUI[] = await Promise.all(
+        entriesData.map(async (entry: any) => {
+          const photos = photosData.filter(
+            (p: ProgressPhotoDB) => p.entry_id === entry.id
+          );
 
-        const photoMap: ProgressEntryUI["photos"] = {};
+          const photoMap: ProgressEntryUI["photos"] = {};
 
-        photos.forEach((p) => {
-          photoMap[p.type as PhotoType] = p.url;
-        });
+          for (const p of photos) {
+            const { data } = await supabase.storage
+              .from("progress-photos")
+              .createSignedUrl(p.path, 60 * 60); // 1 hora
 
-        return {
-          id: entry.id,
-          date: entry.date,
-          weight: entry.weight,
-          note: entry.note,
-          photos: photoMap,
-        };
-      });
+            if (data?.signedUrl && (p.type === "front" || p.type === "side" || p.type === "back")) {
+              photoMap[p.type as PhotoType] = data.signedUrl;
+            }
+          }
+
+          return {
+            id: entry.id,
+            date: entry.date,
+            weight: entry.weight,
+            note: entry.note,
+            photos: photoMap,
+          };
+        })
+      );
 
       setEntries(mapped);
       setLoading(false);
@@ -125,18 +141,13 @@ export function useProgressPhotos(userId: string | null) {
       return null;
     }
 
-    const { data } = supabase.storage
-      .from("progress-photos")
-      .getPublicUrl(path);
-
-    const url = data.publicUrl;
-
     const { error: dbError } = await supabase
       .from("progress_photos")
       .insert({
         entry_id: entryId,
         type,
-        url,
+        path, 
+        user_id: userId,
       });
 
     if (dbError) {
@@ -144,21 +155,29 @@ export function useProgressPhotos(userId: string | null) {
       return null;
     }
 
-    setEntries((prev) =>
-      prev.map((e) =>
-        e.id === entryId
-          ? {
-              ...e,
-              photos: {
-                ...e.photos,
-                [type]: url,
-              },
-            }
-          : e
-      )
-    );
+    const { data } = await supabase.storage
+      .from("progress-photos")
+      .createSignedUrl(path, 60 * 60);
 
-    return url;
+    const signedUrl = data?.signedUrl;
+
+    if (signedUrl) {
+      setEntries((prev) =>
+        prev.map((e) =>
+          e.id === entryId
+            ? {
+                ...e,
+                photos: {
+                  ...e.photos,
+                  [type]: signedUrl,
+                },
+              }
+            : e
+        )
+      );
+    }
+
+    return signedUrl;
   };
 
   const getComparison = (index: number) => {

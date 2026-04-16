@@ -2,7 +2,7 @@ import { Card } from "../cards/Card";
 import { TrendingUp } from "lucide-react";
 import WeightChart from "./WeightCharts";
 import RangeFilter from "../RangeFilter";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useMeasurements } from "@/hooks/useMeasurements";
 import MetricCard from "../cards/MetriCard";
 import { BodyMeasurement, UserProfile } from "@/types/types";
@@ -10,39 +10,55 @@ import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
 import { useUser } from "@/hooks/useUser";
+import WeightCard from "../dashboard/WeightCard";
+import HistoryCard from "./measurements/HistoryCard";
 
 
 export default function MeasurementsTab() {
-  const { profile } = useUser();
+  const { profile, loading } = useUser();
   const [range, setRange] = useState<"7D" | "30D" | "90D" >("7D");
   const [open, setOpen] = useState<boolean>(false);
   const [editing, setEditing] = useState<BodyMeasurement | null>(null);
 
+  const userId = profile?.id;
+
   const { 
     latest, 
     change, 
-    weightProgress,
     history: weightHistory,
     addMeasurement,
     metrics,
     updateMeasurement,
     getPrefill,
-    progress
-  } = useMeasurements(profile?.id ?? "", profile ?? {} as UserProfile, range);
+    progress,
+    isLoading
+  } = useMeasurements( userId ?? "",
+    profile ?? ({} as UserProfile), range);
 
   const isValidRange = (value: string): value is "7D" | "30D" | "90D" =>
       value === "7D" || value === "30D" || value === "90D" ;
 
-  const mainMetrics = metrics.slice(0, 4);
-  const extraMetrics = metrics.slice(4);
+  const prefill = useMemo(() => getPrefill(), [weightHistory]);
 
-  const prefill = getPrefill();
+  if (isLoading || loading) {
+    return (
+      <div className="flex flex-col gap-4 w-full pt-6 animate-pulse">
+        <div className="h-32 bg-zinc-800 rounded-xl" />
+        <div className="h-64 bg-zinc-800 rounded-xl" />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="h-24 bg-zinc-800 rounded-xl" />
+          <div className="h-24 bg-zinc-800 rounded-xl" />
+        </div>
+      </div>
+    );
+  }
 
   if (!profile) {
     return (
-      <div className="flex items-center justify-center h-56 text-zinc-500">
-        Iniciá sesión para registrar tus medidas y ver tu progreso
-      </div>
+        <div className="flex-1 flex justify-center items-center h-full mx-auto gap-6 text-center">
+      <h1 className="text-2xl font-bold text-primary">Iniciá sesión para registrar tus medidas y ver tu progreso</h1>
+      
+    </div>
     );
   }
 
@@ -61,6 +77,7 @@ export default function MeasurementsTab() {
           }}
         />
       </div>
+
       {!weightHistory.length ? (
         <Card className="px-6 py-4 flex flex-col gap-2 justify-center items-center w-full">
           <p className="text-sm text-muted-foreground text-center">
@@ -68,44 +85,7 @@ export default function MeasurementsTab() {
           </p>
         </Card>
       ) : (
-        <Card className="px-6 py-4 flex flex-col gap-2 justify-between w-full">
-          <div className="flex flex-col gap-2">
-            
-            <p className="text-xs uppercase tracking-widest text-secondary font-bold">Peso corporal</p>
-            <h2 className="text-4xl font-bold">
-              {latest?.weight?.toFixed(1)}
-              <span className="text-lg font-normal text-muted-foreground uppercase italic ml-2">kg</span> 
-
-            </h2>
-
-            <div className="flex text-sm gap-2 items-center">
-              <TrendingUp className="text-green-500" size={16} />
-              <span className="text-green-500 font-medium">{change?.toFixed(1)} kg {
-                  range === "7D" ? "los ultimos 7 dias" : range === "30D" ? "el último mes" : "los últimos 90 días"
-                }</span>
-            </div>
-            
-          
-          </div>
-
-          <div className="flex flex-col gap-2 mt-1">
-            <div className="flex items-center justify-between text-xs text-muted-foreground font-medium">
-              <span>Objetivo</span>
-              <span>{latest?.weight?.toFixed(1)} / {profile?.weight_goal?.toFixed(1)}</span>
-            </div>
-
-            <div className="w-full h-2 rounded-full bg-zinc-200 dark:bg-zinc-700 overflow-hidden">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            <p className="text-xs text-secondary font-semibold">
-              {(Number(progress?.toFixed(1)))} % hacia tu objetivo
-            </p>
-          </div>
-        </Card>
+        <WeightCard latest={latest} change={change} weightProgress={progress ?? 0} user={profile} />
       )}
 
       {/* Gráfico */}
@@ -116,60 +96,40 @@ export default function MeasurementsTab() {
           
         </div>
         {weightHistory.length > 0 && (
-          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={profile?.weight_goal } />
+          <WeightChart data={weightHistory.map((m) => ({ date: m.date, weight: m.weight }))} goalWeight={profile?.weight_goal ?? 0} />
         )}
       </Card>
 
       {/* 3. Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {mainMetrics.map((metric) => (
-          <MetricCard
-            key={metric.key}
-            label={metric.label}
-            value={metric.value.toFixed(1)}
-            unit={metric.unit}
-            change={metric.change.toFixed(1)}
-            trend={metric.trend}
-            range={range}
-          />
-        ))}
+      {metrics.map((metric, index) => {
+          const isLastAndOdd = index === metrics.length - 1 && metrics.length % 2 !== 0;
 
-
+          return (
+            <div 
+              key={metric.key} 
+              className={isLastAndOdd ? "md:col-span-2" : ""}
+            >
+              <MetricCard
+                metric={{
+                  ...metric,
+                  value: Number(metric.value)
+                }}
+                range={range}
+              />
+            </div>
+          );
+        })}
       </div>
 
-      {extraMetrics.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 opacity-80">
-          {extraMetrics.map(m => (
-            <MetricCard key={m.key}
-              label={m.label}
-              value={m.value.toFixed(1)}
-              unit={m.unit}
-              change={m.change.toFixed(1)}
-              trend={m.trend}
-              range={range}
-            />
-          ))}
-        </div>
-        )}
-
       {/* 4. Historial */}
-      <Card className="px-6">
-        <p className="text-xs uppercase tracking-widest text-secondary font-bold mb-3">Historial</p>
-        {weightHistory.length === 0 ? (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            No hay registros anteriores. Comenzá a registrar tu peso para ver el historial.
-          </p>
-        ) : (
-          <WeightHistory 
-            weightHistory={weightHistory} 
-            onEdit={(m) => {
-              setEditing(m);
-              setOpen(true);
-            }}
-            editing={editing}
-          />
-        )}
-      </Card>
+      <HistoryCard weightHistory={weightHistory} 
+        onEdit={(m) => {
+          setEditing(m);
+          setOpen(true);
+        }} 
+        editing={editing}
+      />
 
       {/* 5. Botón */}
       <button className="bg-primary hover:bg-primary/90 cursor-pointer  py-3 rounded-lg font-semibold  text-gray-100" 
