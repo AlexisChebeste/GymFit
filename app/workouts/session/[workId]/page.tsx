@@ -6,6 +6,7 @@ import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
 import { useWorkout } from "@/hooks/useWorkout";
 import type { WorkoutSession } from "@/types/types";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
@@ -68,7 +69,15 @@ export default function WorkoutSession() {
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[90vh] md:max-h-full">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl ">
-        <p className="uppercase text-sm text-primary leading-5 tracking-widest">Sesión Actual</p>
+        <div className="w-full flex items-center justify-between gap-2">
+          
+          <p className="uppercase text-sm text-primary leading-5 tracking-widest">Sesión Actual</p>
+
+          <Link href="/workouts" className="ml-auto text-sm text-secondary hover:underline transition-colors">
+            <ArrowLeft className="w-4 h-4 inline-block mr-1" />
+            Volver a mis rutinas
+          </Link>
+        </div>
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full pb-2">
           
           <div className="flex flex-col gap-2 ">
