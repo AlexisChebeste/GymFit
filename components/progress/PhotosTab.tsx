@@ -13,10 +13,23 @@ const viewMap = {
 
 type ViewType = keyof typeof viewMap;
 
+export type FormPhotos = {
+  weight: number;
+  note: string;
+  muscle_mass: number;
+  body_fat: number;
+};
+
 export default function PhotosTab() {
 
     const { user } = useUser();
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [formPhotos, setFormPhotos] = useState<FormPhotos>({
+        weight: 0,
+        note: "",
+        muscle_mass: 0,
+        body_fat: 0,
+    })
 
     const {
         entries,
@@ -34,7 +47,12 @@ export default function PhotosTab() {
     ) => {
         if (!user) return;
 
-        const entry = await createEntry();
+        const entry = await createEntry({
+            weight: formPhotos.weight,
+            note: formPhotos.note,
+            muscle_mass: formPhotos.muscle_mass,
+            body_fat: formPhotos.body_fat,
+        });
 
         if (!entry) return;
 
@@ -60,19 +78,45 @@ export default function PhotosTab() {
         <div className="flex flex-col gap-4 flex-1 w-full pt-6">
     
             {last && prev && last.photos[key] && prev.photos[key] && (
-                <div className="w-full">
-                    <p className="text-xs uppercase text-secondary mb-2">
-                    Comparación
+                <div className="w-full flex flex-col items-center">
+            
+                    <p className="text-xs uppercase tracking-widest text-secondary font-bold mb-3">
+                        Comparación
                     </p>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
 
-                    <ComparisonSlider
-                    before={prev.photos[key]!}
-                    after={last.photos[key]!}
-                    />
+                    {/* IZQUIERDA */}
+                    <div className="hidden lg:flex flex-col justify-center text-sm text-gray-400">
+                        <p>Peso anterior</p>
+                        <p className="text-xl text-white font-semibold">
+                        {prev?.weight ?? "--"} kg
+                        </p>
+                    </div>
 
-                    <p className="text-sm text-secondary mb-2 text-center">
+                    {/* CENTRO (SLIDER) */}
+                    <div className="flex justify-center">
+                        <div className="w-full max-w-md h-[800px]">
+                        <ComparisonSlider
+                            before={prev.photos[key]!}
+                            after={last.photos[key]!}
+                        />
+                        </div>
+                    </div>
+
+                    {/* DERECHA */}
+                    <div className="hidden lg:flex flex-col justify-center text-sm text-gray-400 text-right">
+                        <p>Peso actual</p>
+                        <p className="text-xl text-white font-semibold">
+                        {last?.weight ?? "--"} kg
+                        </p>
+                    </div>
+
+                    </div>
+
+                    <p className="text-sm text-secondary mt-2 text-center">
                         {selectedView} — {prev.date} vs {last.date}
                     </p>
+
                 </div>
             )}
 
@@ -101,13 +145,14 @@ export default function PhotosTab() {
                     entries.map((entry, i) => (
                     <div
                         key={i}
-                        className="aspect-square bg-zinc-800 rounded-xl flex items-center justify-center"
+                        className="w-full h-full bg-zinc-800 rounded-xl flex items-center justify-center"
                     >
                         {entry.photos[key] ? (
                             <img
                                 src={entry.photos[key]}
                                 alt="Foto de progreso"
-                                className="w-full h-full object-cover rounded-xl"
+                                loading="lazy"
+                                className="w-full h-full object-contain rounded-xl"
                             />
                         ) : (
                             <div className="text-gray-500">Sin foto</div>
@@ -120,7 +165,15 @@ export default function PhotosTab() {
             </div>
 
             <button className="bg-primary text-black py-3 rounded-lg font-semibold cursor-pointer w-full flex items-center justify-center gap-2 "
-                onClick={() => setModalOpen(true)}
+                onClick={() => {
+                    setModalOpen(true)
+                    setFormPhotos({
+                        weight: 0,
+                        note: "",
+                        muscle_mass: 0,
+                        body_fat: 0,
+                    })
+                }}
             >   
                 <Plus size={16} />
                 Subir progreso
@@ -130,6 +183,8 @@ export default function PhotosTab() {
                 <ProgressPhotoModal 
                     onClose={() => setModalOpen(false)}
                     onSave={handleSaveProgress}
+                    formData={formPhotos}
+                    setFormData={setFormPhotos}
                 />
             )}
 

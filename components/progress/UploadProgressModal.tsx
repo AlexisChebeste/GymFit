@@ -3,15 +3,18 @@
 import { useState } from "react";
 import Modal from "@/components/Modal";
 import { PhotoType } from "@/hooks/useProgressPhotos";
+import { FormPhotos } from "./PhotosTab";
 
 type Props = {
   onClose: () => void;
   onSave: (
     files: Record<PhotoType, File | null>
   ) => Promise<void>;
+  formData: FormPhotos;
+  setFormData: React.Dispatch<React.SetStateAction<FormPhotos>>;
 };
 
-export default function ProgressPhotoModal({ onClose, onSave }: Props) {
+export default function ProgressPhotoModal({ onClose, onSave, formData, setFormData }: Props) {
   const [files, setFiles] = useState<Record<PhotoType, File | null>>({
     front: null,
     side: null,
@@ -41,8 +44,8 @@ export default function ProgressPhotoModal({ onClose, onSave }: Props) {
   };
 
   const renderBox = (type: PhotoType, label: string) => (
-    <div className="flex flex-col gap-2 items-center">
-      <div className="w-32 h-40 bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center">
+    <div className="flex flex-col gap-2 items-center w-full">
+      <div className="w-full h-46 bg-zinc-800 rounded-xl overflow-hidden flex items-center justify-center">
         {preview[type] ? (
           <img
             src={preview[type]!}
@@ -69,15 +72,59 @@ export default function ProgressPhotoModal({ onClose, onSave }: Props) {
   );
 
   return (
-    <Modal onClose={onClose} className="max-w-lg">
+    <Modal onClose={onClose} className="max-w-xl">
       <div className="flex flex-col gap-6">
 
         <h2 className="text-xl font-bold">Nuevo progreso</h2>
 
-        <div className="flex justify-between gap-4">
+        <div className="flex justify-between gap-4 w-full">
           {renderBox("front", "Frente")}
           {renderBox("side", "Lado")}
           {renderBox("back", "Espalda")}
+        </div>
+
+        {/* Aquí podrías agregar campos para peso, nota, masa muscular y grasa corporal */}
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-secondary">Peso (kg)</label>
+            <input
+              type="number"
+              value={formData.weight || ""}
+              onChange={(e) => setFormData({ ...formData, weight: parseFloat(e.target.value) || 0 })}
+              className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 95.0"
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label className="text-sm font-medium text-secondary">Nota</label>
+            <textarea
+              value={formData.note}
+              onChange={(e) => setFormData({ ...formData, note: e.target.value })}
+              className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: Me siento más fuerte y con más energía"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-secondary">Masa muscular (kg)</label>
+              <input
+                type="number"
+                value={formData.muscle_mass || ""}
+                onChange={(e) => setFormData({ ...formData, muscle_mass: parseFloat(e.target.value) || 0 })}
+                className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 70.0"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-secondary">Grasa corporal (%)</label>
+              <input
+                type="number"
+                value={formData.body_fat || ""}
+                onChange={(e) => setFormData({ ...formData, body_fat: parseFloat(e.target.value) || 0 })}
+                className="w-full px-3 py-2 border rounded-md border-zinc-400 dark:border-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary transition" placeholder="Ej: 10"
+              />
+            </div>
+          </div>
         </div>
 
         <button

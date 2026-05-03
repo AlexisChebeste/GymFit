@@ -91,7 +91,14 @@ export function useProgressPhotos(userId: string | null) {
     fetchData();
   }, [userId]);
 
-  const createEntry = async (weight?: number) => {
+  interface CreateEntryData {
+    weight: number;
+    note?: string;
+    muscle_mass?: number;
+    body_fat?: number;
+  }
+
+  const createEntry = async (entryData: CreateEntryData) => {
     if (!userId) return null;
 
     const { data, error } = await supabase
@@ -99,7 +106,10 @@ export function useProgressPhotos(userId: string | null) {
       .insert({
         user_id: userId,
         date: new Date().toISOString(),
-        weight,
+        weight: entryData.weight,
+        note: entryData.note,
+        muscle_mass: entryData.muscle_mass,
+        body_fat: entryData.body_fat,
       })
       .select()
       .single();
@@ -115,6 +125,7 @@ export function useProgressPhotos(userId: string | null) {
         id: data.id,
         date: data.date,
         weight: data.weight,
+        note: data.note,
         photos: {},
       },
     ]);
