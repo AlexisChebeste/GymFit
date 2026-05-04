@@ -42,7 +42,7 @@ export default function WeeklyConsistency({ sessions, routine }: { sessions: Wor
 
   const trainedDays = useMemo(() => {
     return new Set(
-      sessions.map(s => toLocalKey(new Date(s.date)))
+      sessions.map(s => s.date)
     );
   }, [sessions]);
 

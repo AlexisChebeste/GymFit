@@ -6,69 +6,104 @@ import { workoutReducer } from "./workoutReducer";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import { applyLastSession } from "@/lib/applyLastSession";
 import { supabase } from "@/lib/supabaseClient";
+import { useDebouncedEffect } from "./useDebouncedEffect";
 
-const workoutInitial = { id: '', name: '', user_id: '', description: '', exercises: [], created_at: new Date().toISOString(), color: 'blue' };
+type PersistedWorkout = Workout & {
+  updatedAt: number;
+  inProgress: boolean;
+};
+
+const workoutInitial: Workout = {
+  id: '',
+  name: '',
+  user_id: '',
+  description: '',
+  exercises: [],
+  created_at: new Date().toISOString(),
+  color: 'blue'
+};
 
 export function useWorkout(workoutId: string, userId: string, sessions: WorkoutSession[]) {
 
   const [templates, setTemplates] = useState<Workout[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [state, dispatch] = useReducer(workoutReducer, workoutInitial);
   const initialized = useRef(false);
+
+  const [persistedState, setPersistedState, isLocalLoaded] =
+    useLocalStorage<PersistedWorkout | null>("active_session", null);
 
   useEffect(() => {
     if (!userId) return;
 
     const fetchTemplates = async () => {
-      const {data, error } = await supabase
+      const { data, error } = await supabase
         .from("workouts")
         .select("*")
-        .eq("user_id", userId)
+        .eq("user_id", userId);
 
-      if (error) {
-        console.error("Error fetching routine:", error);
-      } else {
-        setTemplates(data || null);
-      }
+      if (error) console.error(error);
+      else setTemplates(data || []);
+
       setIsLoading(false);
     };
 
     fetchTemplates();
   }, [userId]);
-  
-  const [persistedState, setPersistedState, isLocalLoaded] = useLocalStorage<Workout>("active_session", workoutInitial);
 
   useEffect(() => {
     if (isLoading || !isLocalLoaded || initialized.current) return;
 
     const template = templates.find(t => t.id === workoutId);
+    console.log("persistedState", persistedState);
+    console.log("workoutId", workoutId);
+    if (
+      persistedState &&
+      persistedState.id === workoutId &&
+      persistedState.exercises?.length > 0
+    ) {
+      
+      dispatch({ type: "INIT", payload: persistedState });
+      initialized.current = true;
+      return;
+    }
 
-    const existing =
-      persistedState?.id === workoutId ? persistedState : null;
-
-    const lastSession =
-      sessions.length > 0 ? sessions[sessions.length - 1] : undefined;
+    const lastSession = sessions
+      .filter(s => s.workout_id === workoutId)
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
     const initial =
-      existing ||
-      (template
+      template
         ? applyLastSession(template, lastSession)
-        : workoutInitial);
+        : workoutInitial;
 
     dispatch({ type: "INIT", payload: initial });
 
     initialized.current = true;
-  }, [isLoading, isLocalLoaded, templates, workoutId, sessions]);
+  }, [isLoading, isLocalLoaded, templates, workoutId, sessions, persistedState]);
 
   useEffect(() => {
+    initialized.current = false;
+  }, [workoutId]);
+
+
+  useDebouncedEffect(() => {
     if (!isLocalLoaded) return;
-    setPersistedState(state);
-  }, [state, isLocalLoaded]);
+
+    const payload = {
+      ...state,
+      updatedAt: Date.now(),
+      inProgress: true
+    };
+
+    setPersistedState(payload);
+  }, [state, isLocalLoaded], 800);
 
   return {
     workout: state,
     dispatch,
     isLoaded: !isLoading && isLocalLoaded,
+    clearSession: () => setPersistedState(null)
   };
 }

@@ -37,7 +37,7 @@ export default function StatsGrid({ totalVolume, frequency, progress, bestSessio
             <div className="flex items-center gap-3">
                 <TrendingUp className="text-green-500" size={20} />
                 <div className="flex flex-col">
-                <p className="text-lg font-medium ">{progress?.toFixed(2)} <span className="text-xs font-normal text-muted-foreground uppercase italic">% (7D)</span></p>
+                <p className="text-lg font-medium ">{progress === null ? "-" : progress?.toFixed(2)} <span className="text-xs font-normal text-muted-foreground uppercase italic">% (7D)</span></p>
                 </div>
             </div>
             </Card>

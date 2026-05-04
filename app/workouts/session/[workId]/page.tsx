@@ -5,10 +5,12 @@ import { useExercises } from "@/hooks/useExercises";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
 import { useWorkout } from "@/hooks/useWorkout";
+import { supabase } from "@/lib/supabaseClient";
 import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function WorkoutSession() {
   const params = useParams();
@@ -26,16 +28,18 @@ export default function WorkoutSession() {
     workout,
     dispatch,
     isLoaded,
+    clearSession,
   } = useWorkout(workoutId, user?.id ?? "", sessions);
 
   if (!isSessionsLoaded || !isLoaded) return null; // o un loader
 
-  const handleFinishSession = () => {
-    const session: WorkoutSession = {
-      id: crypto.randomUUID(),
+  const handleFinishSession = async () => {
+    if (!user) return;
+    const today = new Date().toISOString().slice(0, 10);
+    const payload = {
       workout_id: workout.id,
-      date: new Date().toISOString(),
-      user_id: user?.id ?? "",
+      user_id: user.id,
+      date: today,
       exercises: workout.exercises.map(ex => ({
         exercise_id: ex.exercise_id,
         sets: ex.sets.map(s => ({
@@ -46,11 +50,23 @@ export default function WorkoutSession() {
       }))
     };
 
-    setSessions(prev => [...prev, session]);
+    const { data, error } = await supabase
+      .from("workout_sessions")
+      .insert(payload)
+      .select()
+      .single();
 
-    
-    localStorage.removeItem("active_session");
-    
+    if (error) {
+      console.error(error);
+      return;
+    }
+
+    setSessions(prev => [...prev, data]);
+
+    clearSession();
+
+    toast.success("Sesión guardada exitosamente");
+
     router.push("/workouts");
   };
   

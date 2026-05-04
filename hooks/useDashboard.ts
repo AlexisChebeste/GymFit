@@ -184,19 +184,15 @@ export function useDashboard(sessions: WorkoutSession[]) {
     return best;
   }, [sessions]);
 
-  function isSameDay(date1: Date, date2: Date) {
-    return date1.toDateString() === date2.toDateString();
+  function getTodayString() {
+    return new Date().toISOString().slice(0, 10);
   }
 
   function hasTrainedToday(sessions: WorkoutSession[]) {
-    const today = new Date();
+    const today = getTodayString();
 
-    return sessions.some(s => {
-        const sessionDate = new Date(s.date);
-        return isSameDay(sessionDate, today);
-    });
+    return sessions.some(s => s.date === today);
   }
-
   return {
     volumeData,   // para el gráfico
     totalVolume,  // cards
