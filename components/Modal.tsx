@@ -4,7 +4,7 @@ export default function Modal({
   className
 }: {
   children: React.ReactNode;
-  onClose: () => void;
+  onClose?: () => void;
   className?: string;
 }) {
   return (

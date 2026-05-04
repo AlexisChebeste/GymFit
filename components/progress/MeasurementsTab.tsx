@@ -142,7 +142,7 @@ export default function MeasurementsTab() {
       </button>
 
       {open && (
-        <Modal onClose={() => setOpen(false)} className="max-w-2xl!">
+        <Modal className="max-w-2xl!">
           <FormModalMeasurement
             userId={profile?.id ?? ""}
             mode={editing ? "edit" : "create"}
