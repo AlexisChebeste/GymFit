@@ -10,7 +10,7 @@ export function applyLastSession(
     ...template,
     exercises: template.exercises.map((ex) => {
       const lastEx = lastSession.exercises.find(
-        (e) => e.exerciseId === ex.exerciseId
+        (e) => e.exercise_id === ex.exercise_id
       );
 
       if (!lastEx) return ex;
