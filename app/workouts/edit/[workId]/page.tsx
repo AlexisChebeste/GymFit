@@ -49,14 +49,18 @@ export default function WorkoutEdit() {
     description: "Una descripción breve de mi rutina"
   });
 
+  const [initialized, setInitialized] = useState(false);
+
   useEffect(() => {
-    if (!workout) return;
+    if (!workout || initialized) return;
 
     setWorkoutForm({
       name: workout.name || "",
       description: workout.description || ""
     });
-  }, [workout]);
+
+    setInitialized(true);
+  }, [workout, initialized]);
 
   const handleSaveTemplate = async () => {
     await saveTemplate({

@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { TrendingDown, Scale, Dumbbell } from "lucide-react";
 import { register } from "@/services/auth.services";
 import { UserProfile } from "@/types/types";
+import { supabase } from "@/lib/supabaseClient";
+import { uploadAvatar } from "@/services/avatar.service";
+import { toast } from "sonner";
+import Link from "next/link";
 
 type Goal = "lose" | "maintain" | "gain";
 
@@ -14,7 +18,7 @@ export default function RegisterPage() {
   const router = useRouter();
 
   const [step, setStep] = useState(1);
-
+  const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState<UserProfileOmit>({
     email: "",
     password: "",
@@ -30,11 +34,23 @@ export default function RegisterPage() {
 
   const handleRegister = async () => {
     try {
-      await register(form);
+      const user = await register(form);
+      let avatarUrl: string | undefined = undefined;
+
+      if (file && user?.id) {
+        avatarUrl = await uploadAvatar(user.id, file);
+      }
+      await supabase.from("profiles").insert({
+        user_id: user?.id,
+        name: form.name,
+        avatar_url: avatarUrl
+      });
+
+      
       router.push("/dashboard");
     } catch (err) {
       console.error(err);
-      alert("Error al registrarse");
+      toast("Error al registrarse");
     }
   };
 
@@ -211,13 +227,26 @@ export default function RegisterPage() {
                 {/* avatar simple opcional */}
                 
                 <input type="file" className="text-sm text-zinc-400 
-                file:mr-4 file:py-2 file:px-4
-                file:rounded-full file:border-0
-                file:text-sm file:font-semibold
-                file:bg-primary file:text-white
-                hover:file:bg-primary/80 transition cursor-pointer"
+                  file:mr-4 file:py-2 file:px-4
+                  file:rounded-full file:border-0
+                  file:text-sm file:font-semibold
+                  file:bg-primary file:text-white
+                  hover:file:bg-primary/80 transition cursor-pointer"
+                  onChange={(e) => {
+                    setFile(e.target.files ? e.target.files[0] : null);
+                  }}
                  />
 
+                 
+
+            </div>
+            <div className="flex flex-col gap-2">
+              {file && (
+                <img
+                  src={URL.createObjectURL(file)}
+                  className="w-48 h-48 rounded-full object-cover self-center object-center"
+                />
+              )}
             </div>
             <div className="flex gap-2">
               <button onClick={back} className="btn-secondary w-full">
@@ -230,6 +259,16 @@ export default function RegisterPage() {
           </>
         )}
 
+        <div className="flex gap-1 items-center">
+            <p className="text-sm text-zinc-400">
+                ¿Ya tienes una cuenta?{' '}
+                <Link
+                    href="/auth/login"
+                    className="text-primary font-semibold hover:underline cursor-pointer">
+                    Inicia sesión
+                </Link>
+            </p>
+        </div>
       </div>
     </div>
   );

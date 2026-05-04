@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabaseClient";
-import { Workout } from "@/types/types";
+import { workoutService } from "@/services/workout.service";
+import { CreateWorkout, Workout } from "@/types/types";
 import { useEffect, useState } from "react";
 
 export function useWorkoutTemplates(userId: string) {
@@ -10,25 +11,21 @@ export function useWorkoutTemplates(userId: string) {
     if(!userId) return;
 
     const fetchTemplates = async () => {
-      const {data, error} = await supabase
-        .from("workouts")
-        .select("*")
-        .eq("user_id", userId);
-
-      if (error) {
-        console.error("Error fetching templates:", error);
-      } else {
-        setTemplates(data as Workout[]);
+      try {
+        const data = await workoutService.getAll(userId);
+        setTemplates(data || []);
+      } catch (err) {
+        console.error("Error fetching templates:", err);
+      } finally {
+        setIsLoaded(true);
       }
-      setIsLoaded(true);
     };
 
     fetchTemplates();
-
   }, [userId]);
     
   const createTemplate = async () => {
-    const newTemplate = {
+    const newTemplate: CreateWorkout = {
       user_id: userId,
       name: `Rutina ${templates.length + 1}`,
       description: "Descripción",
@@ -36,62 +33,33 @@ export function useWorkoutTemplates(userId: string) {
       color: "#10B981",
     };
 
-    const { data, error } = await supabase
-      .from("workouts")
-      .insert(newTemplate)
-      .select()
-      .single();
-
-    if (error) {
+    try {
+      const data : Workout = await workoutService.create(newTemplate);
+      
+      setTemplates((prev) => [...prev, data]);
+      
+      return data.id;
+    }catch (error) {
       console.error(error);
       return;
     }
 
-    setTemplates((prev) => [...prev, data]);
 
-    return data.id;
   };
 
- const deleteTemplate = async (id: string) => {
-    const { error } = await supabase
-      .from("workouts")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      console.error(error);
-      return;
+  const deleteTemplate = async (id: string) => {
+    try {
+      await workoutService.delete(id);
+      setTemplates((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      console.error(err);
     }
-
-    setTemplates((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const updateTemplate = async (updated: Workout) => {
-    const { error } = await supabase
-      .from("workouts")
-      .update({
-        name: updated.name,
-        description: updated.description,
-        exercises: updated.exercises,
-        color: updated.color,
-      })
-      .eq("id", updated.id);
-
-    if (error) {
-      console.error(error);
-      return;
-    }
-
-    setTemplates((prev) =>
-      prev.map((t) => (t.id === updated.id ? updated : t))
-    );
   };
 
   return {
     templates,
     createTemplate,
     deleteTemplate,
-    updateTemplate,
     isLoaded,
   };
 }

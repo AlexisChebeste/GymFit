@@ -1,4 +1,13 @@
 
+export type CreateWorkout = {
+  user_id: string;
+  name: string;
+  description: string;
+  color: string;
+  exercises: ExerciseInstance[];
+};
+
+
 export type Workout = {
     id: string;
     user_id: string;
@@ -106,7 +115,7 @@ export type ProgressPhoto = {
 export type UserProfile = {
   id: string;
   email: string;
-  avatarUrl?: string;
+  avatar_url?: string;
   name: string;
   age: number;
   height: number;

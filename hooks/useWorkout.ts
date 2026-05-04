@@ -39,7 +39,6 @@ export function useWorkout(workoutId: string, userId: string, sessions: WorkoutS
   
   const [persistedState, setPersistedState, isLocalLoaded] = useLocalStorage<Workout>("active_session", workoutInitial);
 
-  // 🔹 inicialización REAL
   useEffect(() => {
     if (isLoading || !isLocalLoaded || initialized.current) return;
 
@@ -62,7 +61,6 @@ export function useWorkout(workoutId: string, userId: string, sessions: WorkoutS
     initialized.current = true;
   }, [isLoading, isLocalLoaded, templates, workoutId, sessions]);
 
-  // 🔹 persistir en localStorage
   useEffect(() => {
     if (!isLocalLoaded) return;
     setPersistedState(state);

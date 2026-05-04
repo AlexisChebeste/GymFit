@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Card } from "../cards/Card";
 import { CheckCircle, Eye, EyeOff } from "lucide-react";
+import { supabase } from "@/lib/supabaseClient";
+import { toast } from "sonner";
 
 function getPasswordStrength(password: string) {
     const checks = {
         uppercase: /[A-Z]/.test(password),
         number: /[0-9]/.test(password),
         symbol: /[^A-Za-z0-9]/.test(password),
-        length: password.length >= 12
+        length: password.length >= 8
     };
 
     const score = Object.values(checks).filter(Boolean).length;
@@ -30,15 +32,53 @@ export default function PasswordSettings() {
 
     const { checks, score } = getPasswordStrength(form.newPassword);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
 
         if (form.newPassword !== form.confirmPassword) {
             setError("Las contraseñas no coinciden");
             return;
         }
 
-        console.log("update password", form);
+        try{
+            const {data: userData} = await supabase.auth.getUser();
+            const email = userData?.user?.email;
+            if (!email) {
+                setError("Usuario no autenticado");
+                return;
+            }
+
+            const { error: signInError } = await supabase.auth.signInWithPassword({
+                email,
+                password: form.currentPassword
+            });
+
+            if (signInError) {
+                setError("Contraseña actual incorrecta");
+                return;
+            }
+
+            const { error: updateError } = await supabase.auth.updateUser({
+                password: form.newPassword
+            });
+
+            if (updateError) {
+                setError("Error al actualizar la contraseña");
+                return;
+            }
+
+            setForm({
+                currentPassword: "",
+                newPassword: "",
+                confirmPassword: ""
+            });
+
+            toast.success("Contraseña actualizada correctamente");
+        } catch (err) {
+            console.error(err);
+            setError("Error al actualizar la contraseña");
+        }
     };
 
     const strengthLabel =
@@ -92,7 +132,7 @@ export default function PasswordSettings() {
                             setForm({ ...form, newPassword: e.target.value })
                             }
                             className="w-full p-3 pr-10 rounded-lg border bg-zinc-200 dark:bg-zinc-800"
-                            placeholder="Mínimo 12 caracteres"
+                            placeholder="Mínimo 8 caracteres"
                         />
 
                         <button

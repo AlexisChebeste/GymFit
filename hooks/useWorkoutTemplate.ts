@@ -4,6 +4,7 @@ import { Workout } from "@/types/types";
 import { useEffect, useReducer, useState } from "react";
 import { workoutReducer } from "./workoutReducer";
 import { supabase } from "@/lib/supabaseClient";
+import { workoutService } from "@/services/workout.service";
 
 export function useWorkoutTemplate(workoutId: string) {
 
@@ -15,68 +16,51 @@ export function useWorkoutTemplate(workoutId: string) {
   );
 
   useEffect(() => {
-  if (!workoutId) return;
+    if (!workoutId) return;
 
-  const fetchWorkout = async () => {
-    const { data, error } = await supabase
-      .from("workouts")
-      .select("*")
-      .eq("id", workoutId)
-      .single();
+    const fetchWorkout = async () => {
+      try {
+        const data = await workoutService.getById(workoutId);
 
-    if (error) {
-      console.error("Error fetching workout:", error);
-    } else {
-      const formatted: Workout = {
-        ...data,
-        exercises: data.exercises || [],
-      };
+        dispatch({
+          type: "INIT",
+          payload: {
+            ...data,
+            exercises: data.exercises || [],
+          },
+        });
+      } catch (err) {
+        console.error("Error fetching workout:", err);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
 
-      dispatch({
-        type: "INIT",
-        payload: formatted,
-      });
-    }
+    fetchWorkout();
+  }, [workoutId]);
 
-    setIsLoaded(true);
-  };
-
-  fetchWorkout();
-}, [workoutId]);
-
-const saveTemplate = async (updates?: {
-    name: string;
-    description: string;
+  const saveTemplate = async (updates?: {
+    name?: string;
+    description?: string;
   }) => {
     if (!state) return;
 
-    const updatedWorkout = {
-      ...state,
-      ...updates,
-    };
-
-    const { error } = await supabase
-      .from("workouts")
-      .update({
-        name: updatedWorkout.name,
-        description: updatedWorkout.description,
-        exercises: updatedWorkout.exercises,
-      })
-      .eq("id", workoutId);
-
-    if (error) {
-      console.error("Error saving workout:", error);
-    } else {
-      dispatch({
-        type: "EDIT_WORKOUT",
-        payload: {
-          name: updatedWorkout.name,
-          description: updatedWorkout.description
-        }
+    try {
+      const updated = await workoutService.update(workoutId, {
+        name: updates?.name ?? state.name,
+        description: updates?.description ?? state.description,
+        exercises: state.exercises,
       });
+
+      dispatch({
+        type: "INIT",
+        payload: updated,
+      });
+
+    } catch (err) {
+      console.error("Error saving workout:", err);
     }
   };
-
   return {
     workout: state,
     dispatch,

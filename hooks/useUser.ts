@@ -48,6 +48,7 @@ export function useUser() {
   return {
     user,
     profile,
+    setProfile,
     loading,
   };
 }

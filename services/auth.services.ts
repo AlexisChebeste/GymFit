@@ -16,6 +16,7 @@ export async function register(
     password: string;
     name: string;
     age: number;
+    avatar_url?: string;
     height: number;
     weight_goal: number;
     goal_type: "lose" | "maintain" | "gain";
@@ -37,12 +38,15 @@ export async function register(
       name: form.name,
       height: form.height,
       age: form.age,
+      avatar_url: form.avatar_url,
       weight_goal: form.weight_goal,
       goal_type: form.goal_type,
     });
 
     if (error) throw error;
   }
+
+  return user;
 }
 
 export async function logout() {
@@ -50,11 +54,11 @@ export async function logout() {
 }
 
 export async function updateMetrics(userId: string, weightGoal: number, height: number, goalType: GoalOption) {
-  const { error } = await supabase.from("profile").update({
+  const { error } = await supabase.from("profiles").update({
     weight_goal: weightGoal,
     height: height,
     goal_type: goalType,
-    updatedAt: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   }).eq("id", userId);
 
   if (error) throw error;
