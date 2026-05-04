@@ -62,7 +62,7 @@ export function useExerciseStats(
     return sessions
       .map(session => {
         const ex = session.exercises.find(
-          e => e.exerciseId === exerciseId
+          e => e.exercise_id === exerciseId
         );
         if (!ex) return null;
 
