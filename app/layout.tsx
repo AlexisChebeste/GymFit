@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeProvider } from "next-themes";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -29,13 +30,16 @@ export default function RootLayout({
     <html
       lang="es"
       className={cn("h-full", "antialiased", poppins.variable, "font-sans", inter.variable, "dark")}
+      suppressHydrationWarning
     >
       <body className="max-h-screen h-full flex flex-col bg-zinc-50 font-sans dark:bg-natural">
-        <Header />
-        <Toaster />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="dark">
+          <Header />
+          <Toaster />
+          {children}
 
-        <Footer />
+          <Footer />
+        </ThemeProvider>
       </body>
     </html>
   );
