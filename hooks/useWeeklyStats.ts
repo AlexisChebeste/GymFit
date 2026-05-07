@@ -1,87 +1,47 @@
 import { Routine, WorkoutSession } from "@/types/types";
 import { useMemo } from "react";
 
-function toLocalDateString(date: Date) {
-  const offset = date.getTimezoneOffset();
-  const local = new Date(date.getTime() - offset * 60000);
-  return local.toISOString().slice(0, 10); // YYYY-MM-DD
+export function toLocalISO(date: Date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`; // Siempre devuelve YYYY-MM-DD local
 }
 
-function getWeekRange() {
-  const now = new Date();
-
-  const day = now.getDay();
-  const diff = (day === 0 ? -6 : 1) - day;
-
-  const start = new Date(now);
-  start.setDate(now.getDate() + diff);
-
-  const end = new Date(start);
-  end.setDate(start.getDate() + 7);
-
-  return {
-    start: toLocalDateString(start),
-    end: toLocalDateString(end),
-  };
-}
-
-function getLocalDay(dateStr: string) {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const d = new Date(year, month - 1, day); // LOCAL
-
-  const jsDay = d.getDay();
-  return jsDay === 0 ? 6 : jsDay - 1; // lunes = 0
-}
-
-export function useWeeklyStats(
-  routine: Routine | null,
-  sessions: WorkoutSession[]
-) {
+export function useWeeklyStats(routine: Routine | null, sessions: WorkoutSession[]) {
   return useMemo(() => {
-    if (!routine) {
+    // 1. Obtener el lunes de esta semana (Local)
+    const now = new Date();
+    const dayOfWeek = now.getDay(); 
+    const diff = now.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1);
+    const monday = new Date(now.getFullYear(), now.getMonth(), diff);
+
+    // 2. Generar la data de los 7 días
+    const daysData = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(monday);
+      d.setDate(monday.getDate() + i);
+      
+      const dateKey = toLocalISO(d);
+      // JS: 0=Dom, 1=Lun... -> Tu DB: 1=Lun, 7=Dom
+      const dayNum = d.getDay() === 0 ? 7 : d.getDay();
+
       return {
-        completionRate: 0,
-        missedWorkouts: 0,
+        date: d,
+        dateKey,
+        isToday: d.toDateString() === now.toDateString(),
+        hasTrained: sessions.some(s => s.date === dateKey),
+        isPlanned: routine?.days.some(rd => rd.day === dayNum) ?? false
       };
-    }
-
-    const { start, end } = getWeekRange();
-
-    const sessionsThisWeek = sessions.filter(
-      (s) => s.date >= start && s.date < end
-    );
-
-    const trainedDays = new Set(
-      sessionsThisWeek.map((s) => getLocalDay(s.date))
-    );
-
-    const plannedDays = routine.days.map(d => {
-      const day = d.day;
-
-      // si viene 1–7 (lunes=1, domingo=7)
-      return day === 7 ? 6 : day - 1;
     });
 
-    const completed = plannedDays.filter((d) =>
-      trainedDays.has(d)
-    ).length;
-
-    const completionRate =
-      plannedDays.length === 0
-        ? 0
-        : (completed / plannedDays.length) * 100;
-
-    // hoy en formato lunes = 0
-    const now = new Date();
-    const today = now.getDay() === 0 ? 6 : now.getDay() - 1;
-
-    const missedWorkouts = plannedDays.filter(
-      (d) => d <= today && !trainedDays.has(d)
-    ).length;
+    // 3. Métricas
+    const plannedCount = routine?.days.length || 0;
+    const trainedCount = daysData.filter(d => d.hasTrained).length;
+    const completionRate = plannedCount === 0 ? 0 : (trainedCount / plannedCount) * 100;
 
     return {
-      completionRate,
-      missedWorkouts,
+      daysData,
+      completionRate: Number(Math.min(completionRate, 100).toFixed(1)),
     };
   }, [routine, sessions]);
 }

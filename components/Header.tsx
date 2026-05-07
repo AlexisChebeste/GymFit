@@ -21,8 +21,8 @@ export default function Header() {
   if(isPageLogin) return null
 
   return (
-    <header className="w-full bg-white dark:bg-stone-950 shadow-md border-b border-gray-200 dark:border-gray-800 max-h-14 h-full">
-      <div className="mx-auto flex items-center justify-between h-full px-4 max-w-7xl">
+    <header className="w-full bg-white dark:bg-stone-950 shadow-md border-b border-gray-200 dark:border-gray-800 min-h-14">
+      <div className="mx-auto flex items-center justify-between h-14 px-4 max-w-7xl">
         <Link href="/dashboard" className="text-2xl font-bold text-primary italic">
             TrackFit
         </Link>

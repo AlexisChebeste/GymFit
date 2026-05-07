@@ -37,7 +37,7 @@ export default function DashboardView({ user, sessions, routine, templates, meas
 
   const {todayWorkout, nextWorkout, isToday, label } = useWorkoutSchedule(routine, templates);
 
-  const { completionRate, missedWorkouts } = useWeeklyStats(routine, sessions);
+  const { completionRate, daysData } = useWeeklyStats(routine, sessions);
 
   const isRestDay = !isToday && !nextWorkout;
 
@@ -48,9 +48,9 @@ export default function DashboardView({ user, sessions, routine, templates, meas
         <main className="flex flex-1 w-full flex-col items-start p-4 bg-white dark:bg-natural gap-4 max-w-7xl h-full ">
           <section className="flex flex-col gap-4 md:flex-row  justify-between w-full ">
             
-            <DashboardHeader name={user?.name} completionRate={completionRate} missedWorkouts={missedWorkouts} />
+            <DashboardHeader name={user?.name} completionRate={completionRate} />
 
-            <WeeklyConsistency sessions={sessions} routine={routine} />
+            <WeeklyConsistency days={daysData} />
           
           </section>
           
@@ -85,11 +85,14 @@ export default function DashboardView({ user, sessions, routine, templates, meas
             )}
 
             <div className="lg:col-span-3 flex flex-col gap-2 w-full pb-6">
-              <h2 className="text-xs uppercase tracking-widest text-secondary font-bold">Perspectivas</h2>
-              <p className="text-sm text-muted-foreground">
-                Aquí encontrarás análisis y recomendaciones basadas en tus datos de entrenamiento.
-              </p>
-              <InsightsCard insightsData={insightsData} volumeData={volumeData} />
+              <Card className="bg-zinc-900/40 border-white/5 p-6 relative overflow-hidden group transition-all hover:border-primary/20 gap-2 w-full flex flex-col">
+                <h2 className="text-xs uppercase tracking-widest text-secondary font-bold">Perspectivas</h2>
+                <p className="text-sm text-muted-foreground">
+                  Aquí encontrarás análisis y recomendaciones basadas en tus datos de entrenamiento.
+                </p>
+                <InsightsCard insightsData={insightsData} volumeData={volumeData} />
+
+              </Card>
             </div>
           </div>
         </main>

@@ -13,7 +13,7 @@ interface InsightsCardProps {
 export default function InsightsCard({ insightsData, volumeData }: InsightsCardProps) {
 
     return(
-        <Card className="bg-zinc-900/40 border-white/5 p-6 relative overflow-hidden group transition-all hover:border-primary/20">
+        <div className="flex flex-col gap-4 mt-4">
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-[80px]" />
 
             <div className="flex items-start gap-4">
@@ -42,6 +42,6 @@ export default function InsightsCard({ insightsData, volumeData }: InsightsCardP
                 </div>
                 </div>
             </div>
-            </Card>
+            </div>
     )
 }

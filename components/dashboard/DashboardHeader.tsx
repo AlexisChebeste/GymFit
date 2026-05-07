@@ -1,23 +1,23 @@
 
 
-export default function DashboardHeader({ name, completionRate, missedWorkouts }: { name: string; completionRate: number; missedWorkouts: number }) {
+export default function DashboardHeader({ name, completionRate }: { name: string; completionRate: number}) {
+
+    const completionColor = completionRate >= 60 ? "text-green-500" : completionRate >= 30 ? "text-amber-500" : "text-orange-500";
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1">
 
             <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Bienvenido de nuevo</p>
             <h1 className="text-4xl font-bold">Hola, {name}!</h1>
             {completionRate !== undefined && (
             <span className="text-sm text-muted-foreground">
                 Tasa de cumplimiento esta semana:{" "}
-                <span className="font-medium text-green-500">{(completionRate).toFixed(1)}%</span>
+                <span className={`font-medium ${completionColor}`}>{(completionRate).toFixed(1)}%</span>
             </span>
             )}
-            {missedWorkouts > 0 && (
-            <span className="text-sm text-red-500">
-                Has perdido {missedWorkouts} entrenamiento(s) esta semana.
-            </span>
-            )}
+            <p className="text-zinc-500 text-sm mt-1 italic">
+                ¡Vamos! Te quedan sesiones pendientes para cerrar la semana.
+            </p>
 
             
         </div>

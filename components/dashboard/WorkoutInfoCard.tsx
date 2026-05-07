@@ -41,8 +41,8 @@ export default function WorkoutInfoCard({ isToday, hasTrainedToday, isRestDay, t
                 : label ?? "Sin planificación"}
             </p>
 
-            <Link href={isToday && !hasTrainedToday ? `/workouts/session/${todayWorkout?.id}` : "/workouts"} className={`text-sm font-semibold w-full text-center py-4 rounded-md flex items-center justify-center transition-colors
-            ${hasTrainedToday ? "bg-green-700 hover:bg-green-800" : "bg-primary/80 hover:bg-primary"}
+            <Link href={isToday && !hasTrainedToday ? `/workouts/session/${todayWorkout?.id}` : "/workouts"} className={`text-sm font-medium w-full text-center py-4 rounded-md flex items-center justify-center transition-colors
+            ${hasTrainedToday ? "bg-green-600 hover:bg-green-800" : "bg-secondary hover:bg-secondary/80 text-white"}
             `}
             >
             

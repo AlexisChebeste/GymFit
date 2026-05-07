@@ -20,7 +20,25 @@ export default function Dashboard() {
 
   const measurements = useMeasurements(user?.id ?? "", profile ?? {} as UserProfile, "30D");
 
-  if (loading) return <Loading />;
+  if (loading) return  (
+      <div className="flex flex-col gap-4 w-full pt-6 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto">
+        <div className="h-64 md:h-32 bg-zinc-800 rounded-xl" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="h-48 bg-zinc-800 rounded-xl lg:col-span-2" />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="h-full bg-zinc-800 rounded-xl" />
+            <div className="h-full bg-zinc-800 rounded-xl" />
+            <div className="h-full bg-zinc-800 rounded-xl" />
+            <div className="h-full bg-zinc-800 rounded-xl" />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="h-80 bg-zinc-800 rounded-xl lg:col-span-2" />
+          <div className="h-48 lg:h-80 bg-zinc-800 rounded-xl" />
+        </div>
+        <div className="h-64 bg-zinc-800 rounded-xl" />
+      </div>
+    );;
 
   if (!user || !profile) return (
       <div className="flex-1 flex flex-col justify-center items-center h-full mx-auto gap-6 text-center">
