@@ -1,5 +1,5 @@
-import { PhotoType, useProgressPhotos } from "@/hooks/useProgressPhotos";
-import { useUser } from "@/hooks/useUser";
+import { PhotoType, useProgressPhotos } from "@/hooks/progress/useProgressPhotos";
+import { useUser } from "@/hooks/user/useUser";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import ComparisonSlider from "./ComparisionSlider";

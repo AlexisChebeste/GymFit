@@ -3,16 +3,17 @@ import { Plus, TrendingUp } from "lucide-react";
 import WeightChart from "./WeightCharts";
 import RangeFilter from "../RangeFilter";
 import { useMemo, useState } from "react";
-import { useMeasurements } from "@/hooks/useMeasurements";
+import { useMeasurements } from "@/hooks/progress/useMeasurements";
 import MetricCard from "../cards/MetriCard";
 import { BodyMeasurement, UserProfile } from "@/types/types";
 import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/user/useUser";
 import WeightCard from "../dashboard/WeightCard";
 import HistoryCard from "./measurements/HistoryCard";
 import Button from "../ui/Button";
+import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
 
 
 export default function MeasurementsTab() {
@@ -23,18 +24,9 @@ export default function MeasurementsTab() {
 
   const userId = profile?.id;
 
-  const { 
-    latest, 
-    change, 
-    history: weightHistory,
-    addMeasurement,
-    metrics,
-    updateMeasurement,
-    getPrefill,
-    progress,
-    isLoading
-  } = useMeasurements( userId ?? "",
-    profile ?? ({} as UserProfile), range);
+  const {measurements, isLoading, addMeasurement, updateMeasurement } = useMeasurements(userId ?? "");
+
+  const { history: weightHistory, latest, change, progress, metrics, getPrefill } = useMeasurementStats(measurements, profile ?? ({} as UserProfile), range);
 
   const isValidRange = (value: string): value is "7D" | "30D" | "90D" =>
       value === "7D" || value === "30D" || value === "90D" ;

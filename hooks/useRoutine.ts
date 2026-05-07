@@ -27,41 +27,25 @@ export function useRoutines(userId: string) {
   }, [userId]);
 
   const createRoutine = async (days: { day: number; templateId: string }[]) => {
-    const { data, error } = await supabase
-      .from("routines")
-      .insert({
+    try{
+      const newRoutine = await routineService.create({
         user_id: userId,
-        days,
-        name: "Mi rutina",
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error(error);
-      return;
+        name: "Mi Rutina",
+        days
+      });
+      setRoutine(newRoutine);
+    } catch (err) {
+      toast.error("Error al crear la rutina");
     }
-
-    setRoutine(data);
   };
 
  const updateRoutine = async (updatedRoutine: Routine) => {
-    const { data, error } = await supabase
-      .from("routines")
-      .update({
-        days: updatedRoutine.days,
-        name: updatedRoutine.name,
-      })
-      .eq("id", updatedRoutine.id)
-      .select()
-      .single();
-
-    if (error) {
-      console.error(error);
-      return;
+    try {
+      const updated = await routineService.update(updatedRoutine.id, updatedRoutine);
+      setRoutine(updated);
+    } catch (err) {
+      toast.error("Error al actualizar la rutina");
     }
-
-    setRoutine(data);
   };
 
   return {

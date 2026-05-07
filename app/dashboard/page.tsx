@@ -2,13 +2,14 @@
 
 import DashboardView from "@/components/DashboardView";
 import Loading from "@/components/Loading";
-import { useMeasurements } from "@/hooks/useMeasurements";
+import { useMeasurements } from "@/hooks/progress/useMeasurements";
 import { useRoutines } from "@/hooks/useRoutine";
-import useSessions from "@/hooks/useSessions";
-import { useUser } from "@/hooks/useUser";
+import useSessions from "@/hooks/session/useSessions";
+import { useUser } from "@/hooks/user/useUser";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { UserProfile } from "@/types/types";
 import { useRouter } from "next/navigation";
+import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
 
 export default function Dashboard() {
   const router = useRouter();
@@ -18,7 +19,9 @@ export default function Dashboard() {
   const { routine } = useRoutines(user?.id ?? "");
   const { templates } = useWorkoutTemplates(user?.id ?? "");
 
-  const measurements = useMeasurements(user?.id ?? "", profile ?? {} as UserProfile, "30D");
+  const measurements = useMeasurements(user?.id ?? "");
+
+  const measurementsStats = useMeasurementStats(measurements.measurements, profile ?? {} as UserProfile, "30D");
 
   if (loading) return  (
       <div className="flex flex-col gap-4 w-full pt-6 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto">
@@ -61,7 +64,7 @@ export default function Dashboard() {
       sessions={sessions}
       routine={routine}
       templates={templates}
-      measurements={measurements}
+      measurementsStats={measurementsStats}
     />
   );
 }

@@ -6,7 +6,7 @@ import { CustomSelect } from "@/components/CustomSelect";
 import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
 import { useRoutines } from "@/hooks/useRoutine";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/user/useUser";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -61,13 +61,13 @@ export default function WorkoutPage() {
     };
 
     const days = [
-        { label: "Domingo", value: 0 },
-        { label: "Lunes", value: 1 },
-        { label: "Martes", value: 2 },
-        { label: "Miércoles", value: 3 },
-        { label: "Jueves", value: 4 },
-        { label: "Viernes", value: 5 },
-        { label: "Sábado", value: 6 },
+        { label: "Lunes", value: 0 },
+        { label: "Martes", value: 1 },
+        { label: "Miércoles", value: 2 },
+        { label: "Jueves", value: 3 },
+        { label: "Viernes", value: 4 },
+        { label: "Sábado", value: 5 },
+        { label: "Domingo", value: 6 },
     ];
 
     const handleSaveRoutine = () => {

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { redirect, useRouter } from "next/navigation"
 import { Eye, EyeOff, Zap } from "lucide-react";
 import Link from "next/link";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/user/useUser";
 import { login } from "@/services/auth.services";
 
 export default function LoginPage() {

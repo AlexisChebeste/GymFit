@@ -3,8 +3,8 @@
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
-import { useExercises } from "@/hooks/useExercises";
-import { useUser } from "@/hooks/useUser";
+import { useExercises } from "@/hooks/exercise/useExercises";
+import { useUser } from "@/hooks/user/useUser";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { workoutReducer } from "@/hooks/workout/workoutReducer";
 import { workoutService } from "@/services/workout.service";

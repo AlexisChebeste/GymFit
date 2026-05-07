@@ -111,8 +111,6 @@ export function useExerciseStats(
     });
   }, [lastSessions]);
 
-  console.log({ bestSets });
-
   //  6. PR GLOBAL (NO depende del filtro)
   const pr = useMemo(() => {
     let best: Set | null = null;

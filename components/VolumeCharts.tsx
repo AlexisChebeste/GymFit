@@ -13,7 +13,6 @@ import {
 
 type BestSet = {
   date: string;
-  rawDate: string;
   volume: number;
 };
 
@@ -75,7 +74,7 @@ export default function VolumeChart({ data }: VolumeChartProps) {
             }}
             labelStyle={{ color: "#aaa" }}
             formatter={(value, _name, item) => {
-              if (item && item.payload && item.payload.rawDate) 
+              if (item && item.payload && item.payload.date) 
                  
               return [`${value} kg`, "Volumen total sesión"];
             }}

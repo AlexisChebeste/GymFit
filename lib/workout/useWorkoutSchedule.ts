@@ -13,7 +13,7 @@ export function getWorkoutSchedule(
     };
   }
 
-  const today = new Date().getDay();
+  const today = new Date().getDay()-1;
 
   const todayPlan = routine.days.find((d) => d.day === today);
 

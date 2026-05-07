@@ -38,10 +38,10 @@ export const routineService = {
 
         return data as Routine;
     },
-    create: async (routineData: Routine) => {
+    create: async (routineData: Omit<Routine, "id" | "created_at" | "updated_at">) => {
         const { data, error } = await supabase
         .from("routines")
-        .insert([routineData])
+        .insert(routineData)
         .select();
 
         if (error) throw new Error(error.message);

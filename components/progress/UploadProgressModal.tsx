@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Modal from "@/components/Modal";
-import { PhotoType } from "@/hooks/useProgressPhotos";
+import { PhotoType } from "@/hooks/progress/useProgressPhotos";
 import { FormPhotos } from "./PhotosTab";
 
 type Props = {

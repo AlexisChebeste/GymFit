@@ -5,7 +5,7 @@ import { useEffect, useReducer, useRef } from "react";
 import { workoutReducer } from "./workoutReducer";
 import { useLocalStorage } from "@/lib/useLocalStorage";
 import { applyLastSession } from "@/lib/applyLastSession";
-import { useDebouncedEffect } from "../useDebouncedEffect";
+import { useDebouncedEffect } from "../utils/useDebouncedEffect";
 
 type PersistedWorkout = Workout & {
   updatedAt: number;

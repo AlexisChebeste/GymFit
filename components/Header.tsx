@@ -6,7 +6,7 @@ import { NavLink } from "./NavLink";
 import { usePathname } from "next/navigation";
 import { logout } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/hooks/user/useUser";
 import Image from "next/image";
 import { ThemeToggle } from "./ui/ThemeToggle";
 const links = [

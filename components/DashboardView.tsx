@@ -18,12 +18,13 @@ interface DashboardViewProps {
     sessions: any[];
     routine: any;
     templates: any[];
-    measurements: any;
+    measurementsStats: any;
 }
 
-export default function DashboardView({ user, sessions, routine, templates, measurements }: DashboardViewProps) {
+export default function DashboardView({ user, sessions, routine, templates, measurementsStats }: DashboardViewProps) {
 
-  const {history: weightHistory, latest, change, progress: weightProgress} = measurements;
+  const {history: weightHistory, latest, change, progress: weightProgress} = measurementsStats;
+
 
   const { 
     volumeData, 

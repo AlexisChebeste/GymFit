@@ -2,7 +2,7 @@
 
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { Card } from "./Card";
-import { Trend } from "@/hooks/useMeasurements";
+import { Trend } from "@/hooks/progress/useMeasurements";
 
 interface MetricCardProps {
     metric: {
@@ -10,8 +10,8 @@ interface MetricCardProps {
         label: string;
         value: number;
         unit: string;
-        change?: number;
-        trend?: Trend;
+        change?: number | string;
+        trend?: Trend | string;
     };
     range: "7D" | "30D" | "90D";
 }

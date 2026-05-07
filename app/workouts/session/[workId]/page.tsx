@@ -2,9 +2,9 @@
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Button from "@/components/ui/Button";
-import { useExercises } from "@/hooks/useExercises";
-import useSessions from "@/hooks/useSessions";
-import { useUser } from "@/hooks/useUser";
+import { useExercises } from "@/hooks/exercise/useExercises";
+import useSessions from "@/hooks/session/useSessions";
+import { useUser } from "@/hooks/user/useUser";
 import { useWorkout } from "@/hooks/workout/useWorkout";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { sessionService } from "@/services/sessions.service";
@@ -24,7 +24,7 @@ export default function WorkoutSession() {
     return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
   }
 
-  const { sessions, setSessions, isSessionsLoaded } = useSessions(user?.id ?? "");
+  const { sessions, createSession, isSessionsLoaded } = useSessions(user?.id ?? "");
   const { exercises } = useExercises(user?.id ?? "");
   const { templates } = useWorkoutTemplates(user?.id ?? "");
   const {
@@ -56,7 +56,7 @@ export default function WorkoutSession() {
     try {
       const savedSession = await sessionService.create(payload);
 
-      setSessions(prev => [...prev, savedSession]);
+      await createSession(savedSession);
 
       clearSession();
 
@@ -129,7 +129,6 @@ export default function WorkoutSession() {
             Finalizar y Guardar Sesión
           </Button>
         </footer>
-        
 
       </main>
     </div>

@@ -1,8 +1,9 @@
 "use client";
 
-import { supabase } from "@/lib/supabaseClient";
+import { exerciseService } from "@/services/exercises.service";
 import { Exercise } from "@/types/types";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function useExercises(userId: string) {
   const [exercises, setExercises] = useState<Exercise[]>([]);
@@ -12,14 +13,9 @@ export function useExercises(userId: string) {
     if (!userId) return;
 
     const fetchExercises = async () => {
-      const { data, error } = await supabase
-        .from("exercises")
-        .select("*")
-        .eq("user_id", userId);
+      try{
+        const data = await exerciseService.getAll(userId);
 
-      if (error) {
-        console.error("Error fetching exercises:", error);
-      } else {
         const mapped = data.map((ex) => ({
           id: ex.id,
           name: ex.name,
@@ -28,40 +24,39 @@ export function useExercises(userId: string) {
         }));
 
         setExercises(mapped);
+      }catch(error){
+        toast.error("Error fetching exercises");
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     };
 
     fetchExercises();
   }, [userId]);
 
   const createExercise = async (name: string, type: string) => {
-    const { data, error } = await supabase
-      .from("exercises")
-      .insert({
+    
+    try{
+      const data = await exerciseService.create({
         name,
         type,
         user_id: userId,
-      })
-      .select()
-      .single();
+      });
 
-    if (error) {
-      console.error("Error creating exercise:", error);
-      return null;
+      const newEx: Exercise = {
+        id: data.id,
+        name: data.name,
+        type: data.type,
+        user_id: data.user_id,
+      };
+
+      setExercises((prev) => [...prev, newEx]);
+      
+      return newEx;
+    }   catch(error){
+      toast.error("Error creating exercise");
+      return;
     }
-
-    const newEx: Exercise = {
-      id: data.id,
-      name: data.name,
-      type: data.type,
-      user_id: data.user_id,
-    };
-
-    setExercises((prev) => [...prev, newEx]);
-
-    return newEx;
   };
 
   return {

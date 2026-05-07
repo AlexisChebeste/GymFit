@@ -17,7 +17,6 @@ export default function useSessions(userId: string) {
           const data = await sessionService.getAll(userId);
           setSessions(data);
         } catch (error) {
-          console.error("Error fetching sessions:", error);
           toast.error("Error al cargar las sesiones.");
         } finally {
           setIsLoading(false);
@@ -27,9 +26,14 @@ export default function useSessions(userId: string) {
       fetchSessions();
     }, [userId]);
 
+    const createSession = async (session: Omit<WorkoutSession, "id">) => {
+      const newSession = await sessionService.create(session);
+      setSessions(prev => [...prev, newSession]);
+    };
+
     return {
       sessions,
-      setSessions,
+      createSession,
       isSessionsLoaded: !isLoading,
     }
 }

@@ -1,9 +1,9 @@
+import { isWithinDays, toLocalISO } from "@/lib/date";
 import { WorkoutSession } from "@/types/types";
 import { useMemo } from "react";
 
 type VolumePoint = {
   date: string;
-  rawDate: string;
   volume: number;
 };
 
@@ -32,13 +32,6 @@ const INSIGHT_MESSAGES = {
 
 export function useDashboard(sessions: WorkoutSession[]) {
 
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short",
-    });
-  }
-
   function getSessionVolume(session: WorkoutSession) {
     return session.exercises.reduce((total, ex) => {
       return total + ex.sets.reduce((sum, set) => {
@@ -47,80 +40,52 @@ export function useDashboard(sessions: WorkoutSession[]) {
     }, 0);
   }
 
-  // 1. Volumen por sesión (ordenado + limpio)
+  const sessionsWithVolume = useMemo(() => {
+    return sessions.map(s => ({
+      ...s,
+      volume: getSessionVolume(s)
+    }));
+  }, [sessions]);
+
   const volumeData: VolumePoint[] = useMemo(() => {
-    return sessions
+    return sessionsWithVolume
       .slice(-10)
       .map((session) => ({
-        date: formatDate(session.date),
-        rawDate: session.date,
-        volume: getSessionVolume(session),
+        date: session.date,
+        volume: session.volume,
       }))
       .sort(
         (a, b) =>
-          new Date(a.rawDate).getTime() - new Date(b.rawDate).getTime()
+          new Date(a.date).getTime() - new Date(b.date).getTime()
       );
-  }, [sessions]);
+  }, [sessionsWithVolume]);
 
-  // 2. Volumen total (últimos 30 días)
   const totalVolume = useMemo(() => {
-    const now = new Date();
+    return sessionsWithVolume
+      .filter(s => isWithinDays(s.date, 30))
+      .reduce((acc, s) => acc + s.volume, 0);
+  }, [sessionsWithVolume]);
 
-    return sessions.reduce((acc, session) => {
-      const date = new Date(session.date);
-
-      const diffDays =
-        (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-
-      if (diffDays <= 30) {
-        return acc + getSessionVolume(session);
-      }
-
-      return acc;
-    }, 0);
-  }, [sessions]);
-
-  // 3. Frecuencia (últimos 30 días)
   const frequency = useMemo(() => {
-    const now = new Date();
+    return sessionsWithVolume.filter(s => isWithinDays(s.date, 30)).length;
+  }, [sessionsWithVolume]);
 
-    return sessions.filter((session) => {
-      const date = new Date(session.date);
-
-      const diffDays =
-        (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-
-      return diffDays <= 30;
-    }).length;
-  }, [sessions]);
-
-  // 4. Progreso (volumen actual vs anterior)
   const progress = useMemo(() => {
-    const now = new Date();
-
     let current = 0;
     let previous = 0;
 
-    sessions.forEach((session) => {
-      const date = new Date(session.date);
-      const volume = getSessionVolume(session);
+    sessionsWithVolume.forEach(s => {
+      const volume = s.volume;
 
-      const diffDays =
-        (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24);
-
-      if (diffDays <= 7) {
-        current += volume;
-      } else if (diffDays <= 30) {
-        previous += volume;
-      }
+      if (isWithinDays(s.date, 7)) current += volume;
+      else if (isWithinDays(s.date, 30)) previous += volume;
     });
 
     if (previous === 0) return null;
 
     return ((current - previous) / previous) * 100;
-  }, [sessions]);
+  }, [sessionsWithVolume]);
 
-  // 5. Insights simples pero útiles
   const insightsData = useMemo(() => {
     if (volumeData.length < 3) {
       return {
@@ -135,13 +100,10 @@ export function useDashboard(sessions: WorkoutSession[]) {
     const prev = volumes.at(-2)!;
     const prev2 = volumes.at(-3)!;
 
-    // 1. Detección de Estancamiento (Plateau)
-    // Si la diferencia entre los últimos 3 es menor al 3%, está estancado
     const isStagnated = Math.abs(last - prev) < (prev * 0.01) && Math.abs(prev - prev2) < (prev2 * 0.03);
     
     if (isStagnated) return INSIGHT_MESSAGES.STAGNATED;
 
-    // 2. Tendencia de mejora (2 sesiones seguidas subiendo)
     if (last > prev && prev > prev2) {
       return {
         ...INSIGHT_MESSAGES.PROGRESSING,
@@ -149,12 +111,10 @@ export function useDashboard(sessions: WorkoutSession[]) {
       };
     }
 
-    // 3. Bajada significativa (Fatiga)
-    if (last < prev * 0.90) { // Si bajó más del 10%
+    if (last < prev * 0.90) { 
       return INSIGHT_MESSAGES.FATIGUE;
     }
 
-    // 4. Mejora puntual
     if (last > prev) {
       return {
           title: "MEJORA DETECTADA",
@@ -170,36 +130,23 @@ export function useDashboard(sessions: WorkoutSession[]) {
     };
   }, [volumeData] );
 
-  // 6. Mejor sesión (para mostrar en la card)
   const bestSession = useMemo(() => {
-    if (!sessions.length) return null;
+    if (!sessionsWithVolume.length) return null;
+    return Math.max(...sessionsWithVolume.map(s => s.volume));
+  }, [sessionsWithVolume]);
 
-    let best = 0;
-
-    sessions.forEach(session => {
-      const volume = getSessionVolume(session);
-      if (volume > best) best = volume;
-    });
-
-    return best;
-  }, [sessions]);
-
-  function getTodayString() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  function hasTrainedToday(sessions: WorkoutSession[]) {
-    const today = getTodayString();
-
+  function hasTrainedToday() {
+    const today = toLocalISO(new Date());
     return sessions.some(s => s.date === today);
   }
+
   return {
-    volumeData,   // para el gráfico
-    totalVolume,  // cards
+    volumeData, 
+    totalVolume, 
     frequency,
     progress,
     bestSession,
     insightsData,
-    hasTrainedToday: hasTrainedToday(sessions)
+    hasTrainedToday: hasTrainedToday()
   };
 }
