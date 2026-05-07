@@ -4,6 +4,7 @@ import { Card } from "@/components/cards/Card";
 import { WorkoutCard } from "@/components/cards/WorkutCard";
 import { CustomSelect } from "@/components/CustomSelect";
 import Modal from "@/components/Modal";
+import Button from "@/components/ui/Button";
 import { useRoutines } from "@/hooks/useRoutine";
 import { useUser } from "@/hooks/useUser";
 import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
@@ -123,11 +124,9 @@ export default function WorkoutPage() {
                         </p>
                     </Card>
 
-                    <Card className="w-full flex gap-4 items-center justify-center bg-secondary! cursor-pointer hover:bg-secondary/80! transition-colors" onClick={handlePlan}>
-                        <p className="text-lg text-zinc-300 font-semibold">
-                            Planificar rutina
-                        </p>
-                    </Card>
+                    <Button onClick={handlePlan}>
+                        Planificar rutina
+                    </Button>
                 </div>
 
                 {selectedId && openModal && (
@@ -211,12 +210,11 @@ export default function WorkoutPage() {
                         </div>
 
                         <div className="flex gap-4 w-full ">
-                            <button
-                                className="p-4 font-semibold bg-primary/60 text-white rounded hover:bg-secondary transition-colors cursor-pointer w-full"
+                            <Button
                                 onClick={handleSaveRoutine}
                             >
                                 Guardar rutina
-                            </button>
+                            </Button>
                         </div>
 
                     </Modal>

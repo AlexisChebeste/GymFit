@@ -1,6 +1,7 @@
 "use client"
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
+import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/useExercises";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
@@ -121,13 +122,13 @@ export default function WorkoutSession() {
           ))}
         </section>
 
-        <footer className="w-full py-8 mt-4 border-t border-zinc-800">
-          <button 
+        <footer className="w-full py-8 my-6  border-t border-zinc-800">
+          <Button 
             onClick={handleFinishSession}
-            className="w-full bg-primary/90 text-natural hover:bg-primary/80  font-black py-4 rounded-2xl shadow-neon-glow transition-transform active:scale-95 cursor-pointer"
+            className="uppercase"
           >
-            FINALIZAR Y GUARDAR SESIÓN
-          </button>
+            Finalizar y Guardar Sesión
+          </Button>
         </footer>
         
 

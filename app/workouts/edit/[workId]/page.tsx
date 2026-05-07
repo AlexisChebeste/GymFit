@@ -3,6 +3,7 @@
 import { Card } from "@/components/cards/Card";
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Modal from "@/components/Modal";
+import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/useExercises";
 import { useUser } from "@/hooks/useUser";
 import { useWorkoutTemplate } from "@/hooks/useWorkoutTemplate";
@@ -106,13 +107,12 @@ export default function WorkoutEdit() {
             />
           </div>
           
-          <Card 
-            className="flex items-center justify-center gap-2 border-2  bg-green-500! shadow-lg cursor-pointer p-4! text-white hover:bg-green-600! transition-colors text-sm font-semibold "
+          <Button 
             onClick={() => setModal({ type: 'ADD' })}
           >
             <Plus className="w-5 h-5" />
             Agregar ejercicio
-          </Card>
+          </Button>
         </div>
 
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
@@ -145,13 +145,13 @@ export default function WorkoutEdit() {
           )))}
         </section>
 
-        <footer className="w-full py-8 mt-4 border-t border-zinc-800">
-          <button 
-            className="w-full bg-primary/90 text-natural hover:bg-primary/80  font-black py-4 rounded-2xl shadow-neon-glow transition-transform active:scale-95 cursor-pointer uppercase"
+        <footer className="w-full py-8 my-6  border-t border-zinc-800">
+          <Button 
             onClick={handleSaveTemplate}
+            className="uppercase"
           >
             Guardar rutina
-          </button>
+          </Button>
         </footer>
         
  {modal?.type === 'ADD' && (

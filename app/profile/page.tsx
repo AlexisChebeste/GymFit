@@ -84,10 +84,10 @@ export default function ProfilePage() {
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
-            <main className="flex flex-1 w-full flex-col md:flex-row gap-6 items-start p-4 py-8 bg-white dark:bg-natural max-w-7xl">
+            <main className="flex flex-1 w-full flex-col lg:flex-row gap-6 items-start p-4 py-8 bg-white dark:bg-natural max-w-7xl">
                 {/* <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Perfil de usuario</p> */}
 
-                <section className="flex flex-col gap-6 items-center w-full md:w-xl md:bg-white md:dark:bg-zinc-900 p-6 rounded-xl py-8">
+                <section className="flex flex-col gap-6 items-center w-full lg:w-xl lg:bg-white lg:dark:bg-zinc-900 p-6 rounded-xl py-8">
                     <div className="border-2 border-primary rounded-full p-1 shadow-[0_0_25px_rgba(57,255,20,0.35)] relative">
                         
                         <img src={profile.avatar_url || "/default-avatar.webp"} alt="Avatar" className="w-46 h-46 rounded-full object-cover" />
@@ -99,7 +99,6 @@ export default function ProfilePage() {
                             <Pen className="w-4 h-4" />
                         </button>
 
-                        {/* INPUT OCULTO */}
                         <input
                             ref={fileRef}
                             type="file"
@@ -118,7 +117,7 @@ export default function ProfilePage() {
 
                     </div>
 
-                    <div className="hidden md:flex flex-col gap-4 p-2 w-full">
+                    <div className="hidden lg:flex flex-col gap-4 p-2 w-full">
                         
                         <span className="text-sm uppercase tracking-widest text-secondary font-bold">Configuración</span>
                         <OptionProfile 
@@ -144,7 +143,8 @@ export default function ProfilePage() {
                         /> */}
                         <OptionProfile title="Cerrar sesión" 
                             label="log-out"
-                            icon={LogOut} className="text-red-700" viewArrow={false} 
+                            icon={LogOut} 
+                            variant="danger"
                             onClick={singOut} 
                         />
                     </div>
@@ -164,7 +164,7 @@ export default function ProfilePage() {
                     
                 </section>
 
-                <div className="flex flex-col gap-4 p-2 w-full md:hidden">
+                <div className="flex flex-col gap-4 p-2 w-full lg:hidden">
                         
                     <span className="text-sm uppercase tracking-widest text-secondary font-bold">Configuración</span>
                     <OptionProfile 
@@ -190,7 +190,8 @@ export default function ProfilePage() {
                     /> */}
                     <OptionProfile title="Cerrar sesión" 
                         label="log-out"
-                        icon={LogOut} className="text-red-700" viewArrow={false} 
+                        icon={LogOut} 
+                        variant="danger"
                         onClick={singOut} 
                     />
                 </div>

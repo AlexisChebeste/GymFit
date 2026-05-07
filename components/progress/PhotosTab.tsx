@@ -4,6 +4,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import ComparisonSlider from "./ComparisionSlider";
 import ProgressPhotoModal from "./UploadProgressModal";
+import Button from "../ui/Button";
 
 const viewMap = {
   Frente: "front",
@@ -164,7 +165,7 @@ export default function PhotosTab() {
 
             </div>
 
-            <button className="bg-primary text-black py-3 rounded-lg font-semibold cursor-pointer w-full flex items-center justify-center gap-2 "
+            <Button
                 onClick={() => {
                     setModalOpen(true)
                     setFormPhotos({
@@ -177,7 +178,7 @@ export default function PhotosTab() {
             >   
                 <Plus size={16} />
                 Subir progreso
-            </button>
+            </Button>
 
             {modalOpen && (
                 <ProgressPhotoModal 

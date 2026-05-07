@@ -42,11 +42,11 @@ export default function DashboardView({ user, sessions, routine, templates, meas
   const isRestDay = !isToday && !nextWorkout;
 
   return (
-    <div className="flex flex-col flex-1 items-center justify-start bg-zinc-50 font-sans dark:bg-natural max-h-[85vh] overflow-y-auto md:max-h-full">
+    <div className="flex flex-col flex-1 items-center justify-start bg-zinc-50 font-sans dark:bg-natural max-h-[86vh] overflow-y-auto md:max-h-full">
       <div className=" h-full w-full flex items-center justify-center ">
 
         <main className="flex flex-1 w-full flex-col items-start p-4 bg-white dark:bg-natural gap-4 max-w-7xl h-full ">
-          <section className="flex flex-col gap-4 md:flex-row items-center justify-between w-full mb-4">
+          <section className="flex flex-col gap-4 md:flex-row  justify-between w-full ">
             
             <DashboardHeader name={user?.name} completionRate={completionRate} missedWorkouts={missedWorkouts} />
 

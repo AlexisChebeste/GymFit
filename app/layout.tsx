@@ -30,7 +30,7 @@ export default function RootLayout({
       lang="es"
       className={cn("h-full", "antialiased", poppins.variable, "font-sans", inter.variable, "dark")}
     >
-      <body className="max-h-screen h-full flex flex-col">
+      <body className="max-h-screen h-full flex flex-col bg-zinc-50 font-sans dark:bg-natural">
         <Header />
         <Toaster />
         {children}

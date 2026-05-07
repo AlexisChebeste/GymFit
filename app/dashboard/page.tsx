@@ -1,6 +1,7 @@
 "use client";
 
 import DashboardView from "@/components/DashboardView";
+import Loading from "@/components/Loading";
 import { useMeasurements } from "@/hooks/useMeasurements";
 import { useRoutines } from "@/hooks/useRoutine";
 import useSessions from "@/hooks/useSessions";
@@ -19,12 +20,7 @@ export default function Dashboard() {
 
   const measurements = useMeasurements(user?.id ?? "", profile ?? {} as UserProfile, "30D");
 
-  if (loading) return (
-    <div className="flex-1 flex justify-center items-center h-full mx-auto gap-6 text-center">
-      <h1 className="text-2xl font-bold text-primary">Cargando...</h1>
-      
-    </div>
-  );
+  if (loading) return <Loading />;
 
   if (!user || !profile) return (
       <div className="flex-1 flex flex-col justify-center items-center h-full mx-auto gap-6 text-center">

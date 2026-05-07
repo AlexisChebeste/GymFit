@@ -27,7 +27,7 @@ export default function StatsChart({ data }: StatsChartProps) {
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-56 text-zinc-500">
-        No hay datos todavía 📭
+        No hay datos suficientes para mostrar el gráfico.
       </div>
     );
   }

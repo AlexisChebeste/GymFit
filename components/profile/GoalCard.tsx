@@ -13,7 +13,7 @@ interface GoalCardProps {
 export default function GoalCard({ label, goal, setGoal, title, description, icon: Icon }: GoalCardProps) {
     return (
         <Card className={`w-full bg-zinc-800 flex flex-col gap-4 p-6 cursor-pointer border-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-all hover:scale-[1.02]
- ${goal === label ? 'bg-zinc-200 dark:bg-zinc-800  border-primary! hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}`} onClick={() => setGoal(label)}>
+ ${goal === label ? 'bg-zinc-200 dark:bg-zinc-800  border-primary/60! hover:bg-zinc-100 dark:hover:bg-zinc-800' : ''}`} onClick={() => setGoal(label)}>
             
             <div className="flex items-center gap-4 mb-2 justify-between">
                 {Icon && <Icon className="w-6 h-6 text-primary" />}
@@ -27,7 +27,7 @@ export default function GoalCard({ label, goal, setGoal, title, description, ico
                 {title}
             </h3>
 
-            <p className="text-xs text-gray-500 hidden lg:block">
+            <p className="text-xs text-gray-500">
                 {description}
             </p>
 

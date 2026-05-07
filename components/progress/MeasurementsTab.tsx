@@ -1,5 +1,5 @@
 import { Card } from "../cards/Card";
-import { TrendingUp } from "lucide-react";
+import { Plus, TrendingUp } from "lucide-react";
 import WeightChart from "./WeightCharts";
 import RangeFilter from "../RangeFilter";
 import { useMemo, useState } from "react";
@@ -12,6 +12,7 @@ import Modal from "../Modal";
 import { useUser } from "@/hooks/useUser";
 import WeightCard from "../dashboard/WeightCard";
 import HistoryCard from "./measurements/HistoryCard";
+import Button from "../ui/Button";
 
 
 export default function MeasurementsTab() {
@@ -63,7 +64,7 @@ export default function MeasurementsTab() {
   }
 
   return (
-    <div className="flex flex-col gap-4 flex-1 w-full pt-6">
+    <div className="flex flex-col gap-4 flex-1 w-full py-4 bg-natural">
       <div className="w-full flex items-center justify-end">
 
         <RangeFilter
@@ -132,17 +133,18 @@ export default function MeasurementsTab() {
       />
 
       {/* 5. Botón */}
-      <button className="bg-primary hover:bg-primary/90 cursor-pointer  py-3 rounded-lg font-semibold  text-gray-100" 
+      <Button
         onClick={() => {
           setEditing(null);
           setOpen(true);
         }}
       >
-        + Registrar medidas
-      </button>
+        <Plus className="w-5 h-5" />
+        Registrar medidas
+      </Button>
 
       {open && (
-        <Modal className="max-w-2xl!">
+        <Modal className="max-w-2xl! overflow-y-auto max-h-[88vh] sm:max-h-full -mt-6 rounded-none! sm:rounded-xl! bg-natural!" >
           <FormModalMeasurement
             userId={profile?.id ?? ""}
             mode={editing ? "edit" : "create"}

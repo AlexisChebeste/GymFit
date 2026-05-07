@@ -81,11 +81,22 @@ export default function PasswordSettings() {
         }
     };
 
+    const handleCancel = () => {
+        setForm({
+            currentPassword: "",
+            newPassword: "",
+            confirmPassword: ""
+        });
+        setError("");
+    };
+
     const strengthLabel =
         score <= 1 ? "Débil" :
         score === 2 ? "Media" :
         score === 3 ? "Buena" :
-        "Fuerte";
+        "Excelente";
+
+    const styleStrength = score > 3 ? "text-green-500" : score == 3 ? "text-yellow-500" : score == 2 ? "text-orange-500" : "text-red-500"
 
     return (
         <>
@@ -149,7 +160,7 @@ export default function PasswordSettings() {
 
                         <div className="flex justify-between text-xs font-semibold uppercase tracking-widest">
                         <span className="text-muted-foreground">Seguridad</span>
-                        <span className="text-green-500">{strengthLabel}</span>
+                        <span className={styleStrength}>{strengthLabel}</span>
                         </div>
 
                         <div className="flex gap-2">
@@ -206,6 +217,7 @@ export default function PasswordSettings() {
                     <div className="flex justify-end gap-4 pt-2">
                         <button
                         type="button"
+                        onClick={handleCancel}
                         className="text-muted-foreground hover:text-white cursor-pointer border px-4 rounded-lg transition border-zinc-500 hover:bg-zinc-600"
                         >
                         Cancelar

@@ -1,6 +1,7 @@
 import { BodyMeasurement } from "@/types/types";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import Button from "../ui/Button";
 
 type FormState = Omit<BodyMeasurement, "weight" | "waist" | "chest" | "body_fat" | "left_arm" | "right_arm" | "left_leg" | "right_leg"> & {
   weight: string;
@@ -118,7 +119,7 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
     }, [initialData, isEditing]);
 
     return (
-        <div className="flex flex-col gap-6 p-2">
+        <div className="flex flex-col gap-4 p-2 h-full">
             <div className="flex items-center justify-between gap-2">
                 <h2 className="text-2xl font-bold ">
                     {isEditing ? "Editar medición" : "Agregar nueva medición"}
@@ -133,7 +134,7 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
             </p>
 
             <form 
-                className="flex flex-col gap-4" 
+                className="flex flex-col" 
                 onSubmit={handleSubmit}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -201,9 +202,9 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
                 </div>
 
                 {/* Aquí irían los inputs para cada campo */}
-                <button className="bg-primary hover:bg-primary/90 cursor-pointer  py-3 rounded-lg font-semibold  text-gray-100" type="submit">
+                <Button  type="submit" >
                     {isEditing ? "Actualizar medición" : "Guardar medición"}
-                </button>
+                </Button>
             </form>
 
 

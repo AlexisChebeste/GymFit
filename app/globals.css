@@ -95,7 +95,7 @@
 }
 
 body {
-  background: var(--color-background);
+  background: var(--color-natural);
   color: var(--color-foreground);
   font-family: "Poppins", sans-serif;
 }

@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/cards/Card";
 import { CustomSelect } from "@/components/CustomSelect";
+import Loading from "@/components/Loading";
 import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
 import { useExercises } from "@/hooks/useExercises";
@@ -13,7 +14,7 @@ import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
-    const {user} = useUser();
+    const {user, loading} = useUser();
     const {sessions} = useSessions(user?.id ?? "");
     const {exercises} = useExercises(user?.id ?? "");
     const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
@@ -44,7 +45,9 @@ export default function StatsPage() {
     
     const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
 
-    if (usedExercises.length === 0) {
+    if (loading) return <Loading />;
+
+    if (usedExercises.length === 0 && !selectedExerciseId) {
         return (
             <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
                 <main className="flex flex-1 w-full flex-col gap-2  p-4 bg-white dark:bg-natural  max-w-7xl h-full items-center justify-center">
@@ -104,7 +107,7 @@ export default function StatsPage() {
                         )}
                     </Card>
                     <Card className="px-6 py-4 flex flex-col gap-4">
-                        <p className="text-xs uppercase tracking-widest text-secondary font-bold">Volumen del mes</p>
+                        <p className="text-xs uppercase tracking-widest text-secondary font-bold">Volumen</p>
                         <p className="text-4xl font-bold flex gap-2 items-baseline">{stats.totalVolume}<span className="text-lg font-normal text-muted-foreground uppercase italic">kg</span></p>
                     </Card>
                     <Card className="px-6 py-4 flex flex-col gap-4">
@@ -125,11 +128,11 @@ export default function StatsPage() {
                     )}
                 </div>
                 
-                <div className="flex flex-col gap-2 w-full h-full">
+                <Card className="lg:col-span-2 flex flex-col gap-4 w-full">
                     <p className="text-sm text-secondary uppercase font-medium">Evolución de Fuerza</p>
-                    
+                
                     <StatsChart data={stats.bestSets} />
-                </div>
+                </Card>
 
                 <div className="flex flex-col gap-3 w-full py-6">
                     <p className="text-xs text-secondary uppercase font-bold tracking-widest">Análisis de Rendimiento</p>

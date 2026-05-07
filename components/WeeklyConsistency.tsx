@@ -56,7 +56,7 @@ export default function WeeklyConsistency({ sessions, routine }: { sessions: Wor
 
   return (
     <Card className="p-4 bg-zinc-900/20 border-white/5">
-      <div className="flex justify-between items-start gap-2">
+      <div className="flex justify-around items-start gap-2">
         {weekDays.map((date, index) => {
           const dateKey = toLocalKey(date); // Genera "2026-04-05" según hora local
           const hasTrained = trainedDays.has(dateKey);

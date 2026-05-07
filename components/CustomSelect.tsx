@@ -6,7 +6,7 @@ export function CustomSelect({ options, value, onChange, defaultValue = "Selecci
   const selectedOption = options.find((o: any) => o.id === value);
 
   return (
-    <div className="relative w-full max-w-xs font-sans">
+    <div className="relative w-full sm:max-w-xs font-sans">
       {/* Botón que simula el select */}
       <button
         onClick={() => setIsOpen(!isOpen)}
