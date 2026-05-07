@@ -5,8 +5,9 @@ import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/useExercises";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
-import { useWorkout } from "@/hooks/useWorkout";
-import { supabase } from "@/lib/supabaseClient";
+import { useWorkout } from "@/hooks/workout/useWorkout";
+import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
+import { sessionService } from "@/services/sessions.service";
 import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -25,12 +26,13 @@ export default function WorkoutSession() {
 
   const { sessions, setSessions, isSessionsLoaded } = useSessions(user?.id ?? "");
   const { exercises } = useExercises(user?.id ?? "");
+  const { templates } = useWorkoutTemplates(user?.id ?? "");
   const {
     workout,
     dispatch,
     isLoaded,
     clearSession,
-  } = useWorkout(workoutId, user?.id ?? "", sessions);
+  } = useWorkout(workoutId, sessions, templates);
 
   if (!isSessionsLoaded || !isLoaded) return null; // o un loader
 
@@ -51,24 +53,21 @@ export default function WorkoutSession() {
       }))
     };
 
-    const { data, error } = await supabase
-      .from("workout_sessions")
-      .insert(payload)
-      .select()
-      .single();
+    try {
+      const savedSession = await sessionService.create(payload);
 
-    if (error) {
-      console.error(error);
-      return;
+      setSessions(prev => [...prev, savedSession]);
+
+      clearSession();
+
+      toast.success("Sesión guardada exitosamente");
+
+      router.push("/workouts");
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al guardar la sesión.");
     }
-
-    setSessions(prev => [...prev, data]);
-
-    clearSession();
-
-    toast.success("Sesión guardada exitosamente");
-
-    router.push("/workouts");
   };
   
   if (!workout || workout.exercises.length === 0) {

@@ -1,16 +1,17 @@
 "use client"
 
-import { Card } from "@/components/cards/Card";
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/useExercises";
 import { useUser } from "@/hooks/useUser";
-import { useWorkoutTemplate } from "@/hooks/useWorkoutTemplate";
+import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
+import { workoutReducer } from "@/hooks/workout/workoutReducer";
+import { workoutService } from "@/services/workout.service";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 type ModalState =
   | { type: 'ADD' }
@@ -19,60 +20,58 @@ type ModalState =
   | null;
 
 export default function WorkoutEdit() {
-  const params = useParams();
-  const workoutId = params.workId as string;
+  const {workId} = useParams();
+  const workoutId = workId as string;
   const router = useRouter();
   const {user} = useUser();
 
-  if (!workoutId) {
-    return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
-  }
-
-  const {
-    workout,
-    dispatch,
-    saveTemplate,
-    isLoaded
-  } = useWorkoutTemplate(workoutId);
+  const [workout, dispatch] = useReducer(workoutReducer, null as any);
+  const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
   const { exercises, createExercise } = useExercises(user?.id ?? "");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [newExerciseType, setNewExerciseType] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
+  const [modal, setModal] = useState<ModalState>(null);
 
+  useEffect(() => {
+    const fetchTemplate = async () => {
+      const template = await workoutService.getById(workoutId);
+
+      if (template) {
+        dispatch({
+          type: "INIT",
+          payload: {
+            ...template,
+            exercises: template.exercises || []
+          }
+        });
+      }
+
+      setIsLoaded(true);
+    };
+
+    fetchTemplate();
+  }, [workoutId]);
+
+  const handleSaveTemplate = async () => {
+    await workoutService.update(workoutId, {
+      name: workout.name,
+      description: workout.description,
+      exercises: workout.exercises
+    });
+
+    router.push('/workouts');
+  }
+  
   const filteredExercises = exercises.filter(ex =>
     ex.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const [modal, setModal] = useState<ModalState>(null);
-  const [workoutForm, setWorkoutForm] = useState({
-    name: "Rutina",
-    description: "Una descripción breve de mi rutina"
-  });
-
-  const [initialized, setInitialized] = useState(false);
-
-  useEffect(() => {
-    if (!workout || initialized) return;
-
-    setWorkoutForm({
-      name: workout.name || "",
-      description: workout.description || ""
-    });
-
-    setInitialized(true);
-  }, [workout, initialized]);
-
-  const handleSaveTemplate = async () => {
-    await saveTemplate({
-      name: workoutForm.name,
-      description: workoutForm.description
-    });
-    router.push('/workouts');
+  if (!isLoaded || !workout) {
+    return <div className="flex items-center justify-center h-screen">Cargando rutina...</div>;
   }
-  
-  if (!isLoaded ) return null; // o loader
-  
+
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[90vh] md:max-h-full">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl ">
@@ -85,23 +84,24 @@ export default function WorkoutEdit() {
             Volver a mis rutinas
           </Link>
         </div>
+
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full pb-2">
           
           <div className="flex flex-col gap-2 ">
             
             <input
               type="text"
-              value={workoutForm.name}
+              value={workout.name}
               onChange={(e) =>
-                setWorkoutForm(prev => ({ ...prev, name: e.target.value }))
+                dispatch({ type: "EDIT_WORKOUT", payload: { name: e.target.value, description: workout.description } })
               }
               className="text-4xl font-bold bg-transparent outline-none"
             />
 
             <textarea
-              value={workoutForm.description}
+              value={workout.description}
               onChange={(e) =>
-                setWorkoutForm(prev => ({ ...prev, description: e.target.value }))
+                dispatch({ type: "EDIT_WORKOUT", payload: { name: workout.name, description: e.target.value } })
               }
               className="text-sm text-secondary bg-transparent outline-none resize-none"
             />
@@ -118,7 +118,7 @@ export default function WorkoutEdit() {
         <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-full">
           {workout.exercises.length === 0 ? (
             <div className="col-span-full text-center text-secondary">
-              No hay ejercicios agregados. ¡Agrega tu primer ejercicio!
+              No hay ejercicios. ¡Agrega tu primer ejercicio!
             </div>
           ) : (
             workout.exercises.map(exercise => (
@@ -129,15 +129,15 @@ export default function WorkoutEdit() {
                 setActions={{
                 update: (setId, field, value) =>
                   dispatch({ type: "UPDATE_SET", payload: { exerciseInstanceId: exercise.id, setId, field, value } }),
-                toggle: (exerciseInstanceId, setId) =>
+                toggle: (_, setId) =>
                   dispatch({ type: "TOGGLE_SET", payload: { exerciseInstanceId: exercise.id, setId } }),
               }}
               editActions={{
-                addSet: (exerciseId) => 
+                addSet: () => 
                   dispatch({ type: "ADD_SET", payload: { exerciseInstanceId: exercise.id } }),
                 deleteExercise: (exerciseId) => 
                   dispatch({ type: "DELETE_EXERCISE", payload: { exerciseId } }),
-                deleteSet: (exerciseId, setId) => 
+                deleteSet: (_, setId) => 
                   dispatch({ type: "DELETE_SET", payload: { exerciseInstanceId: exercise.id, setId } })
               }}
               exercises={exercises}
@@ -154,116 +154,116 @@ export default function WorkoutEdit() {
           </Button>
         </footer>
         
- {modal?.type === 'ADD' && (
-  <Modal onClose={() => setModal(null)}>
-    
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-xl font-bold">Agregar ejercicio</h2>
-      <button onClick={() => setModal(null)}>
-        <X className="w-4 h-4" />
-      </button>
-    </div>
+        {modal?.type === 'ADD' && (
+          <Modal onClose={() => setModal(null)}>
+            
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Agregar ejercicio</h2>
+              <button onClick={() => setModal(null)}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
 
-    <input
-      type="text"
-      placeholder="Buscar ejercicio..."
-      className="w-full p-3 bg-black/70 rounded-lg mb-4 outline-none"
-      value={search}
-      onChange={(e) => {
-        setSearch(e.target.value);
-        setSelectedExercise(null);
-      }}
-    />
+            <input
+              type="text"
+              placeholder="Buscar ejercicio..."
+              className="w-full p-3 bg-black/70 rounded-lg mb-4 outline-none"
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setSelectedExercise(null);
+              }}
+            />
 
-    <div className="flex flex-col gap-2 max-h-60 overflow-y-auto mb-4">
-      
-      {filteredExercises.length > 0 ? (
-        filteredExercises.map(ex => (
-          <button
-            key={ex.id}
-            onClick={() => setSelectedExercise(ex.id)}
-            className={`text-left p-3 rounded-lg transition 
-              ${selectedExercise === ex.id 
-                ? "bg-primary text-white" 
-                : "bg-black/40 hover:bg-black/60"
-              }
-            `}
-          >
-            <div className="font-semibold">{ex.name}</div>
-            <div className="text-xs text-zinc-400">{ex.type}</div>
-          </button>
-        ))
-      ) : (
-        <div className="text-sm text-zinc-400 text-center py-4">
-          No se encontraron ejercicios
-        </div>
-      )}
+            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto mb-4">
+              
+              {filteredExercises.length > 0 ? (
+                filteredExercises.map(ex => (
+                  <button
+                    key={ex.id}
+                    onClick={() => setSelectedExercise(ex.id)}
+                    className={`text-left p-3 rounded-lg transition 
+                      ${selectedExercise === ex.id 
+                        ? "bg-primary text-white" 
+                        : "bg-black/40 hover:bg-black/60"
+                      }
+                    `}
+                  >
+                    <div className="font-semibold">{ex.name}</div>
+                    <div className="text-xs text-zinc-400">{ex.type}</div>
+                  </button>
+                ))
+              ) : (
+                <div className="text-sm text-zinc-400 text-center py-4">
+                  No se encontraron ejercicios
+                </div>
+              )}
 
-    </div>
+            </div>
 
-    {search && filteredExercises.length === 0 && (
-  <div className="flex flex-col gap-3 mb-3">
-    
-    <select
-      className="p-3 bg-black/70 rounded-lg"
-      value={newExerciseType}
-      onChange={(e) => setNewExerciseType(e.target.value)}
-    >
-      <option value="">Tipo de ejercicio</option>
-      <option value="Barra">Barra</option>
-      <option value="Mancuernas">Mancuernas</option>
-      <option value="Máquina">Máquina</option>
-      <option value="Polea">Polea</option>
-      <option value="Otro">Otro</option>
-    </select>
+            {search && filteredExercises.length === 0 && (
+              <div className="flex flex-col gap-3 mb-3">
+                
+                <select
+                  className="p-3 bg-black/70 rounded-lg"
+                  value={newExerciseType}
+                  onChange={(e) => setNewExerciseType(e.target.value)}
+                >
+                  <option value="">Tipo de ejercicio</option>
+                  <option value="Barra">Barra</option>
+                  <option value="Mancuernas">Mancuernas</option>
+                  <option value="Máquina">Máquina</option>
+                  <option value="Polea">Polea</option>
+                  <option value="Otro">Otro</option>
+                </select>
 
-    <button
-      disabled={!newExerciseType}
-      className={`w-full p-3 rounded-lg transition
-        ${newExerciseType 
-          ? "bg-blue-600 hover:bg-blue-700" 
-          : "bg-gray-600 text-gray-400 cursor-not-allowed"}
-      `}
-      onClick={async () => {
-        const newEx = await createExercise(search, newExerciseType);
+                <button
+                  disabled={!newExerciseType}
+                  className={`w-full p-3 rounded-lg transition
+                    ${newExerciseType 
+                      ? "bg-blue-600 hover:bg-blue-700" 
+                      : "bg-gray-600 text-gray-400 cursor-not-allowed"}
+                  `}
+                  onClick={async () => {
+                    const newEx = await createExercise(search, newExerciseType);
 
-        if (newEx) {
-          setSelectedExercise(newEx.id);
-        }
-        setNewExerciseType("");
-      }}
-    >
-      Crear "{search}"
-    </button>
+                    if (newEx) {
+                      setSelectedExercise(newEx.id);
+                    }
+                    setNewExerciseType("");
+                  }}
+                >
+                  Crear "{search}"
+                </button>
 
-  </div>
-)}
+              </div>
+            )}
 
-    <button
-      disabled={!selectedExercise}
-      onClick={() => {
-        if (!selectedExercise) return;
+            <button
+              disabled={!selectedExercise}
+              onClick={() => {
+                if (!selectedExercise) return;
 
-        dispatch({
-          type: "ADD_EXERCISE",
-          payload: { exerciseId: selectedExercise }
-        });
+                dispatch({
+                  type: "ADD_EXERCISE",
+                  payload: { exerciseId: selectedExercise }
+                });
 
-        setSearch("");
-        setSelectedExercise(null);
-        setModal(null);
-      }}
-      className={`w-full py-3 rounded-lg font-semibold transition
-        ${selectedExercise 
-          ? "bg-primary/80 hover:bg-primary/90 text-white" 
-          : "bg-gray-600 text-gray-400 cursor-not-allowed"}
-      `}
-    >
-      Agregar ejercicio
-    </button>
+                setSearch("");
+                setSelectedExercise(null);
+                setModal(null);
+              }}
+              className={`w-full py-3 rounded-lg font-semibold transition
+                ${selectedExercise 
+                  ? "bg-primary/80 hover:bg-primary/90 text-white" 
+                  : "bg-gray-600 text-gray-400 cursor-not-allowed"}
+              `}
+            >
+              Agregar ejercicio
+            </button>
 
-  </Modal>
-)}
+          </Modal>
+        )}
       </main>
     </div>
   );

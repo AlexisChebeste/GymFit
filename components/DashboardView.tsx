@@ -5,7 +5,7 @@ import VolumeChart from "@/components/VolumeCharts";
 import WeeklyConsistency from "@/components/WeeklyConsistency";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useWeeklyStats } from "@/hooks/useWeeklyStats";
-import { useWorkoutSchedule } from "@/hooks/useWorkoutSchedule";
+import { getWorkoutSchedule } from "@/lib/workout/useWorkoutSchedule";
 import { UserProfile } from "@/types/types";
 import DashboardHeader from "./dashboard/DashboardHeader";
 import WorkoutInfoCard from "./dashboard/WorkoutInfoCard";
@@ -35,7 +35,7 @@ export default function DashboardView({ user, sessions, routine, templates, meas
     hasTrainedToday
   } = useDashboard(sessions);
 
-  const {todayWorkout, nextWorkout, isToday, label } = useWorkoutSchedule(routine, templates);
+  const {todayWorkout, nextWorkout, isToday, label } = getWorkoutSchedule(routine, templates);
 
   const { completionRate, daysData } = useWeeklyStats(routine, sessions);
 

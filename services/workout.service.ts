@@ -27,10 +27,18 @@ export const workoutService = {
 
         return data;
     },
-    create: async (workoutData: CreateWorkout) => {
+    create: async (userId: string, templateIndex: number) => {
+        const newTemplate: CreateWorkout = {
+            user_id: userId,
+            name: `Rutina ${templateIndex + 1}`,
+            description: "Descripción",
+            exercises: [],
+            color: "#10B981",
+        };
+
         const { data, error } = await supabase
         .from("workouts")
-        .insert([workoutData])
+        .insert([newTemplate])
         .select();
 
         if (error) throw new Error(error.message);

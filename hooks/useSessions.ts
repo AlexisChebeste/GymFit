@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabaseClient";
+import { sessionService } from "@/services/sessions.service";
 import { WorkoutSession } from "@/types/types";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 
 export default function useSessions(userId: string) {
@@ -11,17 +13,15 @@ export default function useSessions(userId: string) {
   useEffect(() => {
     if (!userId) return;
       const fetchSessions = async () => {
-        const {data, error } = await supabase
-          .from("workout_sessions")
-          .select("*")
-          .eq("user_id", userId)
-
-        if (error) {
-          console.error("Error fetching routine:", error);
-        } else {
-          setSessions(data || []);
+        try {
+          const data = await sessionService.getAll(userId);
+          setSessions(data);
+        } catch (error) {
+          console.error("Error fetching sessions:", error);
+          toast.error("Error al cargar las sesiones.");
+        } finally {
+          setIsLoading(false);
         }
-        setIsLoading(false);
       };
 
       fetchSessions();

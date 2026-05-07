@@ -1,6 +1,8 @@
 import { supabase } from "@/lib/supabaseClient";
+import { routineService } from "@/services/routine.service";
 import { Routine } from "@/types/types";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function useRoutines(userId: string) {
   const [routine, setRoutine] = useState<Routine | null>(null)
@@ -10,18 +12,15 @@ export function useRoutines(userId: string) {
     if (!userId) return;
 
     const fetchRoutine = async () => {
-      const {data, error } = await supabase
-        .from("routines")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching routine:", error);
-      } else {
+      try {
+        const data = await routineService.getRoutineSingle(userId);
         setRoutine(data || null);
+      } catch (err) {
+        console.error("Error fetching routine:", err);
+        toast.error("Error en cargar la rutina");
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     fetchRoutine();

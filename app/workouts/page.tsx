@@ -7,7 +7,7 @@ import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
 import { useRoutines } from "@/hooks/useRoutine";
 import { useUser } from "@/hooks/useUser";
-import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
+import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";

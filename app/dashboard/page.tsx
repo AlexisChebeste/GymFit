@@ -6,7 +6,7 @@ import { useMeasurements } from "@/hooks/useMeasurements";
 import { useRoutines } from "@/hooks/useRoutine";
 import useSessions from "@/hooks/useSessions";
 import { useUser } from "@/hooks/useUser";
-import { useWorkoutTemplates } from "@/hooks/useWorkoutTemplates";
+import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { UserProfile } from "@/types/types";
 import { useRouter } from "next/navigation";
 

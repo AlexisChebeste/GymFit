@@ -1,9 +1,9 @@
-import { supabase } from "@/lib/supabaseClient";
 import { workoutService } from "@/services/workout.service";
-import { CreateWorkout, Workout } from "@/types/types";
+import { Workout } from "@/types/types";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-export function useWorkoutTemplates(userId: string) {
+export function useWorkoutTemplates(userId: string, workoutId?: string) {
   const [templates, setTemplates] = useState<Workout[]>([]);
   const [isLoaded, setIsLoaded] = useState<boolean>(false);
 
@@ -13,9 +13,11 @@ export function useWorkoutTemplates(userId: string) {
     const fetchTemplates = async () => {
       try {
         const data = await workoutService.getAll(userId);
+        console.log("Fetched templates:", data);
         setTemplates(data || []);
       } catch (err) {
         console.error("Error fetching templates:", err);
+        toast.error("Error al cargar las plantillas de entrenamiento.");
       } finally {
         setIsLoaded(true);
       }
@@ -25,25 +27,16 @@ export function useWorkoutTemplates(userId: string) {
   }, [userId]);
     
   const createTemplate = async () => {
-    const newTemplate: CreateWorkout = {
-      user_id: userId,
-      name: `Rutina ${templates.length + 1}`,
-      description: "Descripción",
-      exercises: [],
-      color: "#10B981",
-    };
 
     try {
-      const data : Workout = await workoutService.create(newTemplate);
+      const data : Workout = await workoutService.create(userId, templates.length);
       
       setTemplates((prev) => [...prev, data]);
       
       return data.id;
     }catch (error) {
-      console.error(error);
-      return;
+      toast.error("Error al crear la plantilla de entrenamiento.");
     }
-
 
   };
 
@@ -52,14 +45,23 @@ export function useWorkoutTemplates(userId: string) {
       await workoutService.delete(id);
       setTemplates((prev) => prev.filter((t) => t.id !== id));
     } catch (err) {
-      console.error(err);
+      toast.error("Error al eliminar la plantilla de entrenamiento.");
     }
+  };
+
+  const updateTemplate = async (id: string, updates: Partial<Workout>) => {
+    const updated = await workoutService.update(id, updates);
+
+    setTemplates(prev =>
+      prev.map(t => (t.id === id ? updated : t))
+    );
   };
 
   return {
     templates,
     createTemplate,
     deleteTemplate,
+    updateTemplate,
     isLoaded,
   };
 }
