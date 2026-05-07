@@ -30,180 +30,138 @@ export function useExerciseStats(
   exerciseId: string,
   range: "30D" | "3M" | "6M" | "ALL"
 ) {
-
-  //  SCORE (prioriza peso real)
-  function getSetScore(s : Set) {
-    return s.weight * (1 + (s.reps + s.rir) / 30);
-  }
-
-  function formatDate(date: string) {
-    return new Date(date).toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "short"
-    });
-  }
-
-  function filterByRange(date: string, range: string) {
-    const d = new Date(date);
-
-    if (isNaN(d.getTime())) return false; 
+  return useMemo(() => {
 
     const now = new Date();
-    const diffDays = (now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24);
 
-    if (range === "30D") return diffDays <= 30;
-    if (range === "3M") return diffDays <= 90;
-    if (range === "6M") return diffDays <= 180;
-    return true;
-  }
+    const rangeDays =
+      range === "30D" ? 30 :
+      range === "3M" ? 90 :
+      range === "6M" ? 180 :
+      Infinity;
 
-  //  1. TODAS las sesiones del ejercicio (sin filtro)
-  const allExerciseSessions = useMemo(() => {
-    return sessions
+    const getScore = (s: Set) =>
+      s.weight * (1 + (s.reps + s.rir) / 30);
+
+    const formatDate = (date: string) =>
+      new Date(date).toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "short"
+      });
+
+    const exerciseSessions = sessions
       .map(session => {
-        const ex = session.exercises.find(
-          e => e.exercise_id === exerciseId
-        );
+        const ex = session.exercises.find(e => e.exercise_id === exerciseId);
         if (!ex) return null;
+
+        const diff =
+          (now.getTime() - new Date(session.date).getTime()) /
+          (1000 * 60 * 60 * 24);
 
         return {
           date: session.date,
-          sets: ex.sets
+          sets: ex.sets,
+          inRange: diff <= rangeDays
         };
       })
-      .filter(Boolean) as { date: string; sets: Set[] }[];
-  }, [sessions, exerciseId]);
+      .filter(Boolean) as {
+        date: string;
+        sets: Set[];
+        inRange: boolean;
+      }[];
 
-  //  2. Sesiones filtradas por rango (para gráfico + métricas dinámicas)
-  const filteredSessions = useMemo(() => {
+    const allSessions = exerciseSessions;
+    const filtered = exerciseSessions.filter(s => s.inRange);
 
-    return allExerciseSessions.filter(session =>
-      filterByRange(session.date, range)
-    );
-  }, [allExerciseSessions, range]);
-
-  //  3. Ordenar por fecha (IMPORTANTE)
-  const sortedSessions = useMemo(() => {
-    return [...filteredSessions].sort(
+    const sorted = [...filtered].sort(
       (a, b) =>
         new Date(a.date).getTime() - new Date(b.date).getTime()
     );
-  }, [filteredSessions]);
 
-  // 4. Limitar sesiones para gráfico (UX limpia)
-  const lastSessions = useMemo(() => {
-    return sortedSessions.slice(-12);
-  }, [sortedSessions]);
+    const lastSessions = sorted.slice(-12);
 
-  //  5. Best set por sesión (para gráfico)
-  const bestSets = useMemo(() => {
-    return lastSessions.map(session => {
+    const bestSets = lastSessions.map(session => {
       const best = session.sets.reduce((a, b) =>
-        getSetScore(a) > getSetScore(b) ? a : b
+        getScore(a) > getScore(b) ? a : b
       );
 
       return {
         rawDate: session.date,
         date: formatDate(session.date),
         ...best,
-        score: getSetScore(best)
+        score: getScore(best)
       };
     });
-  }, [lastSessions]);
 
-  //  6. PR GLOBAL (NO depende del filtro)
-  const pr = useMemo(() => {
-    let best: Set | null = null;
+    let pr: Set | null = null;
 
-    allExerciseSessions.forEach(session => {
+    allSessions.forEach(session => {
       session.sets.forEach(set => {
         if (
-          !best ||
-          set.weight > best.weight ||
-          (set.weight === best.weight && set.reps > best.reps)
+          !pr ||
+          set.weight > pr.weight ||
+          (set.weight === pr.weight && set.reps > pr.reps)
         ) {
-          best = set;
+          pr = set;
         }
       });
     });
 
-    return best;
-  }, [allExerciseSessions]);
-
-  //  7. Volumen (según filtro)
-  const totalVolume = useMemo(() => {
-    return filteredSessions.reduce((acc, session) => {
-      return (
-        acc +
-        session.sets.reduce(
-          (sum, set) => sum + set.weight * set.reps,
-          0
-        )
-      );
+    const totalVolume = filtered.reduce((acc, s) => {
+      return acc + s.sets.reduce((sum, set) =>
+        sum + set.weight * set.reps, 0);
     }, 0);
-  }, [filteredSessions]);
 
-  // 8. Frecuencia (según filtro)
-  const frequency = filteredSessions.length;
+    const frequency = filtered.length;
 
-  //  9. Progreso (comparación interna del rango)
-  const progress = useMemo(() => {
-    if (filteredSessions.length < 2) return null;
+    let progress: number | null = null;
 
-    const mid = Math.floor(filteredSessions.length / 2);
-    const firstHalf = filteredSessions.slice(0, mid);
-    const secondHalf = filteredSessions.slice(mid);
+    if (sorted.length >= 4) {
+      const first = sorted.slice(0, 3);
+      const last = sorted.slice(-3);
 
-    // Función para obtener el promedio de volumen por sesión
-    const getAvgVolume = (sessions: typeof filteredSessions) => {
-      if (sessions.length === 0) return 0;
-      const totalVolume = sessions.reduce((acc, session) => {
-        return acc + session.sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
-      }, 0);
-      return totalVolume / sessions.length; // Dividimos por cantidad de sesiones
+      const avg = (arr: typeof sorted) =>
+        arr.reduce((acc, s) =>
+          acc + s.sets.reduce((sum, set) =>
+            sum + set.weight * set.reps, 0), 0
+        ) / arr.length;
+
+      const prev = avg(first);
+      const curr = avg(last);
+
+      if (prev !== 0) {
+        progress = ((curr - prev) / prev) * 100;
+      }
+    }
+
+    let insights = "Seguí entrenando para obtener más datos.";
+
+    if (bestSets.length >= 3) {
+      const scores = bestSets.map(s => s.score);
+      const last = scores.at(-1)!;
+      const prev = scores.at(-2)!;
+
+      const plateau = scores
+        .slice(-4)
+        .every(s => Math.abs(s - last) < last * 0.02);
+
+      if (plateau) {
+        insights = "Estancamiento detectado. Probá cambiar volumen o intensidad.";
+      } else if (last > prev) {
+        insights = "Progreso positivo. Estás levantando más que antes.";
+      } else if (last < prev * 0.9) {
+        insights = "Fatiga detectada. Considerá descanso o deload.";
+      }
+    }
+
+    return {
+      bestSets,
+      pr,
+      totalVolume,
+      frequency,
+      progress,
+      insights
     };
 
-    const prevAvg = getAvgVolume(firstHalf);
-    const currentAvg = getAvgVolume(secondHalf);
-
-    if (prevAvg === 0) return null;
-
-    // Calculamos la diferencia porcentual entre promedios
-    return ((currentAvg - prevAvg) / prevAvg) * 100;
-  }, [filteredSessions]);
-
-  // 10. Insights
-  const insights = useMemo(() => {
-    if (bestSets.length < 3) return "Seguí registrando sesiones para desbloquear el análisis de rendimiento. ¡Vamos por ese progreso!";
-
-    const scores = bestSets.map(s => s.score);
-    const last = scores.at(-1)!;
-    const prev = scores.at(-2)!;
-    
-    // 1. Detección de Estancamiento (Plateau)
-    const isPlateau = scores.slice(-4).every(s => Math.abs(s - last) < (last * 0.02)); 
-    if (isPlateau) return "Estancamiento detectado. Considerá un Deload o cambiar el rango de repeticiones para romper la meseta.";
-
-    // 2. Progreso de Fuerza Real (1RM)
-    const totalGain = ((last - scores[0]) / scores[0]) * 100;
-    if (totalGain > 10) return `¡Increíble! Tu fuerza estimada subió un ${totalGain.toFixed(1)}% desde que empezaste.`;
-
-    // 3. Eficiencia de Esfuerzo (RIR)
-    const lastSet = bestSets.at(-1)!;
-    if (lastSet.rir && lastSet.rir > 4) return "Estás moviendo buen peso, pero tu RIR es alto. Podrías intentar subir la carga en la próxima sesión.";
-
-    // 4. Tu lógica de tendencia actual (simplificada)
-    if (last > prev) return "Ganancia de fuerza respecto a la sesión anterior. ¡Buen trabajo! ";
-    
-    return "Manteniendo el nivel. La consistencia es la clave del crecimiento. ";
-  }, [bestSets]);
-
-  return {
-    bestSets,
-    pr,
-    totalVolume,
-    frequency,
-    progress,
-    insights
-  };
+  }, [sessions, exerciseId, range]);
 }

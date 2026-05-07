@@ -15,6 +15,7 @@ import { UserProfile } from "@/types/types";
 import { supabase } from "@/lib/supabaseClient";
 import { uploadAvatar } from "@/services/avatar.service";
 import { toast } from "sonner";
+import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
 
 type ProfileSection =
   | "account"
@@ -24,8 +25,9 @@ type ProfileSection =
 export default function ProfilePage() {
     const router = useRouter();
     const {profile, setProfile, loading } = useUser();
-    const {latest} = useMeasurements(profile?.id ?? "",profile ?? {} as UserProfile ,"90D");
-    
+    const {measurements} = useMeasurements(profile?.id ?? "");
+    const {latest} = useMeasurementStats(measurements, profile ?? {} as UserProfile, "30D");
+
     const fileRef = useRef<HTMLInputElement>(null);
     const [section, setSection] = useState<ProfileSection>("account");
 
