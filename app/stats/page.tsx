@@ -129,7 +129,7 @@ export default function StatsPage() {
                 </div>
                 
                 <Card className="lg:col-span-2 flex flex-col gap-4 w-full">
-                    <p className="text-sm text-secondary uppercase font-medium">Evolución de Fuerza</p>
+                    <p className="text-xs uppercase tracking-widest text-secondary font-bold">Evolución de Fuerza</p>
                 
                     <StatsChart data={stats.bestSets} />
                 </Card>
@@ -137,7 +137,6 @@ export default function StatsPage() {
                 <div className="flex flex-col gap-3 w-full py-6">
                     <p className="text-xs text-secondary uppercase font-bold tracking-widest">Análisis de Rendimiento</p>
                     <Card className="bg-primary/5 border-primary/20 p-6 relative overflow-hidden group">
-                        {/* Decoración neón sutil de fondo */}
                         <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all" />
                         
                         <div className="flex items-start gap-4">

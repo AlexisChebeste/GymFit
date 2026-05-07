@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   LineChart,
   Line,
@@ -21,6 +22,12 @@ interface VolumeChartProps {
 }
 
 export default function VolumeChart({ data }: VolumeChartProps) {
+  const [mounted, setMounted] = useState(false);
+  
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-56 text-zinc-500">
@@ -29,9 +36,13 @@ export default function VolumeChart({ data }: VolumeChartProps) {
     );
   }
 
+  if (!mounted) {
+    return <div className="w-full h-64" />;
+  }
+
   return (
-    <div className="w-full h-64" >
-      <ResponsiveContainer width="100%" height="100%" >
+    <div className="w-full min-h-64" >
+      <ResponsiveContainer width="100%"  height={256}>
         <LineChart data={data}>
           <CartesianGrid
             strokeDasharray="3 3"

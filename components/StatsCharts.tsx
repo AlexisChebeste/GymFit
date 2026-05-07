@@ -33,8 +33,8 @@ export default function StatsChart({ data }: StatsChartProps) {
   }
 
   return (
-    <div className="w-full h-64" >
-      <ResponsiveContainer width="100%" height="100%" >
+    <div className="w-full min-h-64" >
+      <ResponsiveContainer width="100%" height={256}>
         <LineChart data={data}>
           <CartesianGrid
             strokeDasharray="3 3"

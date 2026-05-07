@@ -71,7 +71,7 @@ export default function WeightChart({ data, goalWeight }: StatsChartProps) {
   
 
   return (
-    <div className="w-full h-72 flex flex-col gap-2">
+    <div className="w-full min-h-72 flex flex-col gap-2">
       <div className="flex justify-between items-center px-1">
         <span className="text-xs text-muted-foreground uppercase tracking-widest">
           Progreso
@@ -89,7 +89,7 @@ export default function WeightChart({ data, goalWeight }: StatsChartProps) {
         </span>
       </div>
 
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height={256}>
         <ComposedChart data={enhancedData}>
           <defs>
             <linearGradient id="colorWeight" x1="0" y1="0" x2="0" y2="1">
