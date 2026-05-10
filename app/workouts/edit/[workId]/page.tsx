@@ -7,6 +7,7 @@ import { useExercises } from "@/hooks/exercise/useExercises";
 import { useUser } from "@/hooks/user/useUser";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { workoutReducer } from "@/hooks/workout/workoutReducer";
+import { workoutActions } from "@/lib/workout/workoutActions";
 import { workoutService } from "@/services/workout.service";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
@@ -39,13 +40,7 @@ export default function WorkoutEdit() {
       const template = await workoutService.getById(workoutId);
 
       if (template) {
-        dispatch({
-          type: "INIT",
-          payload: {
-            ...template,
-            exercises: template.exercises || []
-          }
-        });
+        dispatch(workoutActions.init(template));
       }
 
       setIsLoaded(true);
@@ -93,7 +88,7 @@ export default function WorkoutEdit() {
               type="text"
               value={workout.name}
               onChange={(e) =>
-                dispatch({ type: "EDIT_WORKOUT", payload: { name: e.target.value, description: workout.description } })
+                dispatch(workoutActions.editWorkout(e.target.value, workout.description))
               }
               className="text-4xl font-bold bg-transparent outline-none"
             />
@@ -101,7 +96,7 @@ export default function WorkoutEdit() {
             <textarea
               value={workout.description}
               onChange={(e) =>
-                dispatch({ type: "EDIT_WORKOUT", payload: { name: workout.name, description: e.target.value } })
+                dispatch(workoutActions.editWorkout(workout.name, e.target.value))
               }
               className="text-sm text-secondary bg-transparent outline-none resize-none"
             />
@@ -128,17 +123,17 @@ export default function WorkoutEdit() {
                 exercise={exercise}
                 setActions={{
                 update: (setId, field, value) =>
-                  dispatch({ type: "UPDATE_SET", payload: { exerciseInstanceId: exercise.id, setId, field, value } }),
+                  dispatch(workoutActions.updateSet(exercise.id, setId, field, value)),
                 toggle: (_, setId) =>
-                  dispatch({ type: "TOGGLE_SET", payload: { exerciseInstanceId: exercise.id, setId } }),
+                  dispatch(workoutActions.toggleSet(exercise.id, setId)),
               }}
               editActions={{
                 addSet: () => 
-                  dispatch({ type: "ADD_SET", payload: { exerciseInstanceId: exercise.id } }),
+                  dispatch(workoutActions.addSet(exercise.id)),
                 deleteExercise: (exerciseId) => 
-                  dispatch({ type: "DELETE_EXERCISE", payload: { exerciseId } }),
+                  dispatch(workoutActions.deleteExercise(exerciseId)),
                 deleteSet: (_, setId) => 
-                  dispatch({ type: "DELETE_SET", payload: { exerciseInstanceId: exercise.id, setId } })
+                  dispatch(workoutActions.deleteSet(exercise.id, setId))
               }}
               exercises={exercises}
             />
@@ -244,10 +239,7 @@ export default function WorkoutEdit() {
               onClick={() => {
                 if (!selectedExercise) return;
 
-                dispatch({
-                  type: "ADD_EXERCISE",
-                  payload: { exerciseId: selectedExercise }
-                });
+                dispatch(workoutActions.addExercise(selectedExercise));
 
                 setSearch("");
                 setSelectedExercise(null);

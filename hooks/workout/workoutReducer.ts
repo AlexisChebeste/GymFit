@@ -1,3 +1,4 @@
+import { addExercise, addSet, deleteExercise, deleteSet, toggleSetCompletion, updateSet } from "@/lib/workout/workout.helpers";
 import { Workout } from "@/types/types";
 
 type Action =
@@ -28,110 +29,36 @@ export function workoutReducer(state: Workout, action: Action): Workout {
       };
 
     case "ADD_SET":
-      return {
-        ...state,
-        exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseInstanceId
-            ? {
-                ...ex,
-                sets: [
-                  ...ex.sets,
-                  {
-                    id: crypto.randomUUID(),
-                    exerciseInstanceId: ex.id,
-                    set: ex.sets.length + 1,
-                    weight: 0,
-                    reps: 0,
-                    rir: 0,
-                    isPR: false,
-                    isCompleted: false
-                  }
-                ]
-              }
-            : ex
-        )
-      };
+      return addSet(state, action.payload.exerciseInstanceId);
 
     case "UPDATE_SET":
-      return {
-        ...state,
-        exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseInstanceId
-            ? {
-                ...ex,
-                sets: ex.sets.map(s =>
-                  s.id === action.payload.setId
-                    ? { ...s, [action.payload.field]: action.payload.value }
-                    : s
-                )
-              }
-            : ex
-        )
-      };
+      return updateSet(
+        state,
+        action.payload.exerciseInstanceId,
+        action.payload.setId,
+        action.payload.field,
+        action.payload.value
+      );
 
     case "TOGGLE_SET":
-      return {
-        ...state,
-        exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseInstanceId
-            ? {
-                ...ex,
-                sets: ex.sets.map(s =>
-                  s.id === action.payload.setId
-                    ? { ...s, isCompleted: !s.isCompleted }
-                    : s
-                )
-              }
-            : ex
-        )
-      };
+      return toggleSetCompletion(
+        state,
+        action.payload.exerciseInstanceId,
+        action.payload.setId
+      );
 
     case "DELETE_SET":
-      return {
-        ...state,
-        exercises: state.exercises.map(ex =>
-          ex.id === action.payload.exerciseInstanceId
-            ? {
-                ...ex,
-                sets: ex.sets
-                  .filter(s => s.id !== action.payload.setId)
-                  .map((s, i) => ({ ...s, set: i + 1 })) // reordenar
-              }
-            : ex
-        )
-      };
+      return deleteSet(
+        state,
+        action.payload.exerciseInstanceId,
+        action.payload.setId
+      );
 
     case "ADD_EXERCISE":
-      const instanceId = crypto.randomUUID();  
-
-      return {
-        ...state,
-        exercises: [
-          ...state.exercises,
-          {
-            id: instanceId,
-            exercise_id: action.payload.exerciseId,
-            sets: [
-              {
-                id: crypto.randomUUID(),
-                exerciseInstanceId: instanceId,
-                set: 1,
-                weight: 0,
-                reps: 0,
-                rir: 0,
-                isCompleted: false,
-                isPR: false
-              }
-            ]
-          }
-        ]
-      };
+      return addExercise(state, action.payload.exerciseId);
     
     case "DELETE_EXERCISE":
-      return {
-        ...state,
-        exercises: state.exercises.filter(ex => ex.id !== action.payload.exerciseId)
-      };
+      return deleteExercise(state, action.payload.exerciseId);
 
     default:
       return state;

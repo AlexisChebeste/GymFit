@@ -7,6 +7,7 @@ import useSessions from "@/hooks/session/useSessions";
 import { useUser } from "@/hooks/user/useUser";
 import { useWorkout } from "@/hooks/workout/useWorkout";
 import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
+import { workoutActions } from "@/lib/workout/workoutActions";
 import { sessionService } from "@/services/sessions.service";
 import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
@@ -111,9 +112,9 @@ export default function WorkoutSession() {
               mode="session"
               setActions={{
                 update: (setId, field, value) =>
-                  dispatch({ type: "UPDATE_SET", payload: { exerciseInstanceId: exercise.id, setId, field, value } }),
+                  dispatch(workoutActions.updateSet(exercise.id, setId, field, value)),
                 toggle: (exerciseInstanceId, setId) =>
-                  dispatch({ type: "TOGGLE_SET", payload: { exerciseInstanceId, setId } }),
+                  dispatch(workoutActions.toggleSet(exerciseInstanceId, setId)),
               }}
               sessions={sessions}
               exercises={exercises}
