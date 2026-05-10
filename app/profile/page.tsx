@@ -1,21 +1,19 @@
 "use client"
 
-import { UserRound, KeyRound, LockKeyhole, LogOut } from "lucide-react";
+import { UserRound, KeyRound, LogOut } from "lucide-react";
 import { Pen } from "lucide-react";
 import {  useRef, useState } from "react";
 import OptionProfile from "@/components/profile/OptionProfile";
 import FitnessSettings from "@/components/profile/FitnessSettings";
-import { useMeasurements } from "@/hooks/progress/useMeasurements";
 import PasswordSettings from "@/components/profile/PasswordSettings";
-import PrivacySettings from "@/components/profile/PrivacySettings";
-import { useUser } from "@/hooks/user/useUser";
-import { logout, updateMetrics } from "@/services/auth.services";
+import { logout } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
 import { UserProfile } from "@/types/types";
-import { supabase } from "@/lib/supabaseClient";
-import { uploadAvatar } from "@/services/avatar.service";
-import { toast } from "sonner";
 import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
+import { useMeasurementsQuery } from "@/queries/measurements/getMeasurementsQuery";
+import { useProfileQuery } from "@/queries/profile/getProfileQuery";
+import { useUploadAvatarMutation } from "@/queries/profile/useUploadAvatarMutation";
+import { useUser } from "@/contexts/AuthContext";
 
 type ProfileSection =
   | "account"
@@ -24,14 +22,16 @@ type ProfileSection =
 
 export default function ProfilePage() {
     const router = useRouter();
-    const {profile, setProfile, loading } = useUser();
-    const {measurements} = useMeasurements(profile?.id ?? "");
+    const {user, loading} = useUser();
+    const {data: profile} = useProfileQuery(user?.id ?? "");
+    const {data: measurements = [], isLoading} = useMeasurementsQuery(profile?.id ?? "");
     const {latest} = useMeasurementStats(measurements, profile ?? {} as UserProfile, "30D");
 
     const fileRef = useRef<HTMLInputElement>(null);
     const [section, setSection] = useState<ProfileSection>("account");
+    const uploadAvatar = useUploadAvatarMutation();
 
-    if (loading) {
+    if (loading || isLoading) {
         return (
             <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full ">
                 <main className="flex flex-1 w-full flex-col gap-2 items-center p-4 bg-white dark:bg-natural max-w-7xl h-full justify-center text-center">
@@ -65,23 +65,8 @@ export default function ProfilePage() {
     const handleAvatarChange = async (file: File) => {
         if (!profile) return;
 
-        try {
-            const url = await uploadAvatar(profile.id, file);
-            console.log("Avatar subido con éxito:", url);
-            await supabase
-                .from("profiles")
-                .update({ avatar_url: url })
-                .eq("id", profile.id);
+        await uploadAvatar.mutateAsync({ userId: profile.id, file });
 
-            setProfile((prev) => ({
-                ...prev!,
-                avatar_url: url
-            }));
-
-        } catch (err) {
-            console.error(err);
-            toast.error("Error al subir el avatar. Por favor, intenta de nuevo.");
-        }
     };
 
     return (
@@ -158,7 +143,6 @@ export default function ProfilePage() {
                         <FitnessSettings
                             profile={profile}
                             currentWeight={latest?.weight}
-                            updateMetrics={updateMetrics}
                         />
                     }
                     {section === "password" && <PasswordSettings />}

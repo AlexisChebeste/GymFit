@@ -1,15 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react";
-import { redirect, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { Eye, EyeOff, Zap } from "lucide-react";
 import Link from "next/link";
-import { useUser } from "@/hooks/user/useUser";
-import { login } from "@/services/auth.services";
+import { useLoginMutation } from "@/queries/profile/useLoginMutation";
 
 export default function LoginPage() {
     const router = useRouter();
-    const {user, profile} = useUser();
 
     const [showCurrent, setShowCurrent] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -18,24 +16,19 @@ export default function LoginPage() {
         password: ""
     });
 
+    const loginMutation = useLoginMutation();
+    
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         try {
-            await login(loginForm.email, loginForm.password);
+            await loginMutation.mutateAsync(loginForm);
             router.push("/dashboard");
         } catch (error) {
             setError("Credenciales inválidas. Por favor, intenta de nuevo.");
         }
     };
 
-    useEffect(() => {
-        if (user && profile) {
-            router.push("/dashboard");
-        }
-    }, [user, profile]);
-
-    
     return (
         <div className="flex flex-col items-center justify-center h-screen gap-8 bg-natural p-6">
 

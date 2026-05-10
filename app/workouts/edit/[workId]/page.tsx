@@ -3,13 +3,13 @@
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
-import { useExercises } from "@/hooks/exercise/useExercises";
-import { useUser } from "@/hooks/user/useUser";
+import { useUser } from "@/contexts/AuthContext";
 import { workoutReducer } from "@/hooks/workout/workoutReducer";
 import { workoutActions } from "@/lib/workout/workoutActions";
+import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
+import { useCreateExerciseMutation } from "@/queries/exercises/useCreateExercisesMutation";
 import { useWorkoutByIdQuery } from "@/queries/workout/getWorkoutByIdQuery";
 import { useUpdateWorkoutMutation } from "@/queries/workout/useUpdateWorkoutMutation";
-import { workoutService } from "@/services/workout.service";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -29,7 +29,7 @@ export default function WorkoutEdit() {
   const {user} = useUser();
 
   const [workout, dispatch] = useReducer(workoutReducer, null as any);
-  const { exercises, createExercise } = useExercises(user?.id ?? "");
+  const { data: exercises = [], isLoading: isExercisesLoading } = useExercisesQuery(user?.id ?? "");
   const [search, setSearch] = useState<string>("");
   const [newExerciseType, setNewExerciseType] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
@@ -39,6 +39,8 @@ export default function WorkoutEdit() {
     data: template,
     isLoading
   } = useWorkoutByIdQuery(workoutId);
+
+  const createExercise = useCreateExerciseMutation();
 
   const updateWorkout = useUpdateWorkoutMutation();
 
@@ -68,6 +70,19 @@ export default function WorkoutEdit() {
   const filteredExercises = exercises.filter(ex =>
     ex.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleCreateExercise = async () => {
+    const newEx = await createExercise.mutateAsync({
+      name: search, 
+      type: newExerciseType,
+      user_id: user?.id ?? ""
+    });
+
+    if (newEx) {
+      setSelectedExercise(newEx.id);
+    }
+    setNewExerciseType("");
+  }
 
   if (isLoading || !workout) {
     return <div className="flex items-center justify-center h-screen">Cargando rutina...</div>;
@@ -225,14 +240,7 @@ export default function WorkoutEdit() {
                       ? "bg-blue-600 hover:bg-blue-700" 
                       : "bg-gray-600 text-gray-400 cursor-not-allowed"}
                   `}
-                  onClick={async () => {
-                    const newEx = await createExercise(search, newExerciseType);
-
-                    if (newEx) {
-                      setSelectedExercise(newEx.id);
-                    }
-                    setNewExerciseType("");
-                  }}
+                  onClick={handleCreateExercise}
                 >
                   Crear "{search}"
                 </button>

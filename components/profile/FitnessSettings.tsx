@@ -4,6 +4,7 @@ import GoalCard from "./GoalCard";
 import { useState } from "react";
 import { GoalOption, UserProfile } from "@/types/types";
 import Button from "../ui/Button";
+import { useUpdateProfileMutation } from "@/queries/profile/useUpdateProfileMutation";
 
 type GoalInfo = {
     title: string;
@@ -39,7 +40,9 @@ type FormSettings = {
     weight_goal: number;
 }
 
-export default function FitnessSettings({ profile, currentWeight, updateMetrics }: { profile: UserProfile, currentWeight?: number, updateMetrics: (userId: string, weightGoal: number, height: number, goalType: GoalOption) => void }) {
+export default function FitnessSettings({ profile, currentWeight }: { profile: UserProfile, currentWeight?: number }) {
+
+    const updateMutation = useUpdateProfileMutation();
 
     const [form, setForm] = useState<FormSettings>({
         goal_type: profile?.goal_type as GoalOption,
@@ -55,8 +58,8 @@ export default function FitnessSettings({ profile, currentWeight, updateMetrics 
         });
     }
 
-    const handleSave = () => {
-        updateMetrics(profile.id,form.weight_goal, form.height, form.goal_type);
+    const handleSave = async () => {
+        await updateMutation.mutateAsync({ userId: profile.id, data: form});
     }
 
     const hasChanges =

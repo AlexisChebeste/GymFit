@@ -5,18 +5,18 @@ import { CustomSelect } from "@/components/CustomSelect";
 import Loading from "@/components/Loading";
 import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
-import { useExercises } from "@/hooks/exercise/useExercises";
+import { useUser } from "@/contexts/AuthContext";
 import { ExerciseStats, useExerciseStats } from "@/hooks/exercise/useExercisesStats";
-import { useUser } from "@/hooks/user/useUser";
 import { useLocalStorage } from "@/lib/useLocalStorage";
+import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
 import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
     const {user, loading} = useUser();
-    const {data: sessions = []} = useSessionsQuery(user?.id ?? "");
-    const {exercises} = useExercises(user?.id ?? "");
+    const {data: sessions = [], isLoading: isSessionsLoading} = useSessionsQuery(user?.id ?? "");
+    const {data: exercises = [], isLoading: isExercisesLoading} = useExercisesQuery(user?.id ?? "");
     const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
 
     const isValidRange = (value: string): value is "30D" | "3M" | "6M" =>
@@ -45,7 +45,7 @@ export default function StatsPage() {
     
     const stats : ExerciseStats = useExerciseStats(sessions, selectedExerciseId, range);
 
-    if (loading) return <Loading />;
+    if (loading || isSessionsLoading || isExercisesLoading) return <Loading />;
 
     if (usedExercises.length === 0 && !selectedExerciseId) {
         return (

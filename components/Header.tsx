@@ -4,11 +4,12 @@ import { LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { NavLink } from "./NavLink";
 import { usePathname } from "next/navigation";
-import { logout } from "@/services/auth.services";
 import { useRouter } from "next/navigation";
-import { useUser } from "@/hooks/user/useUser";
 import Image from "next/image";
 import { ThemeToggle } from "./ui/ThemeToggle";
+import { useProfileQuery } from "@/queries/profile/getProfileQuery";
+import { useLogoutMutation } from "@/queries/profile/useLogoutMutation";
+import { useUser } from "@/contexts/AuthContext";
 const links = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/workouts", label: "Entrenamientos" },
@@ -17,18 +18,27 @@ const links = [
 ]
 
 export default function Header() {
+
+  
   const router = useRouter();
   const pathname = usePathname();
-  const {profile} = useUser();
 
   const isPageLogin = pathname.includes("/auth/login") || pathname.includes("/auth/register")
+    if(isPageLogin ) return null;
+  const {user, loading} = useUser();
 
-  const singOut = () => {
-      logout();
+  const userId = user?.id;
+  const logoutMutation = useLogoutMutation();
+
+  const {data: profile } = useProfileQuery(userId);
+
+  const singOut = async() => {
+      await logoutMutation.mutateAsync();
+      
       router.push("/auth/login");
   }
 
-  if(isPageLogin) return null
+  if(loading) return null;
 
   return (
     <header className="w-full bg-white dark:bg-stone-950 shadow-md border-b border-gray-200 dark:border-gray-800 min-h-14">

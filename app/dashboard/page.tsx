@@ -1,26 +1,27 @@
 "use client";
 
 import DashboardView from "@/components/DashboardView";
-import { useRoutines } from "@/hooks/useRoutine";
-import { useUser } from "@/hooks/user/useUser";
 import { UserProfile } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
 import { useMeasurementsQuery } from "@/queries/measurements/getMeasurementsQuery";
 import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
+import { useRoutinesQuery } from "@/queries/routines/getRoutinesQuery";
+import { useProfileQuery } from "@/queries/profile/getProfileQuery";
+import { useUser } from "@/contexts/AuthContext";
 
 export default function Dashboard() {
   const router = useRouter();
-  const { user, profile, loading } = useUser();
-
+  const { user, loading } = useUser();
+  const { data: profile = {} } = useProfileQuery(user?.id ?? "");
   const { data: sessions = [] } = useSessionsQuery(user?.id ?? "");
-  const { routine } = useRoutines(user?.id ?? "");
+  const { data: routine = null } = useRoutinesQuery(user?.id ?? "");
   const { data: templates = [] } = useWorkoutsQuery(user?.id ?? "");
 
   const {data: measurements = []} = useMeasurementsQuery(user?.id ?? "");
 
-  const measurementsStats = useMeasurementStats(measurements, profile ?? {} as UserProfile, "30D");
+  const measurementsStats = useMeasurementStats(measurements, profile as UserProfile, "30D");
 
   if (loading) return  (
       <div className="flex flex-col gap-4 w-full pt-6 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto">
@@ -59,7 +60,7 @@ export default function Dashboard() {
 
   return (
     <DashboardView
-      user={profile}
+      user={profile as UserProfile}
       sessions={sessions}
       routine={routine}
       templates={templates}

@@ -1,10 +1,10 @@
 import { PhotoType, useProgressPhotos } from "@/hooks/progress/useProgressPhotos";
-import { useUser } from "@/hooks/user/useUser";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import ComparisonSlider from "./ComparisionSlider";
 import ProgressPhotoModal from "./UploadProgressModal";
 import Button from "../ui/Button";
+import { useUser } from "@/contexts/AuthContext";
 
 const viewMap = {
   Frente: "front",

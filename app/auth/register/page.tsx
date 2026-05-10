@@ -9,6 +9,8 @@ import { supabase } from "@/lib/supabaseClient";
 import { uploadAvatar } from "@/services/avatar.service";
 import { toast } from "sonner";
 import Link from "next/link";
+import { useRegisterMutation } from "@/queries/profile/useRegisterMutation";
+import { useUploadAvatarMutation } from "@/queries/profile/useUploadAvatarMutation";
 
 type Goal = "lose" | "maintain" | "gain";
 
@@ -32,24 +34,19 @@ export default function RegisterPage() {
   const next = () => setStep((s) => s + 1);
   const back = () => setStep((s) => s - 1);
 
+  const registerMutation = useRegisterMutation();
+  const uploadAvatar = useUploadAvatarMutation();
+
   const handleRegister = async () => {
     try {
-      const user = await register(form);
-      let avatarUrl: string | undefined = undefined;
+      const user = await registerMutation.mutateAsync(form);
 
-      if (file && user?.id) {
-        avatarUrl = await uploadAvatar(user.id, file);
+      if (file && user) {
+        await uploadAvatar.mutateAsync({ userId: user.id, file });
       }
-      await supabase.from("profiles").insert({
-        user_id: user?.id,
-        name: form.name,
-        avatar_url: avatarUrl
-      });
 
-      
       router.push("/dashboard");
     } catch (err) {
-      console.error(err);
       toast("Error al registrarse");
     }
   };

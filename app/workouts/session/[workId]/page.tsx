@@ -2,14 +2,13 @@
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Button from "@/components/ui/Button";
-import { useExercises } from "@/hooks/exercise/useExercises";
-import { useUser } from "@/hooks/user/useUser";
+import { useUser } from "@/contexts/AuthContext";
 import { useWorkout } from "@/hooks/workout/useWorkout";
 import { workoutActions } from "@/lib/workout/workoutActions";
+import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
 import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { useCreateSessionMutation } from "@/queries/sessions/useCreateSessionMutation";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
-import { sessionService } from "@/services/sessions.service";
 import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -27,8 +26,8 @@ export default function WorkoutSession() {
   }
 
   const { data: sessions = [], isLoading } = useSessionsQuery(user?.id ?? "");
-  const { exercises } = useExercises(user?.id ?? "");
-  const { data: templates = [] } = useWorkoutsQuery(user?.id ?? "");
+  const { data: exercises = [], isLoading: isExercisesLoading } = useExercisesQuery(user?.id ?? "");
+  const { data: templates = [], isLoading: isTemplatesLoading } = useWorkoutsQuery(user?.id ?? "");
   const {
     workout,
     dispatch,
@@ -37,7 +36,7 @@ export default function WorkoutSession() {
   } = useWorkout(workoutId, sessions, templates);
   const createSession = useCreateSessionMutation();
 
-  if (isLoading || !isLoaded) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
+  if (isLoading || !isLoaded || isExercisesLoading || isTemplatesLoading) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
 
   const handleFinishSession = async () => {
     if (!user) return;

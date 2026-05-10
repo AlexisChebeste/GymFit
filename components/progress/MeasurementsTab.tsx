@@ -7,15 +7,17 @@ import MetricCard from "../cards/MetriCard";
 import { BodyMeasurement, UserProfile } from "@/types/types";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
-import { useUser } from "@/hooks/user/useUser";
 import WeightCard from "../dashboard/WeightCard";
 import HistoryCard from "./measurements/HistoryCard";
 import Button from "../ui/Button";
 import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
 import { useMeasurementsQuery } from "@/queries/measurements/getMeasurementsQuery";
+import { useProfileQuery } from "@/queries/profile/getProfileQuery";
+import { useUser } from "@/contexts/AuthContext";
 
 export default function MeasurementsTab() {
-  const { profile, loading } = useUser();
+  const { user, loading } = useUser();
+  const {data: profile = null} = useProfileQuery(user?.id ?? "")
   const [range, setRange] = useState<"7D" | "30D" | "90D" >("7D");
   const [open, setOpen] = useState<boolean>(false);
   const [editing, setEditing] = useState<BodyMeasurement | null>(null);

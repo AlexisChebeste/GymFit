@@ -1,14 +1,4 @@
 import { supabase } from "@/lib/supabaseClient";
-import { GoalOption } from "@/types/types";
-
-export async function login(email: string, password: string) {
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) throw error;
-}
 
 export async function register(
   form: {
@@ -53,13 +43,24 @@ export async function logout() {
   await supabase.auth.signOut();
 }
 
-export async function updateMetrics(userId: string, weightGoal: number, height: number, goalType: GoalOption) {
-  const { error } = await supabase.from("profiles").update({
-    weight_goal: weightGoal,
-    height: height,
-    goal_type: goalType,
-    updated_at: new Date().toISOString(),
-  }).eq("id", userId);
+export async function getCurrentUser() {
+  const { data, error } = await supabase.auth.getUser();
 
   if (error) throw error;
+
+  return data.user;
 }
+
+export const authService = {
+  login: async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) throw error;
+  },
+  register,
+  logout,
+  getCurrentUser,
+};

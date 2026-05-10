@@ -5,27 +5,31 @@ import { WorkoutCard } from "@/components/cards/WorkutCard";
 import { CustomSelect } from "@/components/CustomSelect";
 import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
-import { useRoutines } from "@/hooks/useRoutine";
-import { useUser } from "@/hooks/user/useUser";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
 import { useCreateWorkoutMutation } from "@/queries/workout/useCreateWorkoutMutation";
 import { useDeleteWorkoutMutation } from "@/queries/workout/useDeleteWorkoutMutation";
+import { useRoutinesQuery } from "@/queries/routines/getRoutinesQuery";
+import { useUpdateRoutineMutation } from "@/queries/routines/useUpdateRoutineMutation";
+import { useCreateRoutineMutation } from "@/queries/routines/useCreateRoutineMutation";
+import { useUser } from "@/contexts/AuthContext";
 
 export default function WorkoutPage() {
-    const {user} = useUser();
+    const {user, loading} = useUser();
     const router = useRouter();
     const {
         data: templates = [],
         isLoading: isLoaded,
     } = useWorkoutsQuery(user?.id ?? "");
 
-    const { routine, createRoutine, updateRoutine } = useRoutines(user?.id ?? "", );
+    const { data: routine } = useRoutinesQuery(user?.id ?? "");
 
     const createTemplate = useCreateWorkoutMutation();
     const deleteWorkout = useDeleteWorkoutMutation();
+    const updateRoutine = useUpdateRoutineMutation();
+    const createRoutine = useCreateRoutineMutation();
 
     const deleteTemplate = async (id: string) => {
         deleteWorkout.mutateAsync(id);
@@ -37,10 +41,10 @@ export default function WorkoutPage() {
     const [selectedName, setSelectedName] = useState<string | null>(null);
     const [plan, setPlan] = useState<Record<number, string | null>>({});
 
-    if (isLoaded) return <div className="flex items-center justify-center h-screen">Cargando rutinas...</div>;
+    if (isLoaded || loading) return <div className="flex items-center justify-center h-screen">Cargando rutinas...</div>;
 
     const handleCreate = async () => {
-        const newId =  createTemplate.mutateAsync(user.id ?? "").then(res => res.id);
+        const newId =  createTemplate.mutateAsync(user?.id ?? "").then(res => res.id);
 
         if (!newId) return;
 
@@ -77,21 +81,28 @@ export default function WorkoutPage() {
         { label: "Domingo", value: 6 },
     ];
 
-    const handleSaveRoutine = () => {
+    const handleSaveRoutine = async () => {
         const days = Object.entries(plan)
             .filter(([_, templateId]) => templateId)
             .map(([day, templateId]) => ({
                 day: Number(day),
                 templateId: templateId as string
             }));
-
+        
         if (routine) {
-            updateRoutine({
-                ...routine,
-                days
+            await updateRoutine.mutateAsync({
+                id: routine.id,
+                data: {
+                    ...routine,
+                    days
+                }
             });
         } else {
-            createRoutine(days);
+            await createRoutine.mutateAsync({
+                user_id: user?.id ?? "",
+                days,
+                name: "Mi rutina semanal"
+            });
         }
 
         setOpenModalPlan(false);
