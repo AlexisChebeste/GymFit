@@ -38,11 +38,7 @@ export default function RootLayout({
         >
           <body className="max-h-screen h-full flex flex-col bg-zinc-50 font-sans dark:bg-natural">
             <ThemeProvider attribute="class" defaultTheme="dark">
-              <Header />
-              <Toaster />
               {children}
-
-              <Footer />
             </ThemeProvider>
           </body>
         </html>

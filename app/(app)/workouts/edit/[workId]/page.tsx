@@ -84,7 +84,7 @@ export default function WorkoutEdit() {
     setNewExerciseType("");
   }
 
-  if (isLoading || !workout) {
+  if (isLoading || !workout || isExercisesLoading) {
     return <div className="flex items-center justify-center h-screen">Cargando rutina...</div>;
   }
 
@@ -125,6 +125,7 @@ export default function WorkoutEdit() {
           
           <Button 
             onClick={() => setModal({ type: 'ADD' })}
+            className="lg:w-72"
           >
             <Plus className="w-5 h-5" />
             Agregar ejercicio
@@ -175,7 +176,10 @@ export default function WorkoutEdit() {
             
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Agregar ejercicio</h2>
-              <button onClick={() => setModal(null)}>
+              <button onClick={() => setModal(null)} className="
+                text-zinc-400 hover:text-zinc-600 transition-colors
+                cursor-pointer
+              ">
                 <X className="w-4 h-4" />
               </button>
             </div>

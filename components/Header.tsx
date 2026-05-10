@@ -3,7 +3,6 @@
 import { LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { NavLink } from "./NavLink";
-import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { ThemeToggle } from "./ui/ThemeToggle";
@@ -21,10 +20,6 @@ export default function Header() {
 
   
   const router = useRouter();
-  const pathname = usePathname();
-
-  const isPageLogin = pathname.includes("/auth/login") || pathname.includes("/auth/register")
-    if(isPageLogin ) return null;
   const {user, loading} = useUser();
 
   const userId = user?.id;
