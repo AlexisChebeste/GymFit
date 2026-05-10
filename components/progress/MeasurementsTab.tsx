@@ -1,12 +1,10 @@
 import { Card } from "../cards/Card";
-import { Plus, TrendingUp } from "lucide-react";
+import { Plus } from "lucide-react";
 import WeightChart from "./WeightCharts";
 import RangeFilter from "../RangeFilter";
-import { useMemo, useState } from "react";
-import { useMeasurements } from "@/hooks/progress/useMeasurements";
+import { useState } from "react";
 import MetricCard from "../cards/MetriCard";
 import { BodyMeasurement, UserProfile } from "@/types/types";
-import { WeightHistory } from "./WeightHistory";
 import FormModalMeasurement from "./FormMeasurement";
 import Modal from "../Modal";
 import { useUser } from "@/hooks/user/useUser";
@@ -14,7 +12,7 @@ import WeightCard from "../dashboard/WeightCard";
 import HistoryCard from "./measurements/HistoryCard";
 import Button from "../ui/Button";
 import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
-
+import { useMeasurementsQuery } from "@/queries/measurements/getMeasurementsQuery";
 
 export default function MeasurementsTab() {
   const { profile, loading } = useUser();
@@ -24,7 +22,7 @@ export default function MeasurementsTab() {
 
   const userId = profile?.id;
 
-  const {measurements, isLoading, addMeasurement, updateMeasurement } = useMeasurements(userId ?? "");
+  const {data: measurements = [], isLoading, error} = useMeasurementsQuery(userId ?? "")
 
   const { history: weightHistory, latest, progress, metrics, prefill } = useMeasurementStats(measurements, profile ?? ({} as UserProfile), range);
 
@@ -53,6 +51,16 @@ export default function MeasurementsTab() {
     </div>
     );
   }
+
+  if (error) {
+    return (
+      <div className="flex-1 flex justify-center items-center h-full mx-auto gap-6 text-center">
+        <h1 className="text-2xl font-bold text-primary">Ocurrió un error al cargar tus medidas. Por favor, intentá nuevamente más tarde.</h1>
+      </div>
+    );
+  }
+
+
 
   return (
     <div className="flex flex-col gap-4 flex-1 w-full py-4 bg-natural">
@@ -135,7 +143,6 @@ export default function MeasurementsTab() {
           <FormModalMeasurement
             userId={profile?.id ?? ""}
             mode={editing ? "edit" : "create"}
-            onSubmit={editing ? updateMeasurement : addMeasurement}
             onClose={() => setOpen(false)}
             initialData={editing ?? prefill}
           />

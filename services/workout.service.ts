@@ -12,7 +12,7 @@ export const workoutService = {
             throw new Error(error.message);
         }
 
-        return data;
+        return data as Workout[];
     },
     getById: async (workoutId: string) => {
         const { data, error } = await supabase
@@ -25,12 +25,12 @@ export const workoutService = {
             throw new Error(error.message);
         }
 
-        return data;
+        return data as Workout;
     },
-    create: async (userId: string, templateIndex: number) => {
+    create: async (userId: string) => {
         const newTemplate: CreateWorkout = {
             user_id: userId,
-            name: `Rutina ${templateIndex + 1}`,
+            name: `Rutina Nueva`,
             description: "Descripción",
             exercises: [],
             color: "#10B981",

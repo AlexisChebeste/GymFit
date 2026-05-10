@@ -5,14 +5,16 @@ import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/exercise/useExercises";
 import { useUser } from "@/hooks/user/useUser";
-import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { workoutReducer } from "@/hooks/workout/workoutReducer";
 import { workoutActions } from "@/lib/workout/workoutActions";
+import { useWorkoutByIdQuery } from "@/queries/workout/getWorkoutByIdQuery";
+import { useUpdateWorkoutMutation } from "@/queries/workout/useUpdateWorkoutMutation";
 import { workoutService } from "@/services/workout.service";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useReducer, useState } from "react";
+import { toast } from "sonner";
 
 type ModalState =
   | { type: 'ADD' }
@@ -27,43 +29,47 @@ export default function WorkoutEdit() {
   const {user} = useUser();
 
   const [workout, dispatch] = useReducer(workoutReducer, null as any);
-  const [isLoaded, setIsLoaded] = useState<boolean>(false);
-
   const { exercises, createExercise } = useExercises(user?.id ?? "");
   const [search, setSearch] = useState<string>("");
   const [newExerciseType, setNewExerciseType] = useState("");
   const [selectedExercise, setSelectedExercise] = useState<string | null>(null);
   const [modal, setModal] = useState<ModalState>(null);
 
+  const {
+    data: template,
+    isLoading
+  } = useWorkoutByIdQuery(workoutId);
+
+  const updateWorkout = useUpdateWorkoutMutation();
+
   useEffect(() => {
-    const fetchTemplate = async () => {
-      const template = await workoutService.getById(workoutId);
+    if (!template) return;
 
-      if (template) {
-        dispatch(workoutActions.init(template));
-      }
+    dispatch(workoutActions.init(template));
 
-      setIsLoaded(true);
-    };
-
-    fetchTemplate();
-  }, [workoutId]);
+  }, [template]);
 
   const handleSaveTemplate = async () => {
-    await workoutService.update(workoutId, {
-      name: workout.name,
-      description: workout.description,
-      exercises: workout.exercises
-    });
+    try {
+      await updateWorkout.mutateAsync({
+        workoutId,
+        workoutData: {
+          name: workout.name,
+          description: workout.description,
+          exercises: workout.exercises
+        }
+      });
+      router.push('/workouts');
+    } catch (error) {
+      toast.error("Error al guardar la rutina. Intenta nuevamente.");
+    }
+  };
 
-    router.push('/workouts');
-  }
-  
   const filteredExercises = exercises.filter(ex =>
     ex.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  if (!isLoaded || !workout) {
+  if (isLoading || !workout) {
     return <div className="flex items-center justify-center h-screen">Cargando rutina...</div>;
   }
 

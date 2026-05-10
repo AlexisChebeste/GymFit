@@ -1,27 +1,26 @@
 "use client";
 
 import DashboardView from "@/components/DashboardView";
-import Loading from "@/components/Loading";
-import { useMeasurements } from "@/hooks/progress/useMeasurements";
 import { useRoutines } from "@/hooks/useRoutine";
-import useSessions from "@/hooks/session/useSessions";
 import { useUser } from "@/hooks/user/useUser";
-import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { UserProfile } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { useMeasurementStats } from "@/hooks/progress/useMeasurementsStats";
+import { useMeasurementsQuery } from "@/queries/measurements/getMeasurementsQuery";
+import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
+import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
 
 export default function Dashboard() {
   const router = useRouter();
   const { user, profile, loading } = useUser();
 
-  const { sessions } = useSessions(user?.id ?? "");
+  const { data: sessions = [] } = useSessionsQuery(user?.id ?? "");
   const { routine } = useRoutines(user?.id ?? "");
-  const { templates } = useWorkoutTemplates(user?.id ?? "");
+  const { data: templates = [] } = useWorkoutsQuery(user?.id ?? "");
 
-  const measurements = useMeasurements(user?.id ?? "");
+  const {data: measurements = []} = useMeasurementsQuery(user?.id ?? "");
 
-  const measurementsStats = useMeasurementStats(measurements.measurements, profile ?? {} as UserProfile, "30D");
+  const measurementsStats = useMeasurementStats(measurements, profile ?? {} as UserProfile, "30D");
 
   if (loading) return  (
       <div className="flex flex-col gap-4 w-full pt-6 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto">

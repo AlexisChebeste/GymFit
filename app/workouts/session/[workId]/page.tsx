@@ -3,11 +3,12 @@
 import ExerciseCard from "@/components/cards/ExerciseCard";
 import Button from "@/components/ui/Button";
 import { useExercises } from "@/hooks/exercise/useExercises";
-import useSessions from "@/hooks/session/useSessions";
 import { useUser } from "@/hooks/user/useUser";
 import { useWorkout } from "@/hooks/workout/useWorkout";
-import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { workoutActions } from "@/lib/workout/workoutActions";
+import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
+import { useCreateSessionMutation } from "@/queries/sessions/useCreateSessionMutation";
+import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
 import { sessionService } from "@/services/sessions.service";
 import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
@@ -16,26 +17,27 @@ import { useParams, useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export default function WorkoutSession() {
-  const params = useParams();
+  const {workId} = useParams();
   const {user} = useUser();
-  const workoutId = params.workId as string;
+  const workoutId = workId as string;
   const router = useRouter();
 
   if (!workoutId) {
     return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
   }
 
-  const { sessions, createSession, isSessionsLoaded } = useSessions(user?.id ?? "");
+  const { data: sessions = [], isLoading } = useSessionsQuery(user?.id ?? "");
   const { exercises } = useExercises(user?.id ?? "");
-  const { templates } = useWorkoutTemplates(user?.id ?? "");
+  const { data: templates = [] } = useWorkoutsQuery(user?.id ?? "");
   const {
     workout,
     dispatch,
     isLoaded,
     clearSession,
   } = useWorkout(workoutId, sessions, templates);
+  const createSession = useCreateSessionMutation();
 
-  if (!isSessionsLoaded || !isLoaded) return null; // o un loader
+  if (isLoading || !isLoaded) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
 
   const handleFinishSession = async () => {
     if (!user) return;
@@ -55,9 +57,8 @@ export default function WorkoutSession() {
     };
 
     try {
-      const savedSession = await sessionService.create(payload);
 
-      await createSession(savedSession);
+      await createSession.mutateAsync(payload);
 
       clearSession();
 
@@ -66,7 +67,6 @@ export default function WorkoutSession() {
       router.push("/workouts");
 
     } catch (err) {
-      console.error(err);
       toast.error("Error al guardar la sesión.");
     }
   };

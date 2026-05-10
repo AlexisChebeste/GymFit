@@ -6,16 +6,16 @@ import Loading from "@/components/Loading";
 import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
 import { useExercises } from "@/hooks/exercise/useExercises";
-import { BestSet, ExerciseStats, useExerciseStats } from "@/hooks/exercise/useExercisesStats";
-import useSessions from "@/hooks/session/useSessions";
+import { ExerciseStats, useExerciseStats } from "@/hooks/exercise/useExercisesStats";
 import { useUser } from "@/hooks/user/useUser";
 import { useLocalStorage } from "@/lib/useLocalStorage";
+import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { TrendingDown, TrendingUp, Zap } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 export default function StatsPage() {
     const {user, loading} = useUser();
-    const {sessions} = useSessions(user?.id ?? "");
+    const {data: sessions = []} = useSessionsQuery(user?.id ?? "");
     const {exercises} = useExercises(user?.id ?? "");
     const [range, setRange] = useState<"30D" | "3M" | "6M">("30D");
 

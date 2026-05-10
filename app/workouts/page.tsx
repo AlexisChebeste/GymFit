@@ -7,22 +7,29 @@ import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
 import { useRoutines } from "@/hooks/useRoutine";
 import { useUser } from "@/hooks/user/useUser";
-import { useWorkoutTemplates } from "@/hooks/workout/useWorkoutTemplates";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
+import { useCreateWorkoutMutation } from "@/queries/workout/useCreateWorkoutMutation";
+import { useDeleteWorkoutMutation } from "@/queries/workout/useDeleteWorkoutMutation";
 
 export default function WorkoutPage() {
     const {user} = useUser();
     const router = useRouter();
     const {
-        templates,
-        createTemplate,
-        deleteTemplate,
-        isLoaded
-    } = useWorkoutTemplates(user?.id ?? "");
+        data: templates = [],
+        isLoading: isLoaded,
+    } = useWorkoutsQuery(user?.id ?? "");
 
     const { routine, createRoutine, updateRoutine } = useRoutines(user?.id ?? "", );
+
+    const createTemplate = useCreateWorkoutMutation();
+    const deleteWorkout = useDeleteWorkoutMutation();
+
+    const deleteTemplate = async (id: string) => {
+        deleteWorkout.mutateAsync(id);
+    }
 
     const [openModal, setOpenModal] = useState(false);
     const [openModalPlan, setOpenModalPlan] = useState(false);
@@ -30,10 +37,10 @@ export default function WorkoutPage() {
     const [selectedName, setSelectedName] = useState<string | null>(null);
     const [plan, setPlan] = useState<Record<number, string | null>>({});
 
-    if (!isLoaded) return null;
+    if (isLoaded) return <div className="flex items-center justify-center h-screen">Cargando rutinas...</div>;
 
     const handleCreate = async () => {
-        const newId = await createTemplate();
+        const newId =  createTemplate.mutateAsync(user.id ?? "").then(res => res.id);
 
         if (!newId) return;
 

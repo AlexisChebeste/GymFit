@@ -2,6 +2,9 @@ import { BodyMeasurement } from "@/types/types";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 import Button from "../ui/Button";
+import { useCreateMeasurementMutation } from "@/queries/measurements/useCreateMeasurementMutation";
+import { useUpdateMeasurementMutation } from "@/queries/measurements/useUpdateMeasurementMutation";
+import { toast } from "sonner";
 
 type FormState = Omit<BodyMeasurement, "weight" | "waist" | "chest" | "body_fat" | "left_arm" | "right_arm" | "left_leg" | "right_leg"> & {
   weight: string;
@@ -14,7 +17,7 @@ type FormState = Omit<BodyMeasurement, "weight" | "waist" | "chest" | "body_fat"
   right_leg: string;
 };
 
-export default function FormModalMeasurement({userId, mode, onSubmit, onClose, initialData }: { userId: string; mode: "create" | "edit"; onSubmit: (m: BodyMeasurement) => void; onClose: () => void; initialData?: BodyMeasurement | null }) {
+export default function FormModalMeasurement({userId, mode, onClose, initialData }: { userId: string; mode: "create" | "edit"; onClose: () => void; initialData?: BodyMeasurement | null }) {
     const isEditing = mode === "edit";
 
     function createDefaultForm(): FormState {
@@ -85,7 +88,7 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
         return errors;
     }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         const parsed: BodyMeasurement = {
@@ -108,8 +111,17 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
             return;
         }
 
-        onSubmit(parsed);
-        onClose();
+        try {
+            await onSubmit(parsed);
+            if (isEditing) {
+                toast.success("Medición actualizada exitosamente");
+            } else {
+                toast.success("Medición creada exitosamente");
+            }
+            onClose();
+        } catch (error) {
+            toast.error("Error al guardar la medición. Intenta de nuevo.");
+        }
     };
 
     useEffect(() => {
@@ -117,6 +129,18 @@ export default function FormModalMeasurement({userId, mode, onSubmit, onClose, i
             setForm(mapToForm(initialData));
         }
     }, [initialData, isEditing]);
+
+    const createMeasurement = useCreateMeasurementMutation();
+
+    const updateMeasurement = useUpdateMeasurementMutation();
+
+    const onSubmit = async (data: BodyMeasurement) => {
+        if (isEditing && initialData) {
+            await updateMeasurement.mutateAsync({ ...data, id: initialData.id });
+        } else {
+            await createMeasurement.mutateAsync(data);
+        }
+    };
 
     return (
         <div className="flex flex-col gap-4 p-2 h-full">

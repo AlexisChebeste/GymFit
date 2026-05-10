@@ -32,9 +32,11 @@ export function useWorkout(workoutId: string, sessions: WorkoutSession[], templa
 
 
   useEffect(() => {
-    if (!isLocalLoaded || initialized.current) return;
+    if (!isLocalLoaded || initialized.current || !templates.length) return;
 
     const template = templates.find(t => t.id === workoutId);
+
+    if(!template) return;
 
     if (
       persistedState &&
@@ -57,7 +59,7 @@ export function useWorkout(workoutId: string, sessions: WorkoutSession[], templa
         : workoutInitial;
 
     dispatch({ type: "INIT", payload: initial });
-
+    
     initialized.current = true;
   }, [isLocalLoaded, templates, workoutId, sessions, persistedState]);
 
