@@ -2,7 +2,7 @@
 
 import { Minus, TrendingDown, TrendingUp } from "lucide-react";
 import { Card } from "./Card";
-import { Trend } from "@/hooks/progress/useMeasurements";
+import { Trend } from "@/types/types";
 
 interface MetricCardProps {
     metric: {

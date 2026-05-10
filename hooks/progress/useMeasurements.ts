@@ -3,8 +3,6 @@ import { BodyMeasurement } from "@/types/types";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-
-
 export function useMeasurements(userId: string) {
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
