@@ -1,11 +1,9 @@
-
-import { supabase } from "@/lib/supabaseClient";
 import { measurementsService } from "@/services/measurements.service";
 import { BodyMeasurement } from "@/types/types";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-export type Trend = "up_good" | "down_good" | "neutral";
+
 
 export function useMeasurements(userId: string) {
   const [measurements, setMeasurements] = useState<BodyMeasurement[]>([]);

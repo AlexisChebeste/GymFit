@@ -26,12 +26,10 @@ export default function MeasurementsTab() {
 
   const {measurements, isLoading, addMeasurement, updateMeasurement } = useMeasurements(userId ?? "");
 
-  const { history: weightHistory, latest, change, progress, metrics, getPrefill } = useMeasurementStats(measurements, profile ?? ({} as UserProfile), range);
+  const { history: weightHistory, latest, progress, metrics, prefill } = useMeasurementStats(measurements, profile ?? ({} as UserProfile), range);
 
   const isValidRange = (value: string): value is "7D" | "30D" | "90D" =>
       value === "7D" || value === "30D" || value === "90D" ;
-
-  const prefill = useMemo(() => getPrefill(), [weightHistory]);
 
   if (isLoading || loading) {
     return (
@@ -47,6 +45,7 @@ export default function MeasurementsTab() {
   }
 
   if (!profile) {
+    
     return (
         <div className="flex-1 flex justify-center items-center h-full mx-auto gap-6 text-center">
       <h1 className="text-2xl font-bold text-primary">Iniciá sesión para registrar tus medidas y ver tu progreso</h1>
@@ -78,10 +77,9 @@ export default function MeasurementsTab() {
           </p>
         </Card>
       ) : (
-        <WeightCard latest={latest} change={change} weightProgress={progress ?? 0} user={profile} />
+        <WeightCard latest={latest} change={metrics[0]?.change} weightProgress={progress ?? 0} user={profile} />
       )}
 
-      {/* Gráfico */}
       <Card className="flex flex-col gap-8 px-6">
         <div className="flex items-center justify-between">
           
@@ -93,7 +91,6 @@ export default function MeasurementsTab() {
         )}
       </Card>
 
-      {/* 3. Métricas */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {metrics.map((metric, index) => {
           const isLastAndOdd = index === metrics.length - 1 && metrics.length % 2 !== 0;
@@ -115,7 +112,6 @@ export default function MeasurementsTab() {
         })}
       </div>
 
-      {/* 4. Historial */}
       <HistoryCard weightHistory={weightHistory} 
         onEdit={(m) => {
           setEditing(m);
@@ -124,7 +120,6 @@ export default function MeasurementsTab() {
         editing={editing}
       />
 
-      {/* 5. Botón */}
       <Button
         onClick={() => {
           setEditing(null);

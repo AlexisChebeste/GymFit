@@ -1,3 +1,5 @@
+export type Trend = "up_good" | "down_good" | "neutral";
+
 
 export type CreateWorkout = {
   user_id: string;
@@ -126,3 +128,12 @@ export type UserProfile = {
 };
 
 export type GoalOption = "lose" | "maintain" | "gain";
+
+export type MetricKey =
+  | "waist"
+  | "chest"
+  | "left_arm"
+  | "right_arm"
+  | "left_leg"
+  | "right_leg"
+  | "body_fat";
