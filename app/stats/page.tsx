@@ -6,7 +6,7 @@ import Loading from "@/components/Loading";
 import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
 import { useExercises } from "@/hooks/exercise/useExercises";
-import { BestSet, useExerciseStats } from "@/hooks/exercise/useExercisesStats";
+import { BestSet, ExerciseStats, useExerciseStats } from "@/hooks/exercise/useExercisesStats";
 import useSessions from "@/hooks/session/useSessions";
 import { useUser } from "@/hooks/user/useUser";
 import { useLocalStorage } from "@/lib/useLocalStorage";
@@ -43,7 +43,7 @@ export default function StatsPage() {
         }
     }, [usedExercises]);
     
-    const stats : { bestSets: BestSet[]; pr: any; totalVolume: number; frequency: number; progress: number | null; insights: string } = useExerciseStats(sessions, selectedExerciseId, range);
+    const stats : ExerciseStats = useExerciseStats(sessions, selectedExerciseId, range);
 
     if (loading) return <Loading />;
 
@@ -145,7 +145,7 @@ export default function StatsPage() {
                         </div>
                         <div className="flex flex-col gap-1">
                             <p className="text-sm text-zinc-100 font-medium leading-relaxed">
-                            {stats.insights}
+                            {stats.insights.message}
                             </p>
                             <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Análisis basado en tus últimas {stats.bestSets?.length} sesiones</p>
                         </div>

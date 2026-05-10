@@ -24,7 +24,7 @@ export type ExerciseStats = {
   totalVolume: number;
   frequency: number;
   progress: number | null;
-  insights: string;
+  insights: {type: "positive" | "negative" | "neutral"; message: string};
 };
 
 export function useExerciseStats(

@@ -1,4 +1,4 @@
-import { Set } from "@/hooks/exercise/useExercisesStats";
+import { BestSet, Set } from "@/hooks/exercise/useExercisesStats";
 import { WorkoutSession } from "@/types/types";
 
 export type ExerciseSession = {
@@ -71,19 +71,24 @@ export function filterSessionsByRange(
   });
 }
 
-export function getBestSets(
-  sessions: ExerciseSession[]
-) {
+export function getBestSets(sessions: ExerciseSession[]): BestSet[] {
 
     const getScore = (s: Set) =>
       s.weight * (1 + (s.reps + s.rir) / 30);
+
+    const formatDate = (date: string) =>
+      new Date(date).toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "short"
+      });
 
     return sessions.map(session => {
         const best = session.sets.reduce((a, b) =>
             getScore(a) > getScore(b) ? a : b
         );
         return {
-            date: session.date,
+            rawDate: session.date,
+            date: formatDate(session.date),
             ...best,
             score: getScore(best)
         };
@@ -111,7 +116,6 @@ export function getExercisePR(
 
     return pr;
 }
-
 
 export function getExerciseProgress(
   sessions: ExerciseSession[]
