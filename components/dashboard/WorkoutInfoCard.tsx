@@ -14,7 +14,7 @@ interface WorkoutInfoCardProps {
 export default function WorkoutInfoCard({ isToday, hasTrainedToday, isRestDay, todayWorkout, nextWorkout, label }: WorkoutInfoCardProps) {
 
     return(
-        <Card className="px-6 py-4 flex flex-col gap-4 colspan-1 lg:col-span-2 justify-between">
+        <Card className="px-4 flex flex-col gap-4 colspan-1 lg:col-span-2 justify-between">
             <section className="flex items-center justify-between">
             <div className="flex flex-col gap-2">
 

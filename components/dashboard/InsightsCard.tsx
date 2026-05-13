@@ -16,27 +16,30 @@ export default function InsightsCard({ insightsData, volumeData }: InsightsCardP
         <div className="flex flex-col gap-4 mt-4">
             <div className="absolute -right-10 -top-10 w-32 h-32 bg-primary/10 rounded-full blur-[80px]" />
 
-            <div className="flex items-start gap-4">
-                <div className="p-3 bg-primary/10 rounded-2xl text-primary shadow-neon-glow">
-                    {/* Mapeo dinámico de iconos de Lucide */}
-                    {insightsData.icon === "Zap" && <Zap size={24} fill="currentColor" />}
-                    {insightsData.icon === "Trophy" && <Trophy size={24} />}
-                    {insightsData.icon === "ShieldAlert" && <ShieldAlert size={24} />}
-                    {/* Agrega más iconos según sea necesario */}
-                    {!["Zap", "Trophy", "ShieldAlert"].includes(insightsData.icon) && (
-                        <Zap size={24} fill="currentColor" /> // Icono por defecto
-                    )}
+            <div className="flex flex-col items-start gap-4">
+                <div className="flex flex-row gap-4 items-center">
+                    <div className="p-2 bg-primary/10 rounded-lg text-primary shadow-neon-glow">
+                        {/* Mapeo dinámico de iconos de Lucide */}
+                        {insightsData.icon === "Zap" && <Zap size={16} fill="currentColor" />}
+                        {insightsData.icon === "Trophy" && <Trophy size={16} />}
+                        {insightsData.icon === "ShieldAlert" && <ShieldAlert size={16} />}
+                        {/* Agrega más iconos según sea necesario */}
+                        {!["Zap", "Trophy", "ShieldAlert"].includes(insightsData.icon) && (
+                            <Zap size={16} fill="currentColor" /> // Icono por defecto
+                        )}
+                        
+                    </div>
+                    <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary">
+                        {insightsData.title}
+                    </h3>
                 </div>
-
                 <div className="flex flex-col gap-2">
-                <h3 className="text-xs font-black uppercase tracking-[0.2em] text-primary">
-                    {insightsData.title}
-                </h3>
-                <p className="text-base text-zinc-100 font-medium leading-relaxed max-w-[90%]">
+                
+                <p className="text-sm text-zinc-100 font-medium leading-relaxed ">
                     {insightsData.text}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] text-zinc-600 font-bold uppercase tracking-widest">
+                    <span className="text-[9px] text-zinc-600 font-bold uppercase tracking-widest">
                         Análisis basado en tus últimas {volumeData.length} sesiones
                     </span>
                 </div>

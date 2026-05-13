@@ -12,7 +12,7 @@ interface WeightCardProps {
 export default function WeightCard({ latest, change, weightProgress, user }: WeightCardProps) {
 
     return(
-        <Card className="px-6 py-4 flex flex-col gap-2 justify-between w-full">
+        <Card className="p-4 flex flex-col gap-2 justify-between w-full">
             <div className="flex flex-col gap-2">
                 
                 <p className="text-xs uppercase tracking-widest text-secondary font-bold">Peso corporal</p>

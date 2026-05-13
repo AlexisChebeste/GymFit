@@ -14,26 +14,20 @@ import { useUser } from "@/contexts/AuthContext";
 export default function Dashboard() {
   const router = useRouter();
   const { user, loading } = useUser();
-  const { data: profile = {} } = useProfileQuery(user?.id ?? "");
-  const { data: sessions = [] } = useSessionsQuery(user?.id ?? "");
-  const { data: routine = null } = useRoutinesQuery(user?.id ?? "");
-  const { data: templates = [] } = useWorkoutsQuery(user?.id ?? "");
+  const { data: profile = {}, isLoading: isProfileLoading } = useProfileQuery(user?.id ?? "");
+  const { data: sessions = [], isLoading: isSessionsLoading } = useSessionsQuery(user?.id ?? "");
+  const { data: routine = null, isLoading: isRoutinesLoading } = useRoutinesQuery(user?.id ?? "");
+  const { data: templates = [], isLoading: isWorkoutsLoading } = useWorkoutsQuery(user?.id ?? "");
 
-  const {data: measurements = []} = useMeasurementsQuery(user?.id ?? "");
+  const {data: measurements = [], isLoading: isMeasurementsLoading} = useMeasurementsQuery(user?.id ?? "");
 
   const measurementsStats = useMeasurementStats(measurements, profile as UserProfile, "30D");
 
-  if (loading) return  (
-      <div className="flex flex-col gap-4 w-full pt-6 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto">
-        <div className="h-64 md:h-32 bg-zinc-800 rounded-xl" />
+  if (loading || isProfileLoading || isSessionsLoading || isRoutinesLoading || isWorkoutsLoading || isMeasurementsLoading) return  (
+      <div className="flex flex-col gap-4 w-full pt-6 pb-2 mb-20 lg:pb-0 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto ">
+        <div className="min-h-64 bg-zinc-800 rounded-xl" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="h-48 bg-zinc-800 rounded-xl lg:col-span-2" />
-          <div className="grid grid-cols-2 gap-4">
-            <div className="h-full bg-zinc-800 rounded-xl" />
-            <div className="h-full bg-zinc-800 rounded-xl" />
-            <div className="h-full bg-zinc-800 rounded-xl" />
-            <div className="h-full bg-zinc-800 rounded-xl" />
-          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="h-80 bg-zinc-800 rounded-xl lg:col-span-2" />
