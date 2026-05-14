@@ -121,10 +121,44 @@ export default function WorkoutPage() {
         );
     }
 
+if (templates.length === 0) {
+    return (
+        <div className="flex flex-col flex-1 bg-natural">
+            <main className="flex flex-1 w-full flex-col p-4 max-w-7xl mx-auto">
+                <p className="uppercase text-[10px] text-secondary font-black tracking-[0.2em] mb-1">
+                    Arma tu rutina
+                </p>
+                <h1 className="text-4xl font-bold text-white mb-8">Mi Rutina</h1>
+
+                <div className="flex-1 flex flex-col items-center justify-center text-center px-4 gap-6">
+                    <div className="p-4 bg-zinc-900 border border-white/5 rounded-2xl text-zinc-600 shadow-xl">
+                        <Plus size={40} strokeWidth={1} />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <p className="text-zinc-400 text-base leading-relaxed">
+                            Aún no tienes rutinas creadas.<br/> 
+                            Comienza diseñando tu primer entrenamiento.
+                        </p>
+                    </div>
+
+                    <Button 
+                        onClick={handleCreate}
+                        className="text-lg font-semibold w-full text-center max-w-md py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none
+                        "
+                    >
+                        Crear nueva rutina
+                    </Button>
+                </div>
+            </main>
+        </div>
+    );
+}
+
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">
             <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl overflow-y-auto max-h-[85vh] md:max-h-[90vh]">
-                <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Arma tu rutina - Selecciona para editar</p>
+                <p className="uppercase text-sm text-secondary leading-5 tracking-widest">Arma tu rutina</p>
                 <h1 className="text-4xl font-bold">Mi Rutina</h1>
 
                 <div className="flex flex-col gap-4 items-center w-full py-4 ">
@@ -138,12 +172,15 @@ export default function WorkoutPage() {
                     <Card className="w-full flex gap-4 items-center justify-center border-dashed border-2 border-stone-300 cursor-pointer hover:bg-secondary/20 transition-colors" onClick={handleCreate}>
                         <Plus className="w-6 h-6 text-stone-600" />
                         <p className="text-lg text-stone-600">
-                            Agregar rutina
+                            Crear nueva rutina
                         </p>
                     </Card>
 
-                    <Button onClick={handlePlan}>
-                        Planificar rutina
+                    <Button 
+                        onClick={handlePlan} 
+                        className="text-sm font-medium w-full text-center py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none"
+                    >
+                        Organizar semana
                     </Button>
                 </div>
 

@@ -1,6 +1,6 @@
 
 
-export default function DashboardHeader({ name, completionRate }: { name: string; completionRate: number}) {
+export default function DashboardHeader({ name, completionRate, hasRoutine }: { name: string; completionRate: number; hasRoutine: boolean }) {
 
     const completionColor = completionRate >= 60 ? "text-green-500" : completionRate >= 30 ? "text-amber-500" : "text-orange-500";
 
@@ -16,7 +16,7 @@ export default function DashboardHeader({ name, completionRate }: { name: string
             </span>
             )}
             <p className="text-zinc-500 text-sm mt-1 italic">
-                ¡Vamos! Te quedan sesiones pendientes para cerrar la semana.
+                {hasRoutine ? completionRate === 100 ? "¡Muy bien! Has alcanzado tu meta de cumplimiento." : "¡Vamos! Te quedan sesiones pendientes para cerrar la semana." : "¡Crea tu primera rutina para comenzar!"}
             </p>
 
             

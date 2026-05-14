@@ -46,13 +46,13 @@ export default function WorkoutInfoCard({ isToday, hasTrainedToday, isRestDay, t
             `}
             >
             
-            {isToday && hasTrainedToday ? <Check  className="mr-2 stroke-2" size={16}/> : isToday ? <Play className="mr-2 stroke-2" size={16} /> : <Eye className="mr-2" size={16} />}
+                {isToday && hasTrainedToday ? <Check  className="mr-2 stroke-2" size={16}/> : isToday ? <Play className="mr-2 stroke-2" size={16} /> : <Eye className="mr-2" size={16} />}
 
-            {isRestDay
-                ? "Ver rutinas"
-                : isToday && !hasTrainedToday
-                ? "Empezar entrenamiento"
-                : "Ver rutina"}
+                {isRestDay
+                    ? "Ver rutinas"
+                    : isToday && !hasTrainedToday
+                    ? "Empezar entrenamiento"
+                    : "Ver rutina"}
             </Link>
         </Card>
     )

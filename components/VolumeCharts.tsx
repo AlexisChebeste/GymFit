@@ -1,5 +1,6 @@
 "use client";
 
+import { LineChartIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
   LineChart,
@@ -29,8 +30,12 @@ export default function VolumeChart({ data }: VolumeChartProps) {
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-56 text-zinc-500">
-        No hay datos todavía 
+      <div className="flex flex-col items-center justify-center h-64 w-full gap-2">
+        <div className="p-3 bg-zinc-800/30 rounded-full text-zinc-600">
+          <LineChartIcon size={24} strokeWidth={1.5} />
+        </div>
+        <p className="text-sm text-zinc-500 font-medium">No hay datos de volumen todavía</p>
+        <p className="text-[10px] text-zinc-600 uppercase tracking-widest">Registrá tu primera sesión</p>
       </div>
     );
   }

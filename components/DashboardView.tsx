@@ -25,7 +25,6 @@ export default function DashboardView({ user, sessions, routine, templates, meas
 
   const {history: weightHistory, latest, change, progress: weightProgress} = measurementsStats;
 
-
   const { 
     volumeData, 
     totalVolume, 
@@ -49,7 +48,7 @@ export default function DashboardView({ user, sessions, routine, templates, meas
         <main className="flex flex-1 w-full flex-col items-start p-4 bg-white dark:bg-natural gap-4 max-w-7xl h-full ">
           <section className="flex flex-col  gap-4 md:flex-row md:items-center justify-between w-full ">
             
-            <DashboardHeader name={user?.name} completionRate={completionRate} />
+            <DashboardHeader name={user?.name} completionRate={completionRate}  hasRoutine={!!routine}/>
 
             <WeeklyConsistency days={daysData} />
           
@@ -85,16 +84,14 @@ export default function DashboardView({ user, sessions, routine, templates, meas
               <WeightCard latest={latest} change={change} weightProgress={weightProgress} user={user} />
             )}
 
-            <div className="lg:col-span-3 flex flex-col gap-2 w-full pb-12">
-              <Card className="bg-zinc-900/40 border-white/5 p-4 relative overflow-hidden group transition-all hover:border-primary/20 gap-2 w-full flex flex-col">
-                <h2 className="text-xs uppercase tracking-widest text-secondary font-bold">Perspectivas</h2>
-                <p className="text-sm text-muted-foreground">
-                  Aquí encontrarás análisis y recomendaciones basadas en tus datos de entrenamiento.
-                </p>
-                <InsightsCard insightsData={insightsData} volumeData={volumeData} />
+            <div className="lg:col-span-3 flex flex-col gap-2 w-full pb-12 sm:pb-6">
+                <div className="flex flex-col items-start px-2 w-full">
+                  <h2 className="text-xs uppercase tracking-widest text-secondary font-bold">Perspectivas</h2>
+                  <InsightsCard insightsData={insightsData} volumeData={volumeData} />
 
-              </Card>
+                </div>
             </div>
+            
           </div>
         </main>
       </div>

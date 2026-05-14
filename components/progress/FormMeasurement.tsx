@@ -226,7 +226,8 @@ export default function FormModalMeasurement({userId, mode, onClose, initialData
                 </div>
 
                 {/* Aquí irían los inputs para cada campo */}
-                <Button  type="submit" >
+                <Button  type="submit" className="text-lg font-semibold w-full text-center py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none
+            ">
                     {isEditing ? "Actualizar medición" : "Guardar medición"}
                 </Button>
             </form>

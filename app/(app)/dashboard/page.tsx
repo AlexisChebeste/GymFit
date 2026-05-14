@@ -24,7 +24,7 @@ export default function Dashboard() {
   const measurementsStats = useMeasurementStats(measurements, profile as UserProfile, "30D");
 
   if (loading || isProfileLoading || isSessionsLoading || isRoutinesLoading || isWorkoutsLoading || isMeasurementsLoading) return  (
-      <div className="flex flex-col gap-4 w-full pt-6 pb-2 mb-20 lg:pb-0 p-4 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto ">
+      <div className="flex flex-col gap-4 w-full pt-6 mb-20 md:mb-0 pb-0 p-2 h-full animate-pulse max-w-7xl mx-auto overflow-y-auto ">
         <div className="min-h-64 bg-zinc-800 rounded-xl" />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="h-48 bg-zinc-800 rounded-xl lg:col-span-2" />
