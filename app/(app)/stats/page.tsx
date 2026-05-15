@@ -2,6 +2,7 @@
 
 import { Card } from "@/components/cards/Card";
 import { CustomSelect } from "@/components/CustomSelect";
+import InsightsCard from "@/components/dashboard/InsightsCard";
 import Loading from "@/components/Loading";
 import RangeFilter from "@/components/RangeFilter";
 import StatsChart from "@/components/StatsCharts";
@@ -50,47 +51,46 @@ export default function StatsPage() {
 
     if (loading || isSessionsLoading || isExercisesLoading) return <Loading />;
 
-if (usedExercises.length === 0 || !selectedExerciseId) {
-    return (
-        <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
-            <main className="flex flex-1 w-full flex-col gap-8 p-4 bg-white dark:bg-natural max-w-7xl h-full items-center justify-center text-center">
-                
-                {/* Contenedor de Icono con Glow */}
-                <div className="relative">
-                    <div className="absolute inset-0 bg-primary/20 blur-[50px] rounded-full" />
-                    <div className="relative p-6 bg-zinc-900 border border-white/5 rounded-full text-zinc-500 shadow-2xl">
-                        <Zap size={48} strokeWidth={1.5} className="animate-pulse" />
-                    </div>
-                </div>
-
-                {/* Texto Motivador */}
-                <div className="flex flex-col gap-2 max-w-md">
-                    <h2 className="text-2xl font-black italic tracking-tight text-zinc-100 uppercase">
-                        Sin datos de rendimiento
-                    </h2>
-                    <p className="text-sm text-zinc-500 leading-relaxed">
-                        Para visualizar tus gráficas de fuerza y récords personales (PR), primero necesitás completar al menos una sesión de entrenamiento. 
-                    </p>
-                </div>
-
-                <div className="flex flex-col gap-3 w-full max-w-md">
-                    <Button 
-                        onClick={() => router.push("/dashboard")}
-                        className="text-lg font-semibold w-full text-center max-w-md py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none
-                        "
-                    >
-                        Empezar a entrenar
-                    </Button>
+    if (usedExercises.length === 0 || !selectedExerciseId) {
+        return (
+            <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
+                <main className="flex flex-1 w-full flex-col gap-8 p-4 bg-white dark:bg-natural max-w-7xl h-full items-center justify-center text-center">
                     
-                    <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">
-                        TrackFit • Engine v1.0
-                    </p>
-                </div>
-                
-            </main>
-        </div>
-    );
-}
+                    {/* Contenedor de Icono con Glow */}
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-primary/20 blur-[50px] rounded-full" />
+                        <div className="relative p-6 bg-zinc-900 border border-white/5 rounded-full text-zinc-500 shadow-2xl">
+                            <Zap size={48} strokeWidth={1.5} className="animate-pulse" />
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col gap-2 max-w-md">
+                        <h2 className="text-2xl font-black italic tracking-tight text-zinc-100 uppercase">
+                            Sin datos de rendimiento
+                        </h2>
+                        <p className="text-sm text-zinc-500 leading-relaxed">
+                            Para visualizar tus gráficas de fuerza y récords personales (PR), primero necesitás completar al menos una sesión de entrenamiento. 
+                        </p>
+                    </div>
+
+                    <div className="flex flex-col gap-3 w-full max-w-md">
+                        <Button 
+                            onClick={() => router.push("/dashboard")}
+                            className="text-lg font-semibold w-full text-center max-w-md py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none
+                            "
+                        >
+                            Empezar a entrenar
+                        </Button>
+                        
+                        <p className="text-[10px] text-zinc-600 uppercase tracking-[0.2em] font-bold">
+                            TrackFit • Engine v1.0
+                        </p>
+                    </div>
+                    
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[85vh] md:max-h-full">
@@ -168,21 +168,8 @@ if (usedExercises.length === 0 || !selectedExerciseId) {
 
                 <div className="flex flex-col gap-3 w-full py-6">
                     <p className="text-xs text-secondary uppercase font-bold tracking-widest">Análisis de Rendimiento</p>
-                    <Card className="bg-primary/5 border-primary/20 p-6 relative overflow-hidden group">
-                        <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-3xl group-hover:bg-primary/20 transition-all" />
-                        
-                        <div className="flex items-start gap-4">
-                        <div className="p-2 bg-primary/20 rounded-lg text-primary shadow-neon-glow">
-                            <Zap size={20} fill="currentColor" />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <p className="text-sm text-zinc-100 font-medium leading-relaxed">
-                            {stats.insights.message}
-                            </p>
-                            <p className="text-[10px] text-zinc-500 uppercase tracking-tighter">Análisis basado en tus últimas {stats.bestSets?.length} sesiones</p>
-                        </div>
-                        </div>
-                    </Card>
+
+                    <InsightsCard insightsData={stats.insights} volumeData={stats.bestSets} />
                 </div>
             </main>
         </div>

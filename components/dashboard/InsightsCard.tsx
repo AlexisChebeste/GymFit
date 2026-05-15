@@ -20,11 +20,9 @@ export default function InsightsCard({ insightsData, volumeData }: InsightsCardP
 
     return (
         <div className="w-full relative mt-2 p-5 rounded-2xl bg-linear-to-br from-zinc-900/80 to-black border border-white/5 overflow-hidden group">
-            {/* Efecto de luz ambiental en la esquina */}
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500" />
 
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center relative z-10">
-                {/* Icono con glow más definido */}
                 <div className="shrink-0 p-3 bg-primary/10 rounded-xl text-primary ring-1 ring-primary/20 shadow-[0_0_20px_rgba(57,255,20,0.1)]">
                     {IconComponent}
                 </div>
@@ -46,7 +44,6 @@ export default function InsightsCard({ insightsData, volumeData }: InsightsCardP
                     </p>
                 </div>
 
-                {/* Badge de estadística */}
                 <div className="flex flex-col items-end gap-1 self-end sm:self-center border-l border-white/10 pl-5">
                     <span className="text-[20px] font-black text-white">
                         {volumeData.length}

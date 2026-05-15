@@ -10,9 +10,9 @@ export function generateExerciseInsight(
 
   if (scores.length < 3) {
     return {
-      type: "neutral",
-      message:
-        "Seguí registrando sesiones para desbloquear insights."
+      title: "RECOMENDACIÓN",
+      text: "Seguí registrando tus sesiones. Necesito al menos 3 entrenamientos para empezar a darte consejos de rendimiento.",
+      icon: "TrendingUp"
     };
   }
 
@@ -21,31 +21,31 @@ export function generateExerciseInsight(
 
   if (detectPlateau(scores)) {
     return {
-      type: "plateau",
-      message:
-        "Estancamiento detectado. Probá variar intensidad."
+      title: "ESTANCAMIENTO",
+      text: "Estancamiento detectado. Probá variar intensidad.",
+      icon: "TrendingDown"
     };
   }
 
   if (detectFatigue(current, previous)) {
     return {
-      type: "fatigue",
-      message:
-        "Tu rendimiento cayó notablemente. Considerá descanso."
-    };
+      title: "FATIGA",
+      text: "Fatiga detectada. Considerá tomar un día de descanso o hacer una sesión más liviana.",
+      icon: "TrendingDown"
+     };
   }
 
   if (detectProgression(current, previous)) {
     return {
-      type: "progress",
-      message:
-        "Buen progreso. Estás moviendo más carga."
+      title: "PROGRESO",
+      text: "¡Buen progreso! Estás moviendo más carga que la última vez. Mantené el buen trabajo.",
+      icon: "TrendingUp"
     };
   }
 
   return {
-    type: "neutral",
-    message:
-      "Manteniendo rendimiento estable."
+    title: "RECOMENDACIÓN",
+    text: "Manteniendo rendimiento estable.",
+    icon: "Minus"
   };
 }
