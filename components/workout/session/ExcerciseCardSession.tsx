@@ -1,37 +1,28 @@
 "use client"
 
 import { Plus } from "lucide-react";
-import { Card } from "./Card";
-import SetRow from "./SetRow";
 import { Exercise, ExerciseInstance, WorkoutSession } from "@/types/types";
-import ExerciseMenu from "./ExerciseMenu";
 import { useMemo } from "react";
+import { Card } from "@/components/cards/Card";
+import SetRow from "./SetRow";
 
 interface ExerciseCardProps {
     exercise: ExerciseInstance;
-    mode: "edit" | "session";
 
     setActions: {
         update: (setId: string, field: 'weight' | 'reps' | 'rir', value: number) => void;
         toggle: (exerciseId: string, setId: string) => void;
     };
 
-    editActions?: {
-        deleteExercise: (exerciseId: string) => void;
-        addSet: (exerciseId: string) => void;
-        deleteSet: (exerciseId: string, setId: string) => void;
-    };
-
     sessions?: WorkoutSession[];
     exercises: Exercise[]
-    setOpenTimer?: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ExerciseCard(
-    { exercise, mode, setActions, editActions, sessions, exercises, setOpenTimer }: ExerciseCardProps) 
+    { exercise, setActions, sessions, exercises, setOpenTimer }: ExerciseCardProps) 
 {
 
-    const isEditMode = mode === "edit";
 
     type ComparableSet = { weight: number; reps: number };
 
@@ -86,16 +77,11 @@ export default function ExerciseCard(
         <>
             <Card key={exercise.id} className="flex flex-col gap-2 w-full sm:w-auto p-0! overflow-hidden border-none ">
                 <header className="flex justify-between items-center bg-zinc-800 p-4">
-                    <div className={`flex  ${mode === "session" ? "flex-row items-center justify-between w-full" : "flex-col"}`}>
+                    <div className={`flex  flex-row items-center justify-between w-full`}>
 
                         <h2 className="text-lg font-semibold">{exerciseData?.name}</h2>
                         <p className="text-sm text-zinc-500">{exerciseData?.type}</p>
                     </div>
-                    {isEditMode && editActions && (
-                        <ExerciseMenu 
-                            onDelete={() => editActions?.deleteExercise(exercise.id)}
-                        />
-                    )}
                 </header>
                 <div className="p-4">
                     <div className="text-center grid grid-cols-5 gap-4 mb-4">
@@ -109,24 +95,14 @@ export default function ExerciseCard(
                             <SetRow
                                 key={set.id}
                                 set={set}
-                                isEdit={isEditMode}
                                 onChangeReps={(value) => setActions.update(set.id, 'reps', value)}
                                 onChangeWeight={(value) => setActions.update(set.id, 'weight', value)}
                                 onChangeRir={(value) => setActions.update(set.id, 'rir', value)}
-                                onToggleDone={() => setActions.toggle(exercise.id, set.id)} 
-                                onDelete={() => editActions?.deleteSet(exercise.id, set.id)}   
+                                onToggleDone={() => setActions.toggle(exercise.id, set.id)}  
                                 isPr={index === 0 && isPRSet(set)}
                                 setOpenTimer={setOpenTimer}
                             />
                         ))}
-                        {isEditMode && (
-                            <button className={`flex items-center gap-4 justify-center p-4 bg-black/30 rounded-lg w-full transition-all duration-200 cursor-pointer border-dashed border-2 border-zinc-500 }`}
-                                onClick={() => editActions?.addSet(exercise.id)}
-                            >
-                                <Plus className="w-5 h-5 " />
-                                <span className="text-sm text-zinc-500">Agregar serie</span>
-                            </button>
-                        )}
 
                     </div>
                 </div>

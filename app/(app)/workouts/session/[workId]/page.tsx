@@ -1,21 +1,19 @@
 "use client"
 
-import ExerciseCard from "@/components/cards/ExerciseCard";
-import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
+import HeaderSession from "@/components/workout/HeaderSession";
+import ExerciseCard from "@/components/workout/session/ExcerciseCardSession";
 import Timer from "@/components/workout/Timer";
 import { useUser } from "@/contexts/AuthContext";
-import { useWorkout } from "@/hooks/workout/useWorkout";
-import { workoutActions } from "@/lib/workout/workoutActions";
 import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
 import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { useCreateSessionMutation } from "@/queries/sessions/useCreateSessionMutation";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
+import { useWorkoutStore } from "@/store/useWorkoutStore";
 import type { WorkoutSession } from "@/types/types";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 export default function WorkoutSession() {
@@ -25,22 +23,33 @@ export default function WorkoutSession() {
   const router = useRouter();
   const [openTimer, setOpenTimer] = useState<boolean>(false);
 
-  if (!workoutId) {
-    return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
-  }
+  const { workout, isLoaded, initWorkout, updateSet, toggleSet, clearSession} = useWorkoutStore();
 
   const { data: sessions = [], isLoading } = useSessionsQuery(user?.id ?? "");
   const { data: exercises = [], isLoading: isExercisesLoading } = useExercisesQuery(user?.id ?? "");
   const { data: templates = [], isLoading: isTemplatesLoading } = useWorkoutsQuery(user?.id ?? "");
-  const {
-    workout,
-    dispatch,
-    isLoaded,
-    clearSession,
-  } = useWorkout(workoutId, sessions, templates);
+
+  useEffect(() => {
+      if (workoutId && templates.length > 0) {
+        initWorkout(workoutId, templates, sessions);
+      }
+    }, [workoutId, templates.length]);
+  
   const createSession = useCreateSessionMutation();
 
   if (isLoading || !isLoaded || isExercisesLoading || isTemplatesLoading) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
+
+  if (!workout || workout.exercises.length === 0) {
+    return <div className="flex flex-col gap-6 items-center justify-center h-screen">
+      Rutina no encontrada o sin ejercicios.
+      <Link 
+        href="/workouts"
+        className="ml-4 bg-primary/90 text-natural hover:bg-primary/80  font-black py-2 px-4 rounded-2xl shadow-neon-glow transition-transform active:scale-95 cursor-pointer"
+      >
+        Volver a Rutinas
+      </Link>
+    </div>;
+  }
 
   const handleFinishSession = async () => {
     if (!user) return;
@@ -63,7 +72,7 @@ export default function WorkoutSession() {
 
       await createSession.mutateAsync(payload);
 
-      clearSession();
+      clearSession(); 
 
       toast.success("Sesión guardada exitosamente");
 
@@ -74,50 +83,21 @@ export default function WorkoutSession() {
     }
   };
   
-  if (!workout || workout.exercises.length === 0) {
-    return <div className="flex flex-col gap-6 items-center justify-center h-screen">
-      Rutina no encontrada o sin ejercicios.
-      <Link 
-        href="/workouts"
-        className="ml-4 bg-primary/90 text-natural hover:bg-primary/80  font-black py-2 px-4 rounded-2xl shadow-neon-glow transition-transform active:scale-95 cursor-pointer"
-      >
-        Volver a Rutinas
-      </Link>
-    </div>;
-  }
-
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[90vh] md:max-h-full">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl ">
-        <div className="w-full flex items-center justify-between gap-2">
-          
-          <p className="uppercase text-sm text-primary leading-5 tracking-widest">Sesión Actual</p>
-
-          <Link href="/workouts" className="ml-auto text-sm text-secondary hover:underline transition-colors">
-            <ArrowLeft className="w-4 h-4 inline-block mr-1" />
-            Volver a mis rutinas
-          </Link>
-        </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full pb-2">
-          
-          <div className="flex flex-col gap-2 ">
-            
-            <h1 className="text-4xl font-bold">{workout.name}</h1>  
-            <p className="text-sm text-secondary">{workout.description}</p>
-          </div>
-        </div>
+        <HeaderSession name={workout.name} description={workout.description} />
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
           {workout.exercises.map(exercise => (
             <ExerciseCard
               key={exercise.id}
               exercise={exercise}
-              mode="session"
               setActions={{
                 update: (setId, field, value) =>
-                  dispatch(workoutActions.updateSet(exercise.id, setId, field, value)),
+                  updateSet(exercise.id, setId, field, value),
                 toggle: (exerciseInstanceId, setId) =>
-                  dispatch(workoutActions.toggleSet(exerciseInstanceId, setId)),
+                  toggleSet(exerciseInstanceId, setId),
               }}
               sessions={sessions}
               exercises={exercises}
@@ -125,6 +105,7 @@ export default function WorkoutSession() {
             />
           ))}
         </section>
+
 
         <footer className="w-full py-8 my-6  border-t border-zinc-800">
           <Button 

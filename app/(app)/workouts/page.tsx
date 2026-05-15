@@ -121,38 +121,38 @@ export default function WorkoutPage() {
         );
     }
 
-if (templates.length === 0) {
-    return (
-        <div className="flex flex-col flex-1 bg-natural">
-            <main className="flex flex-1 w-full flex-col p-4 max-w-7xl mx-auto">
-                <p className="uppercase text-[10px] text-secondary font-black tracking-[0.2em] mb-1">
-                    Arma tu rutina
-                </p>
-                <h1 className="text-4xl font-bold text-white mb-8">Mi Rutina</h1>
+    if (templates.length === 0) {
+        return (
+            <div className="flex flex-col flex-1 bg-natural">
+                <main className="flex flex-1 w-full flex-col p-4 max-w-7xl mx-auto">
+                    <p className="uppercase text-[10px] text-secondary font-black tracking-[0.2em] mb-1">
+                        Arma tu rutina
+                    </p>
+                    <h1 className="text-4xl font-bold text-white mb-8">Mi Rutina</h1>
 
-                <div className="flex-1 flex flex-col items-center justify-center text-center px-4 gap-6">
-                    <div className="p-4 bg-zinc-900 border border-white/5 rounded-2xl text-zinc-600 shadow-xl">
-                        <Plus size={40} strokeWidth={1} />
-                    </div>
-                    
-                    <div className="space-y-2">
-                        <p className="text-zinc-400 text-base leading-relaxed">
-                            Aún no tienes rutinas creadas.<br/> 
-                            Comienza diseñando tu primer entrenamiento.
-                        </p>
-                    </div>
+                    <div className="flex-1 flex flex-col items-center justify-center text-center px-4 gap-6">
+                        <div className="p-4 bg-zinc-900 border border-white/5 rounded-2xl text-zinc-600 shadow-xl">
+                            <Plus size={40} strokeWidth={1} />
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <p className="text-zinc-400 text-base leading-relaxed">
+                                Aún no tienes rutinas creadas.<br/> 
+                                Comienza diseñando tu primer entrenamiento.
+                            </p>
+                        </div>
 
-                    <Button 
-                        onClick={handleCreate}
-                        className=" max-w-md"
-                    >
-                        Crear nueva rutina
-                    </Button>
-                </div>
-            </main>
-        </div>
-    );
-}
+                        <Button 
+                            onClick={handleCreate}
+                            className=" max-w-md"
+                        >
+                            Crear nueva rutina
+                        </Button>
+                    </div>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural ">

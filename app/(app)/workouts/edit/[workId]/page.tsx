@@ -1,22 +1,21 @@
 "use client"
 
-import ExerciseCard from "@/components/cards/ExerciseCard";
-import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
+import ExerciseCard from "@/components/workout/edit/ExcerciseCardEdit";
+import ModalCreateExercise from "@/components/workout/edit/ModalCreateExercise";
 import { useUser } from "@/contexts/AuthContext";
-import { workoutReducer } from "@/hooks/workout/workoutReducer";
-import { workoutActions } from "@/lib/workout/workoutActions";
 import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
 import { useCreateExerciseMutation } from "@/queries/exercises/useCreateExercisesMutation";
 import { useWorkoutByIdQuery } from "@/queries/workout/getWorkoutByIdQuery";
 import { useUpdateWorkoutMutation } from "@/queries/workout/useUpdateWorkoutMutation";
+import { useWorkoutStore } from "@/store/useWorkoutStore";
 import { ArrowLeft, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-type ModalState =
+export type ModalState =
   | { type: 'ADD' }
   | { type: 'EDIT', exerciseId: string }
   | { type: 'DELETE', exerciseId: string }
@@ -28,7 +27,8 @@ export default function WorkoutEdit() {
   const router = useRouter();
   const {user} = useUser();
 
-  const [workout, dispatch] = useReducer(workoutReducer, null as any);
+  const { workout, isLoaded, initWorkout, editWorkout, addSet, deleteExercise, deleteSet, addExercise } = useWorkoutStore();
+
   const { data: exercises = [], isLoading: isExercisesLoading } = useExercisesQuery(user?.id ?? "");
   const [search, setSearch] = useState<string>("");
   const [newExerciseType, setNewExerciseType] = useState("");
@@ -45,13 +45,14 @@ export default function WorkoutEdit() {
   const updateWorkout = useUpdateWorkoutMutation();
 
   useEffect(() => {
-    if (!template) return;
-
-    dispatch(workoutActions.init(template));
-
-  }, [template]);
+      if (workoutId ) {
+        initWorkout(workoutId, template ? [template] : [], []);
+      }
+    }, [workoutId, template]);
 
   const handleSaveTemplate = async () => {
+    if (!workout) return;
+
     try {
       await updateWorkout.mutateAsync({
         workoutId,
@@ -84,7 +85,7 @@ export default function WorkoutEdit() {
     setNewExerciseType("");
   }
 
-  if (isLoading || !workout || isExercisesLoading) {
+  if (!isLoaded || !workout || isExercisesLoading ) {
     return <div className="flex items-center justify-center h-screen">Cargando rutina...</div>;
   }
 
@@ -109,7 +110,7 @@ export default function WorkoutEdit() {
               type="text"
               value={workout.name}
               onChange={(e) =>
-                dispatch(workoutActions.editWorkout(e.target.value, workout.description))
+                editWorkout(e.target.value, workout.description)
               }
               className="text-4xl font-bold bg-transparent outline-none"
             />
@@ -117,7 +118,7 @@ export default function WorkoutEdit() {
             <textarea
               value={workout.description}
               onChange={(e) =>
-                dispatch(workoutActions.editWorkout(workout.name, e.target.value))
+                editWorkout(workout.name, e.target.value)
               }
               className="text-sm text-secondary bg-transparent outline-none resize-none"
             />
@@ -141,28 +142,21 @@ export default function WorkoutEdit() {
             workout.exercises.map(exercise => (
               <ExerciseCard
                 key={exercise.id}
-                mode="edit"
                 exercise={exercise}
-                setActions={{
-                update: (setId, field, value) =>
-                  dispatch(workoutActions.updateSet(exercise.id, setId, field, value)),
-                toggle: (_, setId) =>
-                  dispatch(workoutActions.toggleSet(exercise.id, setId)),
-              }}
-              editActions={{
-                addSet: () => 
-                  dispatch(workoutActions.addSet(exercise.id)),
-                deleteExercise: (exerciseId) => 
-                  dispatch(workoutActions.deleteExercise(exerciseId)),
-                deleteSet: (_, setId) => 
-                  dispatch(workoutActions.deleteSet(exercise.id, setId))
-              }}
-              exercises={exercises}
+                editActions={{
+                  addSet: () => 
+                    addSet(exercise.id),
+                  deleteExercise: (exerciseId) => 
+                    deleteExercise(exerciseId),
+                  deleteSet: (_, setId) => 
+                    deleteSet(exercise.id, setId)
+                }}
+                exercises={exercises}
             />
           )))}
         </section>
 
-        <footer className="w-full py-8 my-6  border-t border-zinc-800">
+        <footer className="sticky bottom-4 md:static w-full py-8 my-6  border-t border-zinc-800">
           <Button 
             onClick={handleSaveTemplate}
             className="uppercase"
@@ -172,107 +166,21 @@ export default function WorkoutEdit() {
         </footer>
         
         {modal?.type === 'ADD' && (
-          <Modal onClose={() => setModal(null)}>
-            
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold">Agregar ejercicio</h2>
-              <button onClick={() => setModal(null)} className="
-                text-zinc-400 hover:text-zinc-600 transition-colors
-                cursor-pointer
-              ">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <input
-              type="text"
-              placeholder="Buscar ejercicio..."
-              className="w-full p-3 bg-black/70 rounded-lg mb-4 outline-none"
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setSelectedExercise(null);
-              }}
-            />
-
-            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto mb-4">
-              
-              {filteredExercises.length > 0 ? (
-                filteredExercises.map(ex => (
-                  <button
-                    key={ex.id}
-                    onClick={() => setSelectedExercise(ex.id)}
-                    className={`text-left p-3 rounded-lg transition 
-                      ${selectedExercise === ex.id 
-                        ? "bg-primary text-white" 
-                        : "bg-black/40 hover:bg-black/60"
-                      }
-                    `}
-                  >
-                    <div className="font-semibold">{ex.name}</div>
-                    <div className="text-xs text-zinc-400">{ex.type}</div>
-                  </button>
-                ))
-              ) : (
-                <div className="text-sm text-zinc-400 text-center py-4">
-                  No se encontraron ejercicios
-                </div>
-              )}
-
-            </div>
-
-            {search && filteredExercises.length === 0 && (
-              <div className="flex flex-col gap-3 mb-3">
-                
-                <select
-                  className="p-3 bg-black/70 rounded-lg"
-                  value={newExerciseType}
-                  onChange={(e) => setNewExerciseType(e.target.value)}
-                >
-                  <option value="">Tipo de ejercicio</option>
-                  <option value="Barra">Barra</option>
-                  <option value="Mancuernas">Mancuernas</option>
-                  <option value="Máquina">Máquina</option>
-                  <option value="Polea">Polea</option>
-                  <option value="Otro">Otro</option>
-                </select>
-
-                <button
-                  disabled={!newExerciseType}
-                  className={`w-full p-3 rounded-lg transition
-                    ${newExerciseType 
-                      ? "bg-blue-600 hover:bg-blue-700" 
-                      : "bg-gray-600 text-gray-400 cursor-not-allowed"}
-                  `}
-                  onClick={handleCreateExercise}
-                >
-                  Crear "{search}"
-                </button>
-
-              </div>
-            )}
-
-            <button
-              disabled={!selectedExercise}
-              onClick={() => {
-                if (!selectedExercise) return;
-
-                dispatch(workoutActions.addExercise(selectedExercise));
-
-                setSearch("");
-                setSelectedExercise(null);
-                setModal(null);
-              }}
-              className={`w-full py-3 rounded-lg font-semibold transition
-                ${selectedExercise 
-                  ? "bg-primary/80 hover:bg-primary/90 text-white" 
-                  : "bg-gray-600 text-gray-400 cursor-not-allowed"}
-              `}
-            >
-              Agregar ejercicio
-            </button>
-
-          </Modal>
+          <ModalCreateExercise
+            filteredExercises={filteredExercises}
+            search={search}
+            newExerciseType={newExerciseType}
+            selectedExercise={selectedExercise}
+            setSearch={setSearch}
+            setNewExerciseType={setNewExerciseType}
+            setSelectedExercise={setSelectedExercise}
+            handleCreateExercise={handleCreateExercise}
+            addExercise={(exerciseId) => {
+              addExercise(exerciseId);
+              setModal(null);
+            }}
+            setModal={setModal}
+          />
         )}
       </main>
     </div>
