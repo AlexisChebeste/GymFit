@@ -10,7 +10,6 @@ interface InsightsCardProps {
 }
 
 export default function InsightsCard({ insightsData, volumeData }: InsightsCardProps) {
-    // Mapeo más limpio de iconos
     const IconComponent: React.ReactNode = {
         Zap: <Zap size={20} fill="currentColor" />,
         Trophy: <Trophy size={20} />,
@@ -19,7 +18,7 @@ export default function InsightsCard({ insightsData, volumeData }: InsightsCardP
     }[insightsData.icon as keyof typeof IconComponent] || <Zap size={20} fill="currentColor" />;
 
     return (
-        <div className="w-full relative mt-2 p-5 rounded-2xl bg-linear-to-br from-zinc-900/80 to-black border border-white/5 overflow-hidden group">
+        <div className="w-full relative mt-2 p-5 rounded-2xl bg-linear-to-br from-zinc-900 to-black border border-zinc-800 overflow-hidden group">
             <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-all duration-500" />
 
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-center relative z-10">

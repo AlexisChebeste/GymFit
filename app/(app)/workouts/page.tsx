@@ -144,8 +144,7 @@ if (templates.length === 0) {
 
                     <Button 
                         onClick={handleCreate}
-                        className="text-lg font-semibold w-full text-center max-w-md py-4 rounded-md flex items-center justify-center transition-colors bg-green-600 hover:bg-green-800 text-black border-none
-                        "
+                        className=" max-w-md"
                     >
                         Crear nueva rutina
                     </Button>

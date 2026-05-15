@@ -8,7 +8,7 @@ export default function WeeklyConsistency({days}: {days: {date: Date, hasTrained
   const dayNames = ["L", "M", "X", "J", "V", "S", "D"];
 
   return (
-    <Card className="p-4 bg-zinc-900/20 border-white/5 ">
+    <Card >
       <div className="flex justify-between items-start w-full sm:gap-4">
         {days.map((d, index) =>(
             <div key={index} className="flex flex-col items-center gap-2">

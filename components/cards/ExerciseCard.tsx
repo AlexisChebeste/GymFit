@@ -24,10 +24,11 @@ interface ExerciseCardProps {
 
     sessions?: WorkoutSession[];
     exercises: Exercise[]
+    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ExerciseCard(
-    { exercise, mode, setActions, editActions, sessions, exercises }: ExerciseCardProps) 
+    { exercise, mode, setActions, editActions, sessions, exercises, setOpenTimer }: ExerciseCardProps) 
 {
 
     const isEditMode = mode === "edit";
@@ -115,6 +116,7 @@ export default function ExerciseCard(
                                 onToggleDone={() => setActions.toggle(exercise.id, set.id)} 
                                 onDelete={() => editActions?.deleteSet(exercise.id, set.id)}   
                                 isPr={index === 0 && isPRSet(set)}
+                                setOpenTimer={setOpenTimer}
                             />
                         ))}
                         {isEditMode && (

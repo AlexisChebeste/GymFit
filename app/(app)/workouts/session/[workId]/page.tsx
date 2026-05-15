@@ -1,7 +1,9 @@
 "use client"
 
 import ExerciseCard from "@/components/cards/ExerciseCard";
+import Modal from "@/components/Modal";
 import Button from "@/components/ui/Button";
+import Timer from "@/components/workout/Timer";
 import { useUser } from "@/contexts/AuthContext";
 import { useWorkout } from "@/hooks/workout/useWorkout";
 import { workoutActions } from "@/lib/workout/workoutActions";
@@ -13,6 +15,7 @@ import type { WorkoutSession } from "@/types/types";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function WorkoutSession() {
@@ -20,6 +23,7 @@ export default function WorkoutSession() {
   const {user} = useUser();
   const workoutId = workId as string;
   const router = useRouter();
+  const [openTimer, setOpenTimer] = useState<boolean>(false);
 
   if (!workoutId) {
     return <div className="flex items-center justify-center h-screen">ID de rutina no proporcionado.</div>;
@@ -94,7 +98,7 @@ export default function WorkoutSession() {
             Volver a mis rutinas
           </Link>
         </div>
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 w-full pb-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full pb-2">
           
           <div className="flex flex-col gap-2 ">
             
@@ -117,6 +121,7 @@ export default function WorkoutSession() {
               }}
               sessions={sessions}
               exercises={exercises}
+              setOpenTimer={setOpenTimer}
             />
           ))}
         </section>
@@ -130,6 +135,9 @@ export default function WorkoutSession() {
           </Button>
         </footer>
 
+        {openTimer && (
+          <Timer onClose={() => setOpenTimer(false)}/>
+        )}
       </main>
     </div>
   );

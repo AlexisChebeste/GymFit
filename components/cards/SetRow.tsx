@@ -5,7 +5,7 @@ import { Check, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
 
-function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEdit, isPr, onChangeRir}: {
+function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEdit, isPr, onChangeRir, setOpenTimer}: {
     set: Set;
     isEdit: boolean;
     onChangeWeight: (newWeight: number) => void;
@@ -14,6 +14,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEd
     onToggleDone: () => void;
     onDelete?: () => void;
     isPr: boolean;
+    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
 
     const [localValue, setLocalValue] = useState<string>(
@@ -25,6 +26,13 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEd
     );
 
     const [localRir, setLocalRir] = useState<string>(set.rir?.toString() ?? "");
+
+    const handleCompleteSet = () => {
+        onToggleDone();
+        if (!set.isCompleted) {
+            setOpenTimer(true);
+        }
+    }
 
     return(
         <div className={`place-items-center grid grid-cols-5 gap-4 py-2 bg-black/30 rounded-lg w-full transition-all duration-200 border-l-4 ${set.isCompleted ? ' border-primary' : 'border-transparent hover:border-primary/50'}`}>
@@ -130,7 +138,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEd
                         ${set.isCompleted ? 'text-secondary bg-primary  border-primary ' : 'hover:bg-primary/40 hover:text-primary'}
                         `}
                         aria-label="Marcar serie como completada"
-                    onClick={onToggleDone}
+                    onClick={handleCompleteSet}
                 >
                     <Check className="inline-block" size={16} strokeWidth={3}/>
                 </button>)}
