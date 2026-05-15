@@ -14,7 +14,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEd
     onToggleDone: () => void;
     onDelete?: () => void;
     isPr: boolean;
-    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpenTimer?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
 
     const [localValue, setLocalValue] = useState<string>(
@@ -30,7 +30,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, onDelete, isEd
     const handleCompleteSet = () => {
         onToggleDone();
         if (!set.isCompleted) {
-            setOpenTimer(true);
+            setOpenTimer?.(true);
         }
     }
 

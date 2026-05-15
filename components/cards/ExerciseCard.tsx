@@ -24,7 +24,7 @@ interface ExerciseCardProps {
 
     sessions?: WorkoutSession[];
     exercises: Exercise[]
-    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
+    setOpenTimer?: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ExerciseCard(
