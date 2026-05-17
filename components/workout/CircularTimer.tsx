@@ -1,6 +1,7 @@
 
 "use client";
 
+import { formatTime } from "@/lib/formatTime";
 import { Pause, Play } from "lucide-react";
 
 interface CircularTimerProps {
@@ -8,7 +9,6 @@ interface CircularTimerProps {
   initialTime: number; 
   isRunning: boolean;
   setIsRunning: (val: boolean) => void;
-  formatTime: (time: number) => string;
 }
 
 export default function CircularTimer({ 
@@ -16,7 +16,6 @@ export default function CircularTimer({
   initialTime, 
   isRunning, 
   setIsRunning, 
-  formatTime 
 }: CircularTimerProps) {
   
   const radius = 90;

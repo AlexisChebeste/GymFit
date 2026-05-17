@@ -9,6 +9,7 @@ import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
 import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
 import { useCreateSessionMutation } from "@/queries/sessions/useCreateSessionMutation";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
+import { useTimerStore } from "@/store/useUIStore";
 import { useWorkoutStore } from "@/store/useWorkoutStore";
 import type { WorkoutSession } from "@/types/types";
 import Link from "next/link";
@@ -21,7 +22,6 @@ export default function WorkoutSession() {
   const {user} = useUser();
   const workoutId = workId as string;
   const router = useRouter();
-  const [openTimer, setOpenTimer] = useState<boolean>(false);
 
   const { workout, isLoaded, initWorkout, updateSet, toggleSet, clearSession} = useWorkoutStore();
 
@@ -101,7 +101,6 @@ export default function WorkoutSession() {
               }}
               sessions={sessions}
               exercises={exercises}
-              setOpenTimer={setOpenTimer}
             />
           ))}
         </section>
@@ -116,9 +115,7 @@ export default function WorkoutSession() {
           </Button>
         </footer>
 
-        {openTimer && (
-          <Timer onClose={() => setOpenTimer(false)}/>
-        )}
+        <Timer />
       </main>
     </div>
   );

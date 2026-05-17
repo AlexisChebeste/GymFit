@@ -1,6 +1,5 @@
 "use client"
 
-import { Plus } from "lucide-react";
 import { Exercise, ExerciseInstance, WorkoutSession } from "@/types/types";
 import { useMemo } from "react";
 import { Card } from "@/components/cards/Card";
@@ -16,13 +15,11 @@ interface ExerciseCardProps {
 
     sessions?: WorkoutSession[];
     exercises: Exercise[]
-    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function ExerciseCard(
-    { exercise, setActions, sessions, exercises, setOpenTimer }: ExerciseCardProps) 
+    { exercise, setActions, sessions, exercises }: ExerciseCardProps) 
 {
-
 
     type ComparableSet = { weight: number; reps: number };
 
@@ -73,6 +70,7 @@ export default function ExerciseCard(
 
     const exerciseData = exercises.find(e => e.id === exercise.exercise_id);
     
+
     return(
         <>
             <Card key={exercise.id} className="flex flex-col gap-2 w-full sm:w-auto p-0! overflow-hidden border-none ">
@@ -100,7 +98,6 @@ export default function ExerciseCard(
                                 onChangeRir={(value) => setActions.update(set.id, 'rir', value)}
                                 onToggleDone={() => setActions.toggle(exercise.id, set.id)}  
                                 isPr={index === 0 && isPRSet(set)}
-                                setOpenTimer={setOpenTimer}
                             />
                         ))}
 

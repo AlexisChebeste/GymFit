@@ -1,19 +1,26 @@
 "use client"
 
+import { useTimerStore } from "@/store/useUIStore";
 import { Set } from "@/types/types";
 import { Check, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
 
-function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChangeRir, setOpenTimer}: {
+function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChangeRir}: {
     set: Set;
     onChangeWeight: (newWeight: number) => void;
     onChangeRir: (newRir: number) => void;
     onChangeReps: (newReps: number) => void;
     onToggleDone: () => void;
     isPr: boolean;
-    setOpenTimer: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
+
+  const {startTimer, setOpen } = useTimerStore();
+    const openTimer = () => {
+        startTimer(120);
+        setOpen(true);
+    }
+
 
     const [localValue, setLocalValue] = useState<string>(
         set.weight ? String(set.weight) : ""
@@ -30,7 +37,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChange
         if (localValue === "" || localReps === "") return;
 
         if (!set.isCompleted) {
-            setOpenTimer?.(true);
+            openTimer();
         }
         onToggleDone();
     }

@@ -5,62 +5,42 @@ import Modal from "../Modal";
 import Button from "../ui/Button";
 import { Pause, Play, Plus } from "lucide-react";
 import CircularTimer from "./CircularTimer";
+import { useTimerStore } from "@/store/useUIStore";
 
 
-export default function Timer({onClose}: {onClose: () => void}) {
+export default function Timer() {
 
-    const [initialTime, setInitialTime] = useState<number>(120); 
-    const [timer, setTimer] = useState<number>(120);
-    const [isRunning, setIsRunning] = useState<boolean>(true);
+    
+    const { time, initialTime, isRunning, setOpen , addExtraTime, isOpen, stopTimer, pauseTimer, resumeTimer} = useTimerStore();
 
-    useEffect(() => {
-        if (!isRunning) return;
-
-        const interval = setInterval(() => {
-            setTimer(prev => {
-                if (prev === 1) {
-                    clearInterval(interval);
-                    setIsRunning(false);
-                }
-
-                if (prev === 0) {
-                    clearInterval(interval);
-                    return 0;
-                }
-                return prev - 1;
-            });
-        }, 1000);
-
-        return () => clearInterval(interval);
-    }, [isRunning]);
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-
-    const handleAddExtraTime = () => {
-        setTimer(prev => prev + 30);
-        setInitialTime(prev => prev + 30); 
-    };
+    if (!isOpen) return null;
 
     return (
-        <Modal className="max-w-sm">
+        <Modal className="max-w-sm" onClose={() => setOpen(false)}>
             <div className="flex flex-col gap-10 items-center justify-center p-4">
-                <p className="text-2xl font-semibold">Tiempo de descanso</p>
+                <div className="flex items-center justify-between w-full">
+                    
+                    <p className="text-2xl font-semibold">Descanso</p>
+                    <button
+                        onClick={() => setOpen(false)}
+                        className="text-sm text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                        aria-label="Minimizar descanso"
+                    >
+                        Minimizar
+                    </button>
+                </div>
+
                 <CircularTimer 
-                    timer={timer} 
+                    timer={time} 
                     initialTime={initialTime} 
                     isRunning={isRunning} 
-                    setIsRunning={setIsRunning} 
-                    formatTime={formatTime} 
+                    setIsRunning={(val) => val ? resumeTimer() : pauseTimer()} 
                 />
                 <div className="flex flex-col gap-4 w-full">
-                    <Button onClick={onClose} autoFocus={true} className="bg-green-600 hover:bg-green-700 text-lg">
+                    <Button onClick={stopTimer} autoFocus={true} className="bg-green-600 hover:bg-green-700 text-lg">
                         Terminar Descanso
                     </Button>
-                    <Button onClick={handleAddExtraTime} className="bg-transparent border border-zinc-800 hover:bg-zinc-800 text-lg text-white">
+                    <Button onClick={() => addExtraTime(30)} className="bg-transparent border border-zinc-800 hover:bg-zinc-800 text-lg text-white">
                         <Plus className="w-4 h-4 inline-block mr-1" />
                         Agregar 30s
                     </Button>

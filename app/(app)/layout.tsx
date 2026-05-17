@@ -2,6 +2,7 @@
 
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
+import FloatingTimer from "@/components/ui/FloatingTimer";
 import { Toaster } from "@/components/ui/sonner";
 
 export default function AppLayout({
@@ -13,6 +14,7 @@ export default function AppLayout({
     <>
       <Header />
       <Toaster />
+      <FloatingTimer />
       {children}
 
       <Footer />
