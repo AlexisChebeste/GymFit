@@ -138,11 +138,11 @@ export default function StatsPage() {
                             <p className="text-4xl font-bold text-muted-foreground">Sin registros de PR en este período</p>
                         )}
                     </Card>
-                    <Card className="px-6 py-4 flex flex-col gap-4">
+                    <Card className="px-6 py-4 flex flex-col gap-4 col-span-2 sm:col-span-1">
                         <p className="text-xs uppercase tracking-widest text-secondary font-bold">Volumen</p>
                         <p className="text-4xl font-bold flex gap-2 items-baseline">{stats.totalVolume}<span className="text-lg font-normal text-muted-foreground uppercase italic">kg</span></p>
                     </Card>
-                    <Card className="px-6 py-4 flex flex-col gap-4">
+                    <Card className="px-6 py-4 flex flex-col gap-4 col-span-2 sm:col-span-1">
                         <p className="text-xs uppercase tracking-widest text-secondary font-bold">Frecuencia</p>
                         <p className="text-4xl font-bold">{stats.frequency} <span className="text-lg font-normal text-muted-foreground uppercase italic">{stats.frequency === 1 ? " sesión" : ` sesiones`}</span></p>
                     </Card>
