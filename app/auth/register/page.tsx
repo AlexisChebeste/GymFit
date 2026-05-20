@@ -53,15 +53,15 @@ export default function RegisterPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-natural p-6">
-      <div className="w-full max-w-md bg-zinc-900 p-8 rounded-xl flex flex-col gap-6">
+      <div className="w-full max-w-md bg-stone-900 p-8 rounded-xl flex flex-col gap-6">
 
         {/* STEP 1 → ACCOUNT */}
         {step === 1 && (
           <>
-            <h1 className="text-3xl font-bold text-primary">Crear cuenta</h1>
+            <h1 className="text-lg font-bold text-primary">Crear cuenta</h1>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                 Correo electrónico
                 </label>
                 <input
@@ -74,7 +74,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                 Contraseña
                 </label>
                 <input
@@ -95,7 +95,7 @@ export default function RegisterPage() {
         {/* STEP 2 → GOAL */}
         {step === 2 && (
           <>
-            <h1 className="text-2xl font-bold text-primary">
+            <h1 className="text-lg font-bold text-primary">
               ¿Cuál es tu objetivo?
             </h1>
 
@@ -124,7 +124,7 @@ export default function RegisterPage() {
 
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col-reverse sm:flex-row">
               <button onClick={back} className="btn-secondary w-full">
                 Atrás
               </button>
@@ -138,12 +138,12 @@ export default function RegisterPage() {
         {/* STEP 3 → BODY DATA */}
         {step === 3 && (
           <>
-            <h1 className="text-2xl font-bold text-primary">
+            <h1 className="text-lg font-bold text-primary">
               Datos físicos
             </h1>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                     Altura (cm)
                 </label>
                 <input
@@ -158,7 +158,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                     Peso objetivo (kg)
                 </label>
                 <input
@@ -172,7 +172,7 @@ export default function RegisterPage() {
                 />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-col-reverse sm:flex-row">
               <button onClick={back} className="btn-secondary w-full">
                 Atrás
               </button>
@@ -186,11 +186,11 @@ export default function RegisterPage() {
         {/* STEP 4 → PROFILE */}
         {step === 4 && (
           <>
-            <h1 className="text-2xl font-bold text-primary">
+            <h1 className="text-lg font-bold text-primary">
               Completa tu perfil
             </h1>
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                 Nombre
                 </label>
             
@@ -204,7 +204,7 @@ export default function RegisterPage() {
             </div>
 
              <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                 Edad
                 </label>
             
@@ -218,7 +218,7 @@ export default function RegisterPage() {
             </div>
 
             <div className="flex flex-col gap-2">
-                <label className="text-xs uppercase tracking-widest text-secondary font-bold">
+                <label className="text-xs uppercase tracking-widest text-zinc-400 font-semibold">
                 Foto de perfil (opcional)
                 </label>
                 {/* avatar simple opcional */}
@@ -245,7 +245,7 @@ export default function RegisterPage() {
                 />
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-2">
               <button onClick={back} className="btn-secondary w-full">
                 Atrás
               </button>
@@ -256,8 +256,8 @@ export default function RegisterPage() {
           </>
         )}
 
-        <div className="flex gap-1 items-center">
-            <p className="text-sm text-zinc-400">
+        <div className="flex gap-1 items-center justify-center">
+            <p className="text-xs md:text-sm text-zinc-400">
                 ¿Ya tienes una cuenta?{' '}
                 <Link
                     href="/auth/login"
