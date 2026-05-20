@@ -27,15 +27,19 @@ export const useTimerStore = create<TimerStore>()(
         startTimer: (seconds) => {
             const currentInterval = get().intervalId;
             if (currentInterval) clearInterval(currentInterval);
+            const endTime = Date.now() + seconds * 1000;
 
             set({ time: seconds, initialTime: seconds, isRunning: true, isOpen: true });
 
             const id = setInterval(() => {
-                const currentTime = get().time;
-                if (currentTime <= 1) {
+                const now = Date.now();
+                const timeLeft = Math.ceil((endTime - now) / 1000);
+
+                if (timeLeft <= 0) {
                     get().stopTimer();
+                    if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
                 } else {
-                    set({ time: currentTime - 1 });
+                    set({ time: timeLeft });
                 }
             }, 1000);
 
