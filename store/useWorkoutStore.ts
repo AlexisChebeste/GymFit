@@ -5,10 +5,12 @@ import { applyLastSession } from "@/lib/applyLastSession";
 
 interface WorkoutStore {
   workout: Workout | null;
-  isLoaded: boolean;
-  
+  startedAt: Date | null;
+  elapsedSeconds: number;
+  currentExerciseId: string | null;
+
   initWorkout: (workoutId: string, templates: Workout[], sessions: WorkoutSession[]) => void;
-  updateSet: (exerciseId: string, setId: string, field: string, value: any) => void;
+  updateSet: (exerciseId: string, setId: string, field: "weight" | "reps" | "rir", value: number) => void;
   toggleSet: (exerciseId: string, setId: string) => void;
   editWorkout: (name: string, description: string) => void;
   addSet: (exerciseId: string) => void;
@@ -16,13 +18,16 @@ interface WorkoutStore {
   deleteSet: (exerciseId: string, setId: string) => void;
   addExercise: (exerciseId: string) => void;
   clearSession: () => void;
+  incrementElapsedSeconds: () => void;
 }
 
 export const useWorkoutStore = create<WorkoutStore>()(
   persist(
     (set, get) => ({
       workout: null,
-      isLoaded: false,
+      startedAt: null,
+      elapsedSeconds: 0,
+      currentExerciseId: null,
 
       initWorkout: (workoutId, templates, sessions) => {
         const currentWorkout = get().workout;
@@ -38,7 +43,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
 
         const initial = applyLastSession(template, lastSession);
         
-        set({ workout: initial, isLoaded: true });
+        set({ workout: initial, startedAt: new Date(), elapsedSeconds: 0, currentExerciseId: initial.exercises[0]?.id ?? null });
       },
 
       updateSet: (exerciseId, setId, field, value) => {
@@ -60,18 +65,27 @@ export const useWorkoutStore = create<WorkoutStore>()(
       toggleSet: (exerciseId, setId) => {
         set((state) => {
           if (!state.workout) return state;
-          
-          state.workout.exercises.forEach(ex => {
-            if (ex.id === exerciseId) {
-              ex.sets.forEach(s => {
-                if (s.id === setId) {
-                  s.isCompleted = !s.isCompleted;
-                }
-              });
-            }
-          });
 
-          return { workout: { ...state.workout } };
+          return {
+            workout: {
+              ...state.workout,
+              exercises: state.workout.exercises.map(ex =>
+                ex.id !== exerciseId
+                  ? ex
+                  : {
+                      ...ex,
+                      sets: ex.sets.map(s =>
+                        s.id !== setId
+                          ? s
+                          : {
+                              ...s,
+                              isCompleted: !s.isCompleted,
+                            }
+                      ),
+                    }
+              ),
+            },
+          };
         });
       },
 
@@ -88,7 +102,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
           const newExercises = state.workout.exercises.map(ex => {
             if (ex.id === exerciseId) {
               const newSet = {
-                id: `temp-${Date.now()}`,
+                id: crypto.randomUUID(),
                 exerciseInstanceId: ex.id,
                 set: ex.sets.length + 1,
                 weight: 0,
@@ -133,7 +147,7 @@ export const useWorkoutStore = create<WorkoutStore>()(
         set((state) => {
           if (!state.workout) return state;
           const newExercise = {
-            id: `temp-ex-${Date.now()}`,
+            id: crypto.randomUUID(),
             exercise_id: exerciseId,
             name: "Ejercicio",
             sets: [],
@@ -142,10 +156,20 @@ export const useWorkoutStore = create<WorkoutStore>()(
         });
       },
 
-      clearSession: () => set({ workout: null, isLoaded: false }),
+      incrementElapsedSeconds: () => {
+        set((state) => ({ elapsedSeconds: state.elapsedSeconds + 1 }));
+      },
+
+      clearSession: () => set({ workout: null, startedAt: null, elapsedSeconds: 0, currentExerciseId: null }),
     }),
     {
       name: 'active_session', 
+      partialize: (state) => ({
+        workout: state.workout,
+        startedAt: state.startedAt,
+        elapsedSeconds: state.elapsedSeconds,
+        currentExerciseId: state.currentExerciseId,
+      }),
     }
   )
 );

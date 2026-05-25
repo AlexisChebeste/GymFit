@@ -137,3 +137,16 @@ export type MetricKey =
   | "left_leg"
   | "right_leg"
   | "body_fat";
+
+export type ExercisePerformance = {
+  last?: {
+    weight: number;
+    reps: number;
+    rir: number;
+  },
+  pr?: {
+    weight: number;
+    reps: number;
+    rir: number;
+  },
+}

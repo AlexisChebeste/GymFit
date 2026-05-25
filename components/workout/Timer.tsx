@@ -16,8 +16,8 @@ export default function Timer() {
     if (!isOpen) return null;
 
     return (
-        <Modal className="max-w-sm" onClose={() => setOpen(false)}>
-            <div className="flex flex-col gap-10 items-center justify-center p-4">
+        <Modal className="max-w-sm " onClose={() => setOpen(false)}>
+            <div className="flex flex-col gap-10 items-center justify-center p-4 z-50">
                 <div className="flex items-center justify-between w-full">
                     
                     <p className="text-2xl font-semibold">Descanso</p>

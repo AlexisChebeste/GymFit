@@ -2,7 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 
-export default function HeaderSession({name, description}: {name: string, description: string}) {
+export default function HeaderSession({name, description, seconds}: {name: string, description: string, seconds: number}) {
   return (
     <>
         <div className="w-full flex items-center justify-between gap-2">
@@ -20,6 +20,9 @@ export default function HeaderSession({name, description}: {name: string, descri
                 
                 <h1 className="text-4xl font-bold">{name}</h1>  
                 <p className="text-sm text-secondary">{description}</p>
+            </div>
+            <div className="flex items-center gap-2">
+                <span className="text-lg font-bold">{Math.floor(seconds / 60)}:{(seconds % 60).toString().padStart(2, '0')}</span>
             </div>
         </div>
     </>

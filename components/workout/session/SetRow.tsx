@@ -1,45 +1,34 @@
 "use client"
 
 import { useTimerStore } from "@/store/useUIStore";
+import { useWorkoutStore } from "@/store/useWorkoutStore";
 import { Set } from "@/types/types";
-import { Check, Trash2 } from "lucide-react";
-import React, { useState } from "react";
+import { Check } from "lucide-react";
+import React from "react";
 
 
-function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChangeRir}: {
+function SetRow({set, isPr, exerciseId}: {
     set: Set;
-    onChangeWeight: (newWeight: number) => void;
-    onChangeRir: (newRir: number) => void;
-    onChangeReps: (newReps: number) => void;
-    onToggleDone: () => void;
+    exerciseId: string;
     isPr: boolean;
 }) {
 
-  const {startTimer, setOpen } = useTimerStore();
+    const updateSet = useWorkoutStore(s => s.updateSet);
+    const toggleSet = useWorkoutStore(s => s.toggleSet);
+    const {startTimer, setOpen } = useTimerStore();
     const openTimer = () => {
         startTimer(120);
         setOpen(true);
     }
 
-
-    const [localValue, setLocalValue] = useState<string>(
-        set.weight ? String(set.weight) : ""
-    );
-
-    const [localReps, setLocalReps] = useState<string>(
-        set.reps !== 0 ? String(set.reps) : ""
-    );
-
-    const [localRir, setLocalRir] = useState<string>(set.rir?.toString() ?? "");
-
     const handleCompleteSet = () => {
         
-        if (localValue === "" || localReps === "") return;
+        if (!set.weight || !set.reps) return;
 
         if (!set.isCompleted) {
             openTimer();
         }
-        onToggleDone();
+        toggleSet(exerciseId, set.id);
     }
 
     return(
@@ -55,20 +44,18 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChange
                     step="0.5"
                     aria-label={`Peso por serie ${set.set}`}
                     className={`bg-black/80 h-10 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-green-500 text-center w-full ${set.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    value={localValue}
+                    value={set.weight || ""}
                     onChange={(e) => {
                         const value = e.target.value;
-                        setLocalValue(value);
 
                         const parsed = parseFloat(value);
                         if (!isNaN(parsed)) {
-                            onChangeWeight(Math.min(999, parsed));
+                            updateSet(exerciseId, set.id, 'weight', Math.min(999, parsed));
                         }
                     }}
                     onBlur={() => {
-                        if (localValue === "") {
-                            setLocalValue("0");
-                            onChangeWeight(0);
+                        if (set.weight === 0) {
+                            updateSet(exerciseId, set.id, 'weight', 0);
                         }
                     }}
                                         
@@ -90,7 +77,7 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChange
                     max={99}
                     aria-label={`Repeticiones por serie ${set.set}`}
                     className={`bg-black/80 h-10 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-green-500 text-center w-full ${set.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    value={localReps}
+                    value={set.reps || ""}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.currentTarget.blur();
@@ -98,17 +85,15 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChange
                     }}
                     onChange={(e) => {
                         const value = e.target.value;
-                        setLocalReps(value);
 
                         const parsed = parseInt(value);
                         if (!isNaN(parsed)) {
-                            onChangeReps(Math.min(99, parsed));
+                            updateSet(exerciseId, set.id, 'reps', Math.min(99, parsed));
                         }
                     }}
                     onBlur={() => {
-                        if (localReps === "") {
-                            setLocalReps("0");
-                            onChangeReps(0);
+                        if (set.reps === 0) {
+                            updateSet(exerciseId, set.id, 'reps', 0);
                         }
                     }}
                     disabled={set.isCompleted}
@@ -123,12 +108,17 @@ function SetRow({set, onChangeWeight, onChangeReps, onToggleDone, isPr, onChange
                     step={1}
                     aria-label={`RIR por serie ${set.set}`}
                     className={`bg-black/80 h-10 rounded-lg border-none focus:outline-none focus:ring-2 focus:ring-green-500 text-center w-full ${set.isCompleted ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    value={localRir}
-                    onChange={(e) => setLocalRir(e.target.value)}
+                    value={set.rir?.toString() || ""}
+                    onChange={(e) => {
+                        const value = e.target.value;
+                        const parsed = parseInt(value);
+                        if (!isNaN(parsed)) {
+                            updateSet(exerciseId, set.id, 'rir', Math.min(5, Math.max(0, parsed)));
+                        }
+                    }}
                     onBlur={() => {
-                        const rir = Math.min(5, Math.max(0, parseInt(localRir) || 0));
-                        onChangeRir(rir);
-                        setLocalRir(rir.toString());
+                        const rir = Math.min(5, Math.max(0, parseInt(set.rir?.toString() || "0") || 0));
+                        updateSet(exerciseId, set.id, 'rir', rir);
                     }}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {

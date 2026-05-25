@@ -3,18 +3,16 @@
 import Button from "@/components/ui/Button";
 import HeaderSession from "@/components/workout/HeaderSession";
 import ExerciseCard from "@/components/workout/session/ExcerciseCardSession";
-import Timer from "@/components/workout/Timer";
 import { useUser } from "@/contexts/AuthContext";
+import { getExercisePerformanceMap } from "@/lib/performance/performance.selectors";
 import { useExercisesQuery } from "@/queries/exercises/getExercisesQuery";
-import { useSessionsQuery } from "@/queries/sessions/getSessionsQuery";
+import { useWorkoutPerformanceQuery } from "@/queries/performance/useWorkoutPerformanceQuery";
 import { useCreateSessionMutation } from "@/queries/sessions/useCreateSessionMutation";
 import { useWorkoutsQuery } from "@/queries/workout/getWorkoutsQuery";
-import { useTimerStore } from "@/store/useUIStore";
 import { useWorkoutStore } from "@/store/useWorkoutStore";
-import type { WorkoutSession } from "@/types/types";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { toast } from "sonner";
 
 export default function WorkoutSession() {
@@ -23,21 +21,58 @@ export default function WorkoutSession() {
   const workoutId = workId as string;
   const router = useRouter();
 
-  const { workout, isLoaded, initWorkout, updateSet, toggleSet, clearSession} = useWorkoutStore();
+  const { workout, initWorkout, updateSet, toggleSet, clearSession, incrementElapsedSeconds, elapsedSeconds } = useWorkoutStore();
 
-  const { data: sessions = [], isLoading } = useSessionsQuery(user?.id ?? "");
+  const { data: performanceSessions = [] , isLoading: isPerformanceLoading } =
+    useWorkoutPerformanceQuery(
+      user?.id,
+      workoutId
+    );
   const { data: exercises = [], isLoading: isExercisesLoading } = useExercisesQuery(user?.id ?? "");
   const { data: templates = [], isLoading: isTemplatesLoading } = useWorkoutsQuery(user?.id ?? "");
 
+  const performanceMap = useMemo(
+    () =>
+      getExercisePerformanceMap(
+        performanceSessions
+      ),
+    [performanceSessions]
+  );
+  
+  const exercisesMap = useMemo(() => {
+    return new Map(
+      exercises.map(ex => [ex.id, ex])
+    );
+  }, [exercises]);
+
   useEffect(() => {
-      if (workoutId && templates.length > 0) {
-        initWorkout(workoutId, templates, sessions);
-      }
-    }, [workoutId, templates.length]);
+    if (!workoutId) return;
+    if (templates.length === 0) return;
+
+    initWorkout(
+      workoutId,
+      templates,
+      performanceSessions
+    );
+
+  }, [
+    workoutId,
+    templates,
+    performanceSessions,
+    initWorkout
+  ]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      incrementElapsedSeconds();
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [incrementElapsedSeconds]);
   
   const createSession = useCreateSessionMutation();
 
-  if (isLoading || !isLoaded || isExercisesLoading || isTemplatesLoading) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
+  if (isPerformanceLoading || !workout || isExercisesLoading || isTemplatesLoading) return <div className="flex items-center justify-center h-screen">Cargando sesión...</div>;
 
   if (!workout || workout.exercises.length === 0) {
     return <div className="flex flex-col gap-6 items-center justify-center h-screen">
@@ -82,29 +117,22 @@ export default function WorkoutSession() {
       toast.error("Error al guardar la sesión.");
     }
   };
-  
+
   return (
     <div className="flex flex-col flex-1 items-center bg-zinc-50 font-sans dark:bg-natural overflow-y-auto max-h-[90vh] md:max-h-full">
       <main className="flex flex-1 w-full flex-col gap-2 items-start p-4 bg-white dark:bg-natural max-w-7xl ">
-        <HeaderSession name={workout.name} description={workout.description} />
+        <HeaderSession name={workout.name} description={workout.description} seconds={elapsedSeconds} />
 
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 w-full">
-          {workout.exercises.map(exercise => (
+          {workout.exercises.map(ex => (
             <ExerciseCard
-              key={exercise.id}
-              exercise={exercise}
-              setActions={{
-                update: (setId, field, value) =>
-                  updateSet(exercise.id, setId, field, value),
-                toggle: (exerciseInstanceId, setId) =>
-                  toggleSet(exerciseInstanceId, setId),
-              }}
-              sessions={sessions}
-              exercises={exercises}
+              key={ex.id}
+              exerciseId={ex.id}
+              performance={performanceMap.get(ex.exercise_id) ?? undefined}
+              exerciseData={exercisesMap.get(ex.exercise_id)}
             />
           ))}
         </section>
-
 
         <footer className="w-full py-8 my-6  border-t border-zinc-800">
           <Button 
@@ -114,8 +142,7 @@ export default function WorkoutSession() {
             Finalizar y Guardar Sesión
           </Button>
         </footer>
-
-        <Timer />
+        
       </main>
     </div>
   );
